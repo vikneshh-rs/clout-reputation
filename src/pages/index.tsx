@@ -96,24 +96,25 @@ export default function LandingPage() {
       <Head>
         <title>Clout Reputation | QR-Powered B2B Reputation Management Platform</title>
         <meta name="description" content="Turn customer feedback into business growth using QR-powered reviews, funnel routing, sentiment analytics, and customer recovery." />
-        <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+        <link href="https://api.fontshare.com/v2/css?f[]=cabinet-grotesk@800,900&display=swap" rel="stylesheet" />
         <style>{`
-          h1, h2, h3, .font-display {
-            font-family: 'Outfit', sans-serif !important;
-            letter-spacing: -0.03em !important;
+          h1, .font-display {
+            font-family: 'Cabinet Grotesk', sans-serif !important;
+            letter-spacing: -0.04em !important;
           }
           body, p, span, div, a, button, select, input, textarea {
-            font-family: 'Plus Jakarta Sans', sans-serif !important;
+            font-family: 'Inter', sans-serif !important;
           }
           .glass-mac-frosted {
             background: linear-gradient(135deg, rgba(255, 255, 255, 0.44) 0%, rgba(255, 255, 255, 0.16) 100%);
-            backdrop-filter: blur(30px) saturate(130%);
+            backdrop-filter: blur(28px) saturate(130%);
             border: 1px solid rgba(255, 255, 255, 0.55);
             box-shadow: 0 12px 40px -10px rgba(15, 23, 42, 0.03);
           }
           .glass-mac-frosted-dark {
             background: linear-gradient(135deg, rgba(15, 23, 42, 0.94) 0%, rgba(15, 23, 42, 0.82) 100%);
-            backdrop-filter: blur(30px) saturate(125%);
+            backdrop-filter: blur(28px) saturate(125%);
             border: 1px solid rgba(255, 255, 255, 0.12);
             box-shadow: 0 20px 50px -12px rgba(15, 23, 42, 0.25);
           }
@@ -170,22 +171,22 @@ export default function LandingPage() {
       </header>
 
       {/* HERO SECTION (Breathable 160px Spacing, Asymmetric visual stack) */}
-      <section className="relative z-10 w-full max-w-7xl mx-auto px-6 lg:px-8 py-40 xl:py-48 grid grid-cols-1 lg:grid-cols-12 gap-20 items-center">
+      <section className="relative z-10 w-full max-w-7xl mx-auto px-6 lg:px-8 py-40 xl:py-48 grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
         {/* Left Column: Typography Showcase */}
-        <div className="lg:col-span-6 space-y-10 text-left">
+        <div className="lg:col-span-5 space-y-10 text-left">
           <div className="inline-flex items-center px-4 py-1.5 rounded-full text-[10px] font-bold bg-[#1857D6]/8 border border-[#1857D6]/15 text-[#1857D6] gap-2 shadow-sm uppercase tracking-widest">
             <Sparkles size={11} className="animate-pulse" />
             Autonomous Sentiment Funnel
           </div>
 
-          <h1 className="text-6xl sm:text-7xl xl:text-8xl font-extrabold tracking-tight text-[#0F172A] leading-[0.98] font-display text-glow">
+          <h1 className="text-5xl sm:text-7xl lg:text-[84px] xl:text-[104px] font-black tracking-tight text-[#0F172A] leading-[0.9] font-display text-glow">
             Collect More <br/>
             <span className="text-[#1857D6]">5-Star Reviews.</span> <br/>
             Before Problems <br/>
             Become Public.
           </h1>
 
-          <p className="text-[#64748B] text-lg leading-relaxed max-w-xl">
+          <p className="text-[#64748B] text-base sm:text-lg leading-relaxed max-w-xl">
             Turn customer feedback into private growth. Distribute smart QR codes to route positive sentiment straight to Google, and privately resolve unhappy guests on the spot.
           </p>
 
@@ -206,94 +207,253 @@ export default function LandingPage() {
           </div>
         </div>
 
-        {/* Right Column: Parallax 3D Stack (Tuned float offsets) */}
-        <div className="lg:col-span-6 relative h-[500px] w-full flex items-center justify-center">
-          {/* Card 1: Review Growth Chart Mockup (Deep Parallax Back Layer) */}
-          <motion.div
-            style={{ y: heroCard1Y }}
-            className="absolute top-8 left-0 w-72 glass-mac-frosted rounded-2xl p-5 shadow-lg border border-white/50"
-          >
-            <div className="flex items-center justify-between mb-3">
-              <span className="text-[9px] font-bold text-[#64748B] uppercase tracking-widest">Google Review Velocity</span>
-              <span className="text-[9px] font-bold text-[#10B981] bg-[#10B981]/8 px-2 py-0.5 rounded-full">+148%</span>
-            </div>
-            <div className="flex items-baseline space-x-1.5 mb-2">
-              <span className="text-2xl font-extrabold text-[#0F172A] font-display">842</span>
-              <span className="text-[9px] text-[#64748B] uppercase font-bold tracking-wider">new 5-stars</span>
-            </div>
-            {/* Smooth SVG chart curve */}
-            <svg className="w-full h-16 text-[#1857D6]" viewBox="0 0 100 30" fill="none">
-              <path d="M0,25 Q15,22 30,10 T60,18 T90,2 T100,5" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" fill="none" />
-              <path d="M0,25 Q15,22 30,10 T60,18 T90,2 T100,5 L100,30 L0,30 Z" fill="url(#heroBlueGlow)" opacity="0.1" />
-              <defs>
-                <linearGradient id="heroBlueGlow" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#1857D6" />
-                  <stop offset="100%" stopColor="#1857D6" stopOpacity="0" />
-                </linearGradient>
-              </defs>
-            </svg>
-          </motion.div>
+        {/* Right Column: Massive Product Composition (Dashboard & Floating Overlay Cards) */}
+        <div className="lg:col-span-7 relative h-[600px] lg:h-[800px] w-full flex items-center justify-center lg:justify-start mt-16 lg:mt-0">
+          {/* Atmospheric Glow Layer behind product */}
+          <div className="absolute -inset-20 z-0 pointer-events-none select-none">
+            <div className="absolute top-[15%] left-[10%] w-[550px] h-[550px] rounded-full bg-[#1857D6]/20 blur-[130px] animate-pulse" />
+            <div className="absolute bottom-[15%] right-[5%] w-[500px] h-[500px] rounded-full bg-cyan-400/15 blur-[110px]" />
+            <div className="absolute top-[30%] left-[40%] w-[450px] h-[450px] rounded-full bg-indigo-500/18 blur-[120px]" />
+          </div>
 
-          {/* Card 2: Satisfaction Score Gauge (Foreground Mid-Layer) */}
+          {/* Main Dashboard Mockup (Tilted/Offset Scale Representation) */}
           <motion.div
             style={{ y: heroCard2Y }}
-            className="absolute z-20 w-80 glass-mac-frosted rounded-2xl p-6 shadow-2xl border border-white/60"
+            className="relative z-10 w-full lg:w-[850px] xl:w-[950px] origin-center lg:translate-x-12 xl:translate-x-20 select-none"
           >
-            <div className="flex items-center space-x-3.5 mb-4">
-              <div className="p-2 bg-[#1857D6]/8 text-[#1857D6] rounded-xl">
-                <Activity size={16} />
+            <motion.div
+              animate={{ y: [0, -10, 0] }}
+              transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
+              className="w-full h-[420px] lg:h-[550px] rounded-2xl border border-white/50 bg-white/45 backdrop-filter backdrop-blur-[28px] shadow-[0_50px_100px_-20px_rgba(15,23,42,0.18)] overflow-hidden flex flex-col"
+            >
+              {/* Mock macOS Titlebar */}
+              <div className="h-10 border-b border-slate-200/50 bg-white/30 flex items-center px-4 justify-between">
+                <div className="flex space-x-1.5">
+                  <span className="w-3 h-3 rounded-full bg-[#EF4444]/80" />
+                  <span className="w-3 h-3 rounded-full bg-[#F59E0B]/80" />
+                  <span className="w-3 h-3 rounded-full bg-[#10B981]/80" />
+                </div>
+                <div className="text-[10px] font-semibold text-[#64748B] bg-white/40 border border-slate-200/20 rounded-md px-6 py-0.5 font-sans uppercase tracking-widest">
+                  app.cloutreputation.com
+                </div>
+                <div className="w-12" />
               </div>
-              <div>
-                <h4 className="text-xs font-bold text-[#0F172A] uppercase tracking-wider">Satisfaction Index</h4>
-                <p className="text-[9px] text-[#64748B]">Real-time customer satisfaction sentiment</p>
-              </div>
-            </div>
-            <div className="flex items-center justify-between">
-              <div className="space-y-1.5">
-                <div className="text-4xl font-extrabold text-[#0F172A] tracking-tight font-display">4.92</div>
-                <div className="flex text-[#1857D6] space-x-0.5">
-                  <Star size={9} className="fill-current" />
-                  <Star size={9} className="fill-current" />
-                  <Star size={9} className="fill-current" />
-                  <Star size={9} className="fill-current" />
-                  <Star size={9} className="fill-current" />
+
+              {/* Mock Dashboard Layout */}
+              <div className="flex-1 flex overflow-hidden">
+                {/* Sidebar */}
+                <div className="w-16 border-r border-slate-200/50 bg-white/20 flex flex-col items-center py-6 space-y-6">
+                  <div className="p-2 bg-[#1857D6]/10 text-[#1857D6] rounded-xl">
+                    <QrCode size={16} />
+                  </div>
+                  <div className="text-[#64748B] hover:text-[#1857D6] transition-colors p-1.5">
+                    <Layers size={15} />
+                  </div>
+                  <div className="text-[#64748B] hover:text-[#1857D6] transition-colors p-1.5">
+                    <Star size={15} />
+                  </div>
+                  <div className="text-[#64748B] hover:text-[#1857D6] transition-colors p-1.5">
+                    <Users size={15} />
+                  </div>
+                  <div className="text-[#64748B] hover:text-[#1857D6] transition-colors p-1.5">
+                    <TrendingUp size={15} />
+                  </div>
+                </div>
+
+                {/* Main Panel */}
+                <div className="flex-1 p-6 overflow-hidden flex flex-col space-y-6">
+                  {/* Upper Stats grid */}
+                  <div className="grid grid-cols-3 gap-4">
+                    <div className="bg-white/45 border border-slate-100 rounded-xl p-3">
+                      <span className="text-[8px] font-bold text-[#64748B] uppercase tracking-wider block mb-1">Reviews Routed</span>
+                      <strong className="text-base lg:text-lg font-bold text-[#0F172A] block font-display">1,482</strong>
+                      <span className="text-[7px] text-[#10B981] font-bold">+18.2% this month</span>
+                    </div>
+                    <div className="bg-white/45 border border-slate-100 rounded-xl p-3">
+                      <span className="text-[8px] font-bold text-[#64748B] uppercase tracking-wider block mb-1">Average Rating</span>
+                      <div className="flex items-center space-x-1">
+                        <strong className="text-base lg:text-lg font-bold text-[#0F172A] font-display">4.92</strong>
+                        <div className="flex text-[#1857D6]"><Star size={7} className="fill-current" /></div>
+                      </div>
+                      <span className="text-[7px] text-[#64748B] font-medium">98.4% satisfaction</span>
+                    </div>
+                    <div className="bg-white/45 border border-slate-100 rounded-xl p-3">
+                      <span className="text-[8px] font-bold text-[#64748B] uppercase tracking-wider block mb-1">Feedback Capture</span>
+                      <strong className="text-base lg:text-lg font-bold text-[#0F172A] block font-display">92.7%</strong>
+                      <span className="text-[7px] text-[#1857D6] font-bold">Autonomous routing</span>
+                    </div>
+                  </div>
+
+                  {/* Inner Dashboard content */}
+                  <div className="flex-1 grid grid-cols-2 gap-5 min-h-0">
+                    {/* Scan Log */}
+                    <div className="bg-white/50 border border-slate-200/50 rounded-xl p-4 flex flex-col min-h-0">
+                      <div className="flex items-center justify-between mb-3">
+                        <h4 className="text-[9px] font-bold text-[#0F172A] uppercase tracking-widest">Active Scan Stream</h4>
+                        <span className="w-1.5 h-1.5 rounded-full bg-[#10B981] animate-ping" />
+                      </div>
+                      <div className="space-y-2 flex-1 overflow-hidden">
+                        {[
+                          { b: 'Luxe Salon', c: 'QR-LUXE', s: 'Routed to Google', r: 5, t: '2m ago', active: true },
+                          { b: 'Cafe Paris', c: 'QR-PARIS', s: 'Private Recovery Form', r: 2, t: '15m ago', active: false },
+                          { b: 'Prime Steak', c: 'QR-STEAK', s: 'Routed to Google', r: 5, t: '48m ago', active: true }
+                        ].map((scan, i) => (
+                          <div key={i} className="flex items-center justify-between p-2 rounded-lg bg-white/35 border border-slate-100/50 text-[9px]">
+                            <div className="space-y-0.5">
+                              <strong className="block text-[#0F172A] font-semibold">{scan.b}</strong>
+                              <span className="text-[7px] font-mono text-[#64748B]">{scan.c}</span>
+                            </div>
+                            <div className="text-right space-y-0.5">
+                              <div className="flex text-[#1857D6] justify-end">
+                                {[...Array(scan.r)].map((_, idx) => (
+                                  <Star key={idx} size={6} className="fill-current" />
+                                ))}
+                              </div>
+                              <span className={`text-[6px] font-bold px-1.5 py-0.5 rounded uppercase tracking-wider block ${scan.active ? 'text-[#10B981] bg-[#10B981]/5' : 'text-amber-600 bg-amber-50'}`}>
+                                {scan.s}
+                              </span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* QR Scan Speed / Chart Mockup */}
+                    <div className="bg-white/50 border border-slate-200/50 rounded-xl p-4 flex flex-col min-h-0">
+                      <h4 className="text-[9px] font-bold text-[#0F172A] uppercase tracking-widest mb-3">Sentiment Funnel Flow</h4>
+                      <div className="flex-1 flex flex-col justify-between">
+                        <div className="space-y-2">
+                          <div className="flex justify-between text-[8px] text-[#64748B]">
+                            <span>Positive Sentiment (4-5 Stars)</span>
+                            <span className="font-bold text-[#1857D6]">88%</span>
+                          </div>
+                          <div className="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden">
+                            <div className="bg-[#1857D6] h-full rounded-full" style={{ width: '88%' }} />
+                          </div>
+                        </div>
+                        <div className="space-y-2">
+                          <div className="flex justify-between text-[8px] text-[#64748B]">
+                            <span>Neutral / Critical (1-3 Stars)</span>
+                            <span className="font-bold text-amber-600">12%</span>
+                          </div>
+                          <div className="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden">
+                            <div className="bg-amber-500 h-full rounded-full" style={{ width: '12%' }} />
+                          </div>
+                        </div>
+                        <div className="pt-2 border-t border-slate-100 mt-2 flex items-center justify-between text-[8px] text-[#64748B]">
+                          <span>Automatic Google Redirects</span>
+                          <span className="font-bold text-[#10B981] uppercase tracking-wider">Enabled</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
-              <div className="w-16 h-16 relative flex items-center justify-center">
-                <svg className="w-full h-full transform -rotate-90">
-                  <circle cx="32" cy="32" r="26" stroke="#f1f5f9" strokeWidth="5.5" fill="transparent" />
-                  <circle cx="32" cy="32" r="26" stroke="#1857D6" strokeWidth="5.5" fill="transparent"
-                    strokeDasharray={163.3} strokeDashoffset={16.3} strokeLinecap="round" />
-                </svg>
-                <span className="absolute text-[9px] font-extrabold text-[#1857D6]">98.4%</span>
-              </div>
-            </div>
+            </motion.div>
           </motion.div>
 
-          {/* Card 3: Recent Activity (Floating Top Layer) */}
+          {/* Card 1: Satisfaction Sentiment Indicator (Top Left / Mid Plane) */}
+          <motion.div
+            style={{ y: heroCard1Y }}
+            className="absolute top-[30px] left-[-30px] xl:left-[-50px] z-30 select-none hidden sm:block"
+          >
+            <motion.div
+              animate={{ y: [0, 10, 0], x: [0, -2, 0] }}
+              transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+              className="w-64 glass-mac-frosted rounded-2xl p-5 shadow-2xl border border-white/60"
+            >
+              <div className="flex items-center space-x-3 mb-3.5">
+                <div className="p-2.5 bg-[#1857D6]/8 text-[#1857D6] rounded-xl">
+                  <Activity size={14} />
+                </div>
+                <div>
+                  <h4 className="text-[10px] font-bold text-[#0F172A] uppercase tracking-widest">Sentiment Score</h4>
+                  <p className="text-[7px] text-[#64748B] uppercase tracking-wider font-bold">Real-time status</p>
+                </div>
+              </div>
+              <div className="flex items-center justify-between">
+                <div className="space-y-1">
+                  <div className="text-3xl font-black text-[#0F172A] font-display">4.92</div>
+                  <div className="flex text-[#1857D6] space-x-0.5">
+                    <Star size={8} className="fill-current" />
+                    <Star size={8} className="fill-current" />
+                    <Star size={8} className="fill-current" />
+                    <Star size={8} className="fill-current" />
+                    <Star size={8} className="fill-current" />
+                  </div>
+                </div>
+                <div className="w-12 h-12 relative flex items-center justify-center">
+                  <svg className="w-full h-full transform -rotate-90">
+                    <circle cx="24" cy="24" r="20" stroke="#f1f5f9" strokeWidth="4.5" fill="transparent" />
+                    <circle cx="24" cy="24" r="20" stroke="#1857D6" strokeWidth="4.5" fill="transparent"
+                      strokeDasharray={125.6} strokeDashoffset={12.5} strokeLinecap="round" />
+                  </svg>
+                  <span className="absolute text-[8px] font-black text-[#1857D6]">98%</span>
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+
+          {/* Card 2: QR Scanner Distribution (Bottom Left / Foreground Plane) */}
+          <motion.div
+            style={{ y: heroCard2Y }}
+            className="absolute bottom-[20px] left-[-10px] xl:left-[-30px] z-40 select-none hidden sm:block"
+          >
+            <motion.div
+              animate={{ y: [0, -12, 0], x: [0, 3, 0] }}
+              transition={{ duration: 7, repeat: Infinity, ease: "easeInOut" }}
+              className="w-72 glass-mac-frosted rounded-2xl p-5 shadow-2xl border border-white/60"
+            >
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-[8px] font-bold text-[#64748B] uppercase tracking-widest">QR Scan Volume</span>
+                <span className="text-[8px] font-bold text-[#10B981] bg-[#10B981]/8 px-2 py-0.5 rounded-full uppercase tracking-wider">Active</span>
+              </div>
+              <div className="space-y-2.5">
+                <div className="flex justify-between items-center text-[10px]">
+                  <span className="text-[#0F172A] font-semibold">Luxe Salon (QR-LUXE)</span>
+                  <span className="font-mono text-[#64748B]">512 scans</span>
+                </div>
+                <div className="flex justify-between items-center text-[10px]">
+                  <span className="text-[#0F172A] font-semibold">Cafe Paris (QR-PARIS)</span>
+                  <span className="font-mono text-[#64748B]">329 scans</span>
+                </div>
+                <div className="flex justify-between items-center text-[10px]">
+                  <span className="text-[#0F172A] font-semibold">Prime Steak (QR-STEAK)</span>
+                  <span className="font-mono text-[#64748B]">184 scans</span>
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+
+          {/* Card 3: Analytics Velocity Chart (Top Right / Deep Plane) */}
           <motion.div
             style={{ y: heroCard3Y }}
-            className="absolute top-[-20px] right-2 w-72 glass-mac-frosted rounded-2xl p-5 shadow-lg border border-white/50"
+            className="absolute top-[-20px] right-[-10px] xl:right-[-40px] z-20 select-none hidden md:block"
           >
-            <div className="flex items-center justify-between pb-3 border-b border-slate-100 mb-3">
-              <div className="flex items-center space-x-2">
-                <span className="w-1.5 h-1.5 rounded-full bg-[#10B981] animate-ping" />
-                <span className="text-[9px] font-bold text-[#0F172A] uppercase tracking-wider">Live Sentiments</span>
+            <motion.div
+              animate={{ y: [0, -8, 0], x: [0, -4, 0] }}
+              transition={{ duration: 5.5, repeat: Infinity, ease: "easeInOut" }}
+              className="w-72 glass-mac-frosted rounded-2xl p-5 shadow-2xl border border-white/60"
+            >
+              <div className="flex items-center justify-between mb-3.5">
+                <span className="text-[8px] font-bold text-[#64748B] uppercase tracking-widest">Review Velocity</span>
+                <span className="text-[8px] font-bold text-[#10B981] bg-[#10B981]/8 px-2 py-0.5 rounded-full">+148%</span>
               </div>
-              <span className="text-[9px] text-[#64748B]">Just scanned</span>
-            </div>
-            <div className="space-y-3">
-              <div className="flex items-center justify-between text-[11px]">
-                <div className="space-y-0.5">
-                  <strong className="block text-[#0F172A] font-semibold">Luxe Salon</strong>
-                  <span className="text-[8px] text-[#64748B] font-mono">QR-LUXE</span>
-                </div>
-                <div className="text-right space-y-0.5">
-                  <div className="flex text-[#1857D6] justify-end"><Star size={7} className="fill-current" /><Star size={7} className="fill-current" /><Star size={7} className="fill-current" /><Star size={7} className="fill-current" /><Star size={7} className="fill-current" /></div>
-                  <span className="text-[8px] text-[#10B981] font-bold bg-[#10B981]/8 px-1.5 py-0.5 rounded uppercase tracking-wider">Routed to Google</span>
-                </div>
+              <div className="flex items-baseline space-x-1.5 mb-2.5">
+                <span className="text-2xl font-black text-[#0F172A] font-display">842</span>
+                <span className="text-[8px] text-[#64748B] uppercase font-bold tracking-widest">New 5-Stars</span>
               </div>
-            </div>
+              <svg className="w-full h-16 text-[#1857D6]" viewBox="0 0 100 30" fill="none">
+                <path d="M0,25 Q15,22 30,10 T60,18 T90,2 T100,5" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" fill="none" />
+                <path d="M0,25 Q15,22 30,10 T60,18 T90,2 T100,5 L100,30 L0,30 Z" fill="url(#heroRedesignBlueGlow)" opacity="0.1" />
+                <defs>
+                  <linearGradient id="heroRedesignBlueGlow" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#1857D6" />
+                    <stop offset="100%" stopColor="#1857D6" stopOpacity="0" />
+                  </linearGradient>
+                </defs>
+              </svg>
+            </motion.div>
           </motion.div>
         </div>
       </section>
