@@ -688,17 +688,17 @@ export default function LandingPage() {
       {/* CINEMATIC PRODUCT SHOWCASE (Whitespace: py-40, Tilted mockup with overlapping floating card) */}
       <section id="product-showcase" className="relative z-10 w-full max-w-7xl mx-auto px-6 lg:px-8 py-40 border-t border-slate-200/40 bg-[#FAFAFA]/50">
         <div className="text-center max-w-3xl mx-auto mb-28 space-y-4">
-          <span className="text-xs font-bold text-[#1857D6] uppercase tracking-widest">Unified Console</span>
+          <span className="text-xs font-bold text-[#1857D6] uppercase tracking-widest">Brand Experience</span>
           <h2 className="text-5xl sm:text-6xl font-extrabold text-[#0F172A] tracking-tight font-display">
-            A Command Center for Multi-site Reputation
+            A Command Center for Your Location's Reputation
           </h2>
           <p className="text-[#64748B] text-base max-w-lg mx-auto">
-            Manage QR inventory, monitor active representatives, and track callback requests from a secure, unified dashboard.
+            Monitor guest reviews in real-time, track sentiment velocity, and recover unhappy diners privately before they post online.
           </p>
         </div>
 
         {/* Asymmetrical Mockup Container with Parallax overlays */}
-        <div className="relative w-full max-w-5xl mx-auto h-[600px] flex items-center justify-center">
+        <div className="relative w-full max-w-5xl mx-auto h-[620px] flex items-center justify-center">
           {/* Main Mockup: Tilted macOS window */}
           <motion.div
             style={{ y: showcaseY }}
@@ -710,26 +710,26 @@ export default function LandingPage() {
                 <span className="w-2.5 h-2.5 rounded-full bg-slate-200" />
                 <span className="w-2.5 h-2.5 rounded-full bg-slate-200" />
                 <span className="w-2.5 h-2.5 rounded-full bg-slate-200" />
-                <span className="text-[10px] font-bold text-[#64748B] pl-4 font-mono">admin.cloutreputation.com/qr-inventory</span>
+                <span className="text-[10px] font-bold text-[#64748B] pl-4 font-mono">bella-italia.cloutrep.com/dashboard</span>
               </div>
-              <span className="px-2.5 py-0.5 bg-blue-50 text-[9px] font-bold text-[#1857D6] rounded-full uppercase tracking-widest">Super Admin</span>
+              <span className="px-2.5 py-0.5 bg-blue-50 text-[9px] font-bold text-[#1857D6] rounded-full uppercase tracking-widest">Merchant Portal</span>
             </div>
 
-            {/* Mockup Dashboard Table Area */}
+            {/* Mockup Dashboard Layout */}
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 min-h-[350px]">
               {/* Sidebar Mockup */}
               <div className="lg:col-span-3 border-r border-slate-100 pr-4 hidden lg:block space-y-5">
-                <span className="text-[9px] font-bold uppercase tracking-widest text-slate-400 block px-2">Menu</span>
+                <span className="text-[9px] font-bold uppercase tracking-widest text-slate-400 block px-2">Bella Italia</span>
                 <div className="space-y-1">
                   {[
-                    { label: 'Dashboard', active: false },
-                    { label: 'QR Inventory', active: true },
-                    { label: 'REPs Panel', active: false },
-                    { label: 'Businesses', active: false }
+                    { label: 'Overview', active: true },
+                    { label: 'Live Reviews', active: false },
+                    { label: 'Sentiment Trends', active: false },
+                    { label: 'Feedback Setup', active: false }
                   ].map((item) => (
                     <div
                       key={item.label}
-                      className={`px-3 py-2 rounded-xl text-[10px] font-bold ${
+                      className={`px-3 py-2 rounded-xl text-[10px] font-bold cursor-default ${
                         item.active ? 'bg-[#1857D6] text-white shadow-sm' : 'text-[#64748B]'
                       }`}
                     >
@@ -739,86 +739,130 @@ export default function LandingPage() {
                 </div>
               </div>
 
-              {/* Table Mockup */}
+              {/* Main Contents */}
               <div className="lg:col-span-9 space-y-4">
+                {/* Stats row */}
                 <div className="grid grid-cols-3 gap-3">
                   {[
-                    { l: 'Total QRs', v: '43' },
-                    { l: 'Unassigned', v: '39' },
-                    { l: 'Assigned', v: '4', c: 'text-[#1857D6]' }
+                    { l: 'Average Rating', v: '4.92', c: 'text-[#0F172A]', s: '★ 98% positive' },
+                    { l: 'Review Volume', v: '1,248', c: 'text-[#1857D6]', s: '+24% this month' },
+                    { l: 'Private Recoveries', v: '43', c: 'text-[#10B981]', s: '100% resolved' }
                   ].map((kpi) => (
                     <div key={kpi.l} className="bg-slate-50 border border-slate-100 rounded-xl p-3">
-                      <span className="text-[8px] font-bold text-[#64748B] uppercase tracking-wider block">{kpi.l}</span>
-                      <strong className={`text-lg font-bold block ${kpi.c || 'text-[#0F172A]'}`}>{kpi.v}</strong>
+                      <span className="text-[8px] font-bold text-[#64748B] uppercase tracking-wider block mb-0.5">{kpi.l}</span>
+                      <strong className={`text-base lg:text-lg font-bold block ${kpi.c}`}>{kpi.v}</strong>
+                      <span className="text-[7px] text-[#64748B] font-medium block">{kpi.s}</span>
                     </div>
                   ))}
                 </div>
 
-                <div className="border border-slate-150 rounded-xl overflow-hidden bg-white">
-                  <table className="min-w-full text-left text-[10px] text-slate-500 font-sans">
-                    <thead className="bg-slate-50 font-bold text-slate-400 uppercase tracking-widest border-b border-slate-150">
-                      <tr>
-                        <th className="px-3 py-2">Code</th>
-                        <th className="px-3 py-2">Status</th>
-                        <th className="px-3 py-2">Assigned</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-slate-100">
+                {/* Split grid: comments vs graph */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {/* Customer Feed */}
+                  <div className="border border-slate-150 rounded-xl p-4 bg-white space-y-3">
+                    <h4 className="text-[9px] font-bold text-[#0F172A] uppercase tracking-widest">Live Feedback Stream</h4>
+                    <div className="space-y-2">
                       {[
-                        { code: 'QR-BELLA', status: 'ASSIGNED', biz: 'Bella Italia' },
-                        { code: 'QR-LUXE', status: 'ASSIGNED', biz: 'Luxe Salon' },
-                        { code: 'QR-000004', status: 'UNASSIGNED', biz: 'None', un: true }
-                      ].map((row) => (
-                        <tr key={row.code} className="hover:bg-slate-50">
-                          <td className="px-3 py-2.5 font-mono font-bold text-[#1857D6]">{row.code}</td>
-                          <td className="px-3 py-2.5">
-                            <span className={`inline-flex px-1.5 py-0.5 rounded text-[8px] font-extrabold ${
-                              row.un ? 'bg-slate-100 text-slate-700' : 'bg-blue-50 text-[#1857D6]'
-                            }`}>{row.status}</span>
-                          </td>
-                          <td className="px-3 py-2.5 font-semibold text-[#0F172A]">{row.biz}</td>
-                        </tr>
+                        { customer: 'Sarah Connor', text: 'Best lasagna in the city. Outstanding service!', source: 'Google', rating: 5, status: 'Routed' },
+                        { customer: 'Jean Picard', text: 'Wait time was 25 minutes, but manager solved it.', source: 'Private', rating: 2, status: 'Recovered' },
+                        { customer: 'Marcus A.', text: 'Tiramisu is legendary. Highly recommend.', source: 'Yelp', rating: 5, status: 'Routed' }
+                      ].map((review, i) => (
+                        <div key={i} className="p-2 border border-slate-100 rounded-lg text-[9px] space-y-1">
+                          <div className="flex items-center justify-between">
+                            <span className="font-bold text-[#0F172A]">{review.customer}</span>
+                            <span className="text-[7px] text-[#64748B]">{review.source}</span>
+                          </div>
+                          <p className="text-[#64748B] text-[8px] italic">"{review.text}"</p>
+                          <div className="flex items-center justify-between pt-1 border-t border-slate-50">
+                            <div className="flex text-[#1857D6] space-x-0.5">
+                              {[...Array(review.rating)].map((_, idx) => (
+                                <Star key={idx} size={6} className="fill-current" />
+                              ))}
+                            </div>
+                            <span className={`text-[6px] font-bold px-1 py-0.2 rounded uppercase tracking-wider ${
+                              review.status === 'Recovered' ? 'text-[#10B981] bg-[#10B981]/8' : 'text-[#1857D6] bg-blue-50'
+                            }`}>{review.status}</span>
+                          </div>
+                        </div>
                       ))}
-                    </tbody>
-                  </table>
+                    </div>
+                  </div>
+
+                  {/* Sentiment Velocity Graph */}
+                  <div className="border border-slate-150 rounded-xl p-4 bg-white flex flex-col justify-between">
+                    <div className="flex items-center justify-between mb-2">
+                      <h4 className="text-[9px] font-bold text-[#0F172A] uppercase tracking-widest">Sentiment Velocity</h4>
+                      <span className="text-[8px] font-bold text-[#1857D6]">30 Day View</span>
+                    </div>
+                    {/* SVG Chart area */}
+                    <div className="flex-1 min-h-[120px] flex items-end">
+                      <svg className="w-full h-24 text-[#1857D6]" viewBox="0 0 100 40" fill="none">
+                        <path d="M0,35 Q15,32 30,15 T60,25 T90,5 T100,8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" fill="none" />
+                        <path d="M0,35 Q15,32 30,15 T60,25 T90,5 T100,8 L100,40 L0,40 Z" fill="url(#showcaseBlueGlow)" opacity="0.1" />
+                        
+                        {/* Secondary dot line representing recovery events */}
+                        <path d="M0,38 C20,38 40,28 60,18 C80,8 90,12 100,5" stroke="#10B981" strokeWidth="1.5" strokeDasharray="2 2" fill="none" />
+                        <defs>
+                          <linearGradient id="showcaseBlueGlow" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stopColor="#1857D6" />
+                            <stop offset="100%" stopColor="#1857D6" stopOpacity="0" />
+                          </linearGradient>
+                        </defs>
+                      </svg>
+                    </div>
+                    <div className="flex items-center justify-between pt-2 border-t border-slate-100 text-[7px] text-[#64748B] font-bold uppercase tracking-wider">
+                      <div className="flex items-center space-x-1">
+                        <span className="w-1.5 h-1.5 rounded-full bg-[#1857D6]" />
+                        <span>Google Reviews</span>
+                      </div>
+                      <div className="flex items-center space-x-1">
+                        <span className="w-1.5 h-1.5 rounded-full bg-[#10B981]" />
+                        <span>Private Recoveries</span>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
           </motion.div>
 
-          {/* Overlapping Floating Component (Parallax Foreground layer, offset right) */}
+          {/* Overlapping Floating Component: Private Recovery Funnel */}
           <motion.div
             style={{ y: showcaseOverlapY }}
-            className="absolute z-20 bottom-10 right-0 w-80 glass-mac-frosted rounded-2xl p-5 shadow-2xl border border-white/60"
+            className="absolute z-20 bottom-10 right-0 w-80 glass-mac-frosted rounded-2xl p-5 shadow-2xl border border-white/60 select-none"
           >
             <div className="flex items-center space-x-3 mb-4">
-              <div className="p-2 bg-[#1857D6]/8 text-[#1857D6] rounded-lg">
-                <LinkIcon size={14} />
+              <div className="p-2 bg-[#10B981]/8 text-[#10B981] rounded-lg">
+                <CheckCircle size={14} />
               </div>
               <div>
-                <h4 className="text-xs font-bold text-[#0F172A] uppercase tracking-wider">Quick Assignment</h4>
-                <p className="text-[8px] text-[#64748B]">Assign QR stickers in one click</p>
+                <h4 className="text-xs font-bold text-[#0F172A] uppercase tracking-wider">Private Recovery Funnel</h4>
+                <p className="text-[8px] text-[#64748B]">Auto-intercept negative scans</p>
               </div>
             </div>
 
             <div className="space-y-3">
-              <div className="p-3 bg-slate-50 rounded-lg text-[10px] space-y-1 font-mono">
-                <div>Sticker: <strong className="text-black">QR-000004</strong></div>
-                <div>Status: <span className="text-[#1857D6] font-bold">UNASSIGNED</span></div>
-              </div>
-              <div className="space-y-1">
-                <label className="block text-[8px] font-bold text-[#64748B] uppercase tracking-widest">Target Business</label>
-                <div className="text-[10px] font-bold text-slate-800 border border-slate-200 rounded-lg p-2 bg-white flex justify-between items-center">
-                  <span>Pondy Promoters</span>
-                  <span className="text-[8px] text-slate-400 font-medium">RESTAURANT</span>
+              <div className="p-3 bg-slate-50 border border-slate-100 rounded-lg text-[10px] space-y-1.5 font-sans">
+                <div className="flex justify-between">
+                  <span className="text-[#64748B]">Guest:</span>
+                  <strong className="text-black font-semibold">Jean Picard</strong>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-[#64748B]">Score:</span>
+                  <span className="text-amber-600 font-bold">★★☆☆☆ (2 Stars)</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-[#64748B]">Action:</span>
+                  <span className="text-[8px] font-bold text-[#10B981] bg-[#10B981]/5 px-1.5 py-0.5 rounded">Sent Comp Voucher</span>
                 </div>
               </div>
-              <button
-                type="button"
-                className="w-full bg-[#1857D6] text-white text-[10px] font-bold py-2 rounded-lg border-none uppercase tracking-widest cursor-pointer"
-              >
-                Confirm Link
-              </button>
+              <div className="flex items-center justify-between text-[9px] bg-blue-50/50 p-2.5 rounded-lg border border-blue-100/50">
+                <div className="flex items-center space-x-2 text-[#1857D6]">
+                  <Check size={12} className="stroke-[3px]" />
+                  <span className="font-bold uppercase tracking-wider">Saved Reputation</span>
+                </div>
+                <span className="text-[#64748B] font-medium text-[8px]">100% Private</span>
+              </div>
             </div>
           </motion.div>
         </div>
@@ -829,15 +873,15 @@ export default function LandingPage() {
             href="#book-demo"
             className="inline-flex items-center space-x-1.5 text-xs font-bold text-[#1857D6] hover:underline uppercase tracking-widest"
           >
-            <span>Tour the Platform Portals</span>
+            <span>Schedule a Live Location Walkthrough</span>
             <ChevronRight size={14} />
           </a>
         </div>
       </section>
 
-      {/* BESPOKE FEATURE GRID SECTION (Whitespace: py-40, staggered asymmetrical layout) */}
+      {/* BESPOKE FEATURE GRID SECTION (Whitespace: py-40, Bento Grid visual architecture) */}
       <section id="features" className="relative z-10 w-full max-w-7xl mx-auto px-6 lg:px-8 py-40 border-t border-slate-200/40">
-        <div className="text-center max-w-3xl mx-auto mb-28 space-y-4">
+        <div className="text-center max-w-3xl mx-auto mb-24 space-y-4">
           <span className="text-xs font-bold text-[#1857D6] uppercase tracking-widest">Capabilities</span>
           <h2 className="text-5xl sm:text-6xl font-extrabold text-[#0F172A] tracking-tight font-display">
             Built for High-Velocity B2B Operations
@@ -847,35 +891,180 @@ export default function LandingPage() {
           </p>
         </div>
 
-        {/* Asymmetrical staggered card list */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-          {[
-            { title: 'Smart Funnel Routing', desc: 'Positive experiences route straight to Google, while critical feedback goes privately to managers.', icon: Star, offset: false },
-            { title: 'QR Batch Manager', desc: 'Create, track, and print physical QR code sheets in clean, audited inventory lists.', icon: QrCode, offset: true },
-            { title: 'Multi-Location Support', desc: 'Monitor satisfaction scores and callback queues across multiple retail sites.', icon: Building2, offset: false },
-            { title: 'Callback Requests', desc: 'Trigger instant notifications for customer callback requests to resolve issues privately.', icon: PhoneCall, offset: true },
-            { title: 'REP Onboarding Audits', desc: 'Audit representative actions, tracking which agents generated and assigned specific QR batches.', icon: Users, offset: false },
-            { title: 'Executive Analytics', desc: 'Unified control panel featuring satisfaction trends, conversion rates, and conversion velocities.', icon: TrendingUp, offset: true },
-            { title: 'Role-Based Portals', desc: 'Differentiated dashboard views and RBAC security rules for Admin, REP, and Merchant accounts.', icon: Shield, offset: false },
-            { title: 'Callback Resolution Queue', desc: 'Log manager action timestamps, recording who resolved callback issues and when.', icon: Layers, offset: true }
-          ].map((item, idx) => (
-            <div
-              key={idx}
-              className={`glass-mac-frosted rounded-3xl p-7 shadow-sm transition-all duration-300 group ${
-                item.offset ? 'lg:translate-y-8' : ''
-              }`}
-            >
-              <div className="h-10 w-10 rounded-xl bg-[#1857D6]/8 text-[#1857D6] flex items-center justify-center mb-5 group-hover:scale-105 transition-transform duration-300">
-                <item.icon size={18} />
+        {/* Bento Grid layout */}
+        <div className="grid grid-cols-1 md:grid-cols-6 gap-6">
+          {/* Card 1: Smart Funnel Routing (cols 3) */}
+          <div className="md:col-span-3 glass-mac-frosted rounded-3xl p-8 flex flex-col justify-between overflow-hidden relative group hover:shadow-xl transition-all duration-300 h-[320px]">
+            <div className="space-y-2">
+              <div className="h-9 w-9 rounded-xl bg-blue-50 text-[#1857D6] flex items-center justify-center mb-3">
+                <Star size={16} />
               </div>
-              <h3 className="text-sm font-bold text-[#0F172A] mb-2">{item.title}</h3>
-              <p className="text-xs text-[#64748B] leading-relaxed">{item.desc}</p>
+              <h3 className="text-sm font-bold text-[#0F172A]">Smart Funnel Routing</h3>
+              <p className="text-xs text-[#64748B] leading-relaxed max-w-xs">
+                Positive reviews are guided to public channels, while constructive feedback opens a private direct channel with managers.
+              </p>
             </div>
-          ))}
+            
+            {/* Funnel Routing Visual Mockup */}
+            <div className="w-full flex items-center justify-center space-x-4 mt-4 bg-slate-50/50 border border-slate-100 rounded-2xl p-4">
+              <div className="bg-white px-3 py-1.5 rounded-lg border border-slate-200 text-[8px] font-bold text-[#0F172A] flex items-center space-x-1.5 shadow-sm">
+                <span>Scan QR</span>
+              </div>
+              <span className="text-slate-350 text-[10px]">➔</span>
+              <div className="flex flex-col space-y-2 text-[7px] font-bold">
+                <div className="bg-[#10B981]/10 text-[#10B981] px-2 py-1 rounded border border-[#10B981]/20 flex items-center space-x-1">
+                  <span>★★★★★</span>
+                  <span>➔</span>
+                  <span className="bg-[#1857D6] text-white px-1 rounded font-sans">Google</span>
+                </div>
+                <div className="bg-amber-500/10 text-amber-600 px-2 py-1 rounded border border-amber-500/20 flex items-center space-x-1">
+                  <span>★★☆☆☆</span>
+                  <span>➔</span>
+                  <span className="bg-[#0F172A] text-white px-1 rounded font-sans">Private</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Card 2: Executive Analytics (cols 3) */}
+          <div className="md:col-span-3 glass-mac-frosted rounded-3xl p-8 flex flex-col justify-between overflow-hidden relative group hover:shadow-xl transition-all duration-300 h-[320px]">
+            <div className="space-y-2">
+              <div className="h-9 w-9 rounded-xl bg-blue-50 text-[#1857D6] flex items-center justify-center mb-3">
+                <TrendingUp size={16} />
+              </div>
+              <h3 className="text-sm font-bold text-[#0F172A]">Executive Analytics</h3>
+              <p className="text-xs text-[#64748B] leading-relaxed max-w-xs">
+                Visualize satisfaction scores, scan velocity rates, and conversion curves from a high-fidelity control deck.
+              </p>
+            </div>
+
+            {/* Mini SVG graph visual */}
+            <div className="w-full bg-slate-50/50 border border-slate-100 rounded-2xl p-4 h-24 flex items-end">
+              <svg className="w-full h-full text-[#1857D6]" viewBox="0 0 100 30" fill="none">
+                <path d="M0,28 Q15,10 30,22 T60,5 T90,15 T100,2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" fill="none" />
+                <path d="M0,28 Q15,10 30,22 T60,5 T90,15 T100,2 L100,30 L0,30 Z" fill="url(#bentoGraphGlow)" opacity="0.08" />
+                <defs>
+                  <linearGradient id="bentoGraphGlow" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#1857D6" />
+                    <stop offset="100%" stopColor="#1857D6" stopOpacity="0" />
+                  </linearGradient>
+                </defs>
+              </svg>
+            </div>
+          </div>
+
+          {/* Card 3: Multi-Location Support (cols 2) */}
+          <div className="md:col-span-2 glass-mac-frosted rounded-3xl p-8 flex flex-col justify-between overflow-hidden relative group hover:shadow-xl transition-all duration-300 h-[340px]">
+            <div className="space-y-2">
+              <div className="h-9 w-9 rounded-xl bg-blue-50 text-[#1857D6] flex items-center justify-center mb-3">
+                <Building2 size={16} />
+              </div>
+              <h3 className="text-sm font-bold text-[#0F172A]">Multi-Location Support</h3>
+              <p className="text-xs text-[#64748B] leading-relaxed">
+                Compare rating indexes and response rates across all your locations in a single console.
+              </p>
+            </div>
+
+            {/* List location metrics */}
+            <div className="space-y-1.5 mt-4 bg-white/40 border border-slate-100 rounded-2xl p-3 text-[9px] font-sans">
+              {[
+                { n: 'Bella Italia', r: '4.92', p: '98%' },
+                { n: 'Luxe Salon', r: '4.85', p: '96%' },
+                { n: 'Bistro Hub', r: '4.90', p: '97%' }
+              ].map((loc, i) => (
+                <div key={i} className="flex justify-between items-center p-1.5 border-b border-slate-100 last:border-0">
+                  <span className="font-bold text-[#0F172A]">{loc.n}</span>
+                  <div className="flex space-x-2 text-[#64748B]">
+                    <span>★ {loc.r}</span>
+                    <span className="text-[#10B981] font-bold">{loc.p}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Card 4: QR Batch Manager & Onboarding (cols 4) */}
+          <div className="md:col-span-4 glass-mac-frosted rounded-3xl p-8 flex flex-col justify-between overflow-hidden relative group hover:shadow-xl transition-all duration-300 h-[340px]">
+            <div className="space-y-2">
+              <div className="h-9 w-9 rounded-xl bg-blue-50 text-[#1857D6] flex items-center justify-center mb-3">
+                <QrCode size={16} />
+              </div>
+              <h3 className="text-sm font-bold text-[#0F172A]">QR Batch Manager & Auditing</h3>
+              <p className="text-xs text-[#64748B] leading-relaxed max-w-md">
+                Generate batches of physical QR codes, track representative onboarding steps, and audit active assignments within an immutable security log.
+              </p>
+            </div>
+
+            {/* Sticker generation overlay visuals */}
+            <div className="grid grid-cols-3 gap-3 mt-4">
+              {[
+                { id: 'QR-BELLA', status: 'Active', color: 'border-l-4 border-l-[#10B981]' },
+                { id: 'QR-PARIS', status: 'Active', color: 'border-l-4 border-l-[#10B981]' },
+                { id: 'QR-000004', status: 'Pending', color: 'border-l-4 border-l-amber-500' }
+              ].map((qr, i) => (
+                <div key={i} className={`bg-slate-50 border border-slate-155 rounded-xl p-3 text-[9px] ${qr.color}`}>
+                  <div className="font-mono font-bold text-[#1857D6] mb-1">{qr.id}</div>
+                  <div className="flex justify-between text-[7px] text-[#64748B] font-bold uppercase tracking-wider">
+                    <span>Sticker</span>
+                    <span className={qr.status === 'Active' ? 'text-[#10B981]' : 'text-amber-600'}>{qr.status}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Card 5: Role-Based Portals (cols 3) */}
+          <div className="md:col-span-3 glass-mac-frosted rounded-3xl p-8 flex flex-col justify-between overflow-hidden relative group hover:shadow-xl transition-all duration-300 h-[300px]">
+            <div className="space-y-2">
+              <div className="h-9 w-9 rounded-xl bg-blue-50 text-[#1857D6] flex items-center justify-center mb-3">
+                <Shield size={16} />
+              </div>
+              <h3 className="text-sm font-bold text-[#0F172A]">Role-Based Portals</h3>
+              <p className="text-xs text-[#64748B] leading-relaxed max-w-xs">
+                Different interfaces custom-tailored for super admins, representative field agents, and business store managers.
+              </p>
+            </div>
+
+            {/* Selector Visuals */}
+            <div className="flex space-x-2 mt-4 bg-slate-50/50 border border-slate-100 rounded-2xl p-3 text-[8px] font-bold justify-between">
+              <span className="bg-white border border-slate-200 text-[#1857D6] px-2.5 py-1.5 rounded-lg shadow-sm">Admin Console</span>
+              <span className="text-[#64748B] px-2.5 py-1.5">Representative App</span>
+              <span className="text-[#64748B] px-2.5 py-1.5">Merchant Panel</span>
+            </div>
+          </div>
+
+          {/* Card 6: Callback Resolution Queue (cols 3) */}
+          <div className="md:col-span-3 glass-mac-frosted rounded-3xl p-8 flex flex-col justify-between overflow-hidden relative group hover:shadow-xl transition-all duration-300 h-[300px]">
+            <div className="space-y-2">
+              <div className="h-9 w-9 rounded-xl bg-blue-50 text-[#1857D6] flex items-center justify-center mb-3">
+                <Layers size={16} />
+              </div>
+              <h3 className="text-sm font-bold text-[#0F172A]">Callback Resolution Queue</h3>
+              <p className="text-xs text-[#64748B] leading-relaxed max-w-xs">
+                Track resolution timestamps, log manager actions, and archive customer conversations from a secure queue.
+              </p>
+            </div>
+
+            {/* Resolved timeline stream */}
+            <div className="space-y-2 mt-4 text-[8px] font-medium border-l border-slate-200 pl-4 relative">
+              <div className="relative">
+                <span className="absolute left-[-20px] top-0.5 w-2 h-2 rounded-full bg-[#1857D6]" />
+                <span className="font-bold text-[#0F172A]">10:14 AM</span> — Negative Scan Intercepted
+              </div>
+              <div className="relative">
+                <span className="absolute left-[-20px] top-0.5 w-2 h-2 rounded-full bg-amber-500" />
+                <span className="font-bold text-[#0F172A]">10:15 AM</span> — Compensation Voucher Sent
+              </div>
+              <div className="relative">
+                <span className="absolute left-[-20px] top-0.5 w-2 h-2 rounded-full bg-[#10B981]" />
+                <span className="font-bold text-[#0F172A]">10:19 AM</span> — Customer Feedback Resolved
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* Section Contextual CTA */}
-        <div className="text-center pt-28">
+        <div className="text-center pt-24">
           <a
             href="#book-demo"
             className="inline-flex items-center space-x-1.5 text-xs font-bold text-[#1857D6] hover:underline uppercase tracking-widest"
