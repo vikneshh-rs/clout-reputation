@@ -1,0 +1,143 @@
+@import "tailwindcss";
+
+@theme {
+  --color-primary-blue: #1857D6;
+  --color-secondary-blue: #3B82F6;
+  --color-accent-aqua: #06B6D4;
+
+  --shadow-card-premium: 0px 4px 20px rgba(15, 23, 42, 0.05);
+  --shadow-card-hover: 0px 12px 40px rgba(15, 23, 42, 0.10);
+  --shadow-modal-premium: 0px 25px 60px rgba(15, 23, 42, 0.12);
+  --shadow-glass-premium: 0px 8px 30px rgba(15, 23, 42, 0.06);
+
+  --font-sans: 'Inter', 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+/* =============================================================
+   FORCED LIGHT MODE — This product is light-only.
+   The .dark class is permanently disabled and inert.
+============================================================= */
+
+/* Override dark color-scheme so system dark mode has zero effect */
+:root {
+  color-scheme: light;
+}
+
+/* Even if .dark class is somehow added, neutralise it */
+html,
+html.dark {
+  background-color: #f8fafc !important;
+  color-scheme: light !important;
+}
+
+/* Prevent any dark: Tailwind class from activating */
+.dark * {
+  --tw-bg-opacity: 1;
+}
+
+body {
+  background-color: #f8fafc;
+  color: #0f172a;
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* =====================
+   Scrollbar — Clean
+===================== */
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #e2e8f0;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #cbd5e1;
+}
+
+/* =====================
+   Typography helpers
+===================== */
+h1, h2, h3, h4, h5, h6 {
+  color: #0f172a;
+}
+
+/* =====================
+   Focus ring — clean
+===================== */
+*:focus-visible {
+  outline: 2px solid #1857D6;
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* =============================================================
+   CUSTOM UI/UX PREMIUM ANIMATIONS (WHITE / GLASS THEME)
+   ============================================================= */
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes float {
+  0% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-5px);
+  }
+  100% {
+    transform: translateY(0px);
+  }
+}
+
+@keyframes pulseGlow {
+  0%, 100% {
+    box-shadow: 0 0 15px rgba(37, 99, 235, 0.1);
+  }
+  50% {
+    box-shadow: 0 0 25px rgba(37, 99, 235, 0.25);
+  }
+}
+
+.animate-slideUp {
+  animation: slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.4s ease-out forwards;
+}
+
+.animate-float {
+  animation: float 4s ease-in-out infinite;
+}
+
+.animate-pulseGlow {
+  animation: pulseGlow 3s ease-in-out infinite;
+}
+
