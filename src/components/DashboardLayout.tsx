@@ -39,7 +39,6 @@ export default function DashboardLayout({ children, title }: DashboardLayoutProp
     ? [
         { name: 'Business Dashboard', href: `/dashboard/business?businessId=${businessId}&readOnly=true`, icon: LayoutDashboard },
         { name: 'Reviews Feed', href: `/dashboard/business/reviews?businessId=${businessId}&readOnly=true`, icon: MessageSquare },
-        { name: 'Callbacks', href: `/dashboard/business/callbacks?businessId=${businessId}&readOnly=true`, icon: PhoneCall },
         { name: 'Profile Settings', href: `/dashboard/business/settings?businessId=${businessId}&readOnly=true`, icon: Settings },
         { name: 'Back to Admin', href: '/dashboard/admin/businesses', icon: ArrowLeft },
       ]
@@ -63,7 +62,6 @@ export default function DashboardLayout({ children, title }: DashboardLayoutProp
     : [
         { name: 'Dashboard', href: '/dashboard/business', icon: LayoutDashboard },
         { name: 'Reviews', href: '/dashboard/business/reviews', icon: MessageSquare },
-        { name: 'Callbacks', href: '/dashboard/business/callbacks', icon: PhoneCall },
         { name: 'Settings', href: '/dashboard/business/settings', icon: Settings },
       ];
 

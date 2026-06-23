@@ -62,9 +62,7 @@ export default function LandingPage() {
   // Interactive Sentiment Routing Widget States
   const [selectedRating, setSelectedRating] = useState<number | null>(null);
   const [feedbackName, setFeedbackName] = useState('');
-  const [feedbackPhone, setFeedbackPhone] = useState('');
   const [feedbackComment, setFeedbackComment] = useState('');
-  const [callbackRequested, setCallbackRequested] = useState(true);
   const [feedbackSubmitted, setFeedbackSubmitted] = useState(false);
 
   const handleLeadSubmit = async (e: React.FormEvent) => {
@@ -85,9 +83,7 @@ export default function LandingPage() {
   const resetFeedbackWidget = () => {
     setSelectedRating(null);
     setFeedbackName('');
-    setFeedbackPhone('');
     setFeedbackComment('');
-    setCallbackRequested(true);
     setFeedbackSubmitted(false);
   };
 
@@ -583,57 +579,42 @@ export default function LandingPage() {
                     className="w-full space-y-4"
                   >
                     <div className="p-4 bg-amber-50/50 border border-amber-100 rounded-xl text-amber-800 text-xs flex items-start gap-2.5">
-                      <PhoneCall className="flex-shrink-0 text-amber-600 mt-0.5" size={14} />
+                      <MessageSquare className="flex-shrink-0 text-amber-600 mt-0.5" size={14} />
                       <span className="text-[11px] leading-relaxed">
-                        <strong>Critical score ({selectedRating} stars) detected.</strong> The review funnel captures feedback privately for immediate owner recovery.
+                        <strong>Critical score ({selectedRating} stars) detected.</strong> The review funnel captures feedback privately to protect your public rating.
                       </span>
                     </div>
 
                     {!feedbackSubmitted ? (
                       <form onSubmit={handleFeedbackSubmit} className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm space-y-3">
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                          <input
-                            type="text"
-                            required
-                            value={feedbackName}
-                            onChange={(e) => setFeedbackName(e.target.value)}
-                            placeholder="Your Name"
-                            className="text-xs border border-slate-200 rounded-lg p-2 focus:border-[#1857D6] focus:outline-none"
-                          />
-                          <input
-                            type="text"
-                            required
-                            value={feedbackPhone}
-                            onChange={(e) => setFeedbackPhone(e.target.value)}
-                            placeholder="Phone Number"
-                            className="text-xs border border-slate-200 rounded-lg p-2 focus:border-[#1857D6] focus:outline-none"
-                          />
-                          <textarea
-                            required
-                            rows={2}
-                            value={feedbackComment}
-                            onChange={(e) => setFeedbackComment(e.target.value)}
-                            placeholder="How can we resolve your issue?"
-                            className="sm:col-span-2 text-xs border border-slate-200 rounded-lg p-2 focus:border-[#1857D6] focus:outline-none resize-none"
-                          />
-                        </div>
-
-                        <div className="flex items-center space-x-2">
-                          <input
-                            type="checkbox"
-                            id="callbackCheck"
-                            checked={callbackRequested}
-                            onChange={(e) => setCallbackRequested(e.target.checked)}
-                            className="rounded text-[#1857D6] focus:ring-[#1857D6]"
-                          />
-                          <label htmlFor="callbackCheck" className="text-[9px] font-bold text-[#64748B] uppercase tracking-wider">
-                            Request callback from a manager
-                          </label>
+                        <div className="space-y-3">
+                          <div className="space-y-1">
+                            <label className="block text-[8px] font-bold text-[#64748B] uppercase tracking-widest">Your Name</label>
+                            <input
+                              type="text"
+                              required
+                              value={feedbackName}
+                              onChange={(e) => setFeedbackName(e.target.value)}
+                              placeholder="e.g. Sarah"
+                              className="w-full text-xs border border-slate-200 rounded-lg p-2.5 focus:border-[#1857D6] focus:outline-none bg-white"
+                            />
+                          </div>
+                          <div className="space-y-1">
+                            <label className="block text-[8px] font-bold text-[#64748B] uppercase tracking-widest">Private Comments</label>
+                            <textarea
+                              required
+                              rows={3}
+                              value={feedbackComment}
+                              onChange={(e) => setFeedbackComment(e.target.value)}
+                              placeholder="How can we resolve your issue?"
+                              className="w-full text-xs border border-slate-200 rounded-lg p-2.5 focus:border-[#1857D6] focus:outline-none resize-none bg-white"
+                            />
+                          </div>
                         </div>
 
                         <button
                           type="submit"
-                          className="w-full bg-[#0F172A] hover:bg-black text-white text-xs font-bold py-2 rounded-lg transition-colors cursor-pointer border-none uppercase tracking-wider"
+                          className="w-full bg-[#0F172A] hover:bg-black text-white text-xs font-bold py-3 rounded-lg transition-colors cursor-pointer border-none uppercase tracking-widest"
                         >
                           Submit Private Feedback
                         </button>
@@ -645,7 +626,7 @@ export default function LandingPage() {
                         </div>
                         <h4 className="text-xs font-bold text-slate-900">Feedback Logged</h4>
                         <p className="text-[11px] text-[#64748B] max-w-sm mx-auto">
-                          Logged privately. A manager will contact you at {feedbackPhone}.
+                          Logged privately. Thank you for your feedback, our team will review it internally.
                         </p>
                       </div>
                     )}
@@ -660,7 +641,7 @@ export default function LandingPage() {
             {[
               { num: '01', title: 'Deploy QR Codes', desc: 'Representatives print and assign custom serial QR badges to tables or point of sale checkout stands.' },
               { num: '02', title: 'Customers Scan', desc: 'Customers scan stickers with their camera, loading the platform in under 2 seconds without app downloads.' },
-              { num: '03', title: 'Booster Routing', desc: 'Positive ratings route directly to Google, while critical feedback goes privately to owner callback request lists.' }
+              { num: '03', title: 'Booster Routing', desc: 'Positive ratings route directly to Google, while critical feedback goes privately to your internal team.' }
             ].map((step, idx) => (
               <div key={step.num} className="space-y-2 relative pl-12">
                 <span className="absolute left-0 top-0 text-2xl font-extrabold text-[#1857D6]/20 font-display">
@@ -1033,15 +1014,15 @@ export default function LandingPage() {
             </div>
           </div>
 
-          {/* Card 6: Callback Resolution Queue (cols 3) */}
+          {/* Card 6: Private Feedback Resolution (cols 3) */}
           <div className="md:col-span-3 glass-mac-frosted rounded-3xl p-8 flex flex-col justify-between overflow-hidden relative group hover:shadow-xl transition-all duration-300 h-[300px]">
             <div className="space-y-2">
               <div className="h-9 w-9 rounded-xl bg-blue-50 text-[#1857D6] flex items-center justify-center mb-3">
                 <Layers size={16} />
               </div>
-              <h3 className="text-sm font-bold text-[#0F172A]">Callback Resolution Queue</h3>
+              <h3 className="text-sm font-bold text-[#0F172A]">Private Feedback Resolution</h3>
               <p className="text-xs text-[#64748B] leading-relaxed max-w-xs">
-                Track resolution timestamps, log manager actions, and archive customer conversations from a secure queue.
+                Track resolution progress, log auto-compensations, and verify guest satisfaction from a unified inbox view.
               </p>
             </div>
 
@@ -1323,31 +1304,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* FINAL HIGH-CONTRAST CONVERSION CTA */}
-      <section className="relative z-10 w-full max-w-5xl mx-auto px-6 lg:px-8 py-40 text-center">
-        <div className="glass-mac-frosted-dark rounded-3xl p-12 lg:p-16 shadow-2xl space-y-8 relative overflow-hidden">
-          {/* Ambient lighting glows inside dark panel */}
-          <div className="absolute top-[-20%] left-[-10%] w-[400px] h-[400px] rounded-full bg-[#1857D6]/20 blur-[90px]" />
-          <div className="absolute bottom-[-20%] right-[-10%] w-[400px] h-[400px] rounded-full bg-cyan-600/10 blur-[90px]" />
 
-          <h2 className="text-4xl sm:text-5xl font-extrabold text-white tracking-tight leading-tight max-w-2xl mx-auto font-display">
-            Ready to Amplify Your Brand Reputation?
-          </h2>
-          <p className="text-slate-400 text-sm sm:text-base max-w-md mx-auto leading-relaxed">
-            Join modern businesses utilizing Clout Reputation to collect more positive reviews, intercept complaints, and grow.
-          </p>
-          
-          <div className="flex items-center justify-center pt-2">
-            <a
-              href="#book-demo"
-              className="inline-flex items-center justify-center px-8 py-4.5 font-bold text-white bg-[#1857D6] hover:bg-[#154fc4] rounded-xl transition-all shadow-[0_4px_14px_rgba(24,87,214,0.35)] hover:shadow-[0_8px_22px_rgba(24,87,214,0.5)] gap-2 uppercase tracking-widest text-xs border-none cursor-pointer"
-            >
-              Schedule Your Live Demo Now
-              <ArrowRight size={14} />
-            </a>
-          </div>
-        </div>
-      </section>
 
       {/* FOOTER */}
       <footer className="relative z-10 w-full max-w-7xl mx-auto px-6 lg:px-8 py-8 border-t border-slate-200/50 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-[#64748B]">
