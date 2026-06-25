@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 @theme {
-  --color-primary-blue: #1857D6;
+  --color-primary-blue: #1853AB;
   --color-secondary-blue: #3B82F6;
   --color-accent-aqua: #06B6D4;
 
@@ -75,7 +75,7 @@ h1, h2, h3, h4, h5, h6 {
    Focus ring — clean
 ===================== */
 *:focus-visible {
-  outline: 2px solid #1857D6;
+  outline: 2px solid #1853AB;
   outline-offset: 2px;
   border-radius: 4px;
 }

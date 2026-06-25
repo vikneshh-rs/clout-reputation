@@ -90,7 +90,7 @@ export default function PlatformAnalyticsPage(props: any) {
   if (authLoading) {
     return (
       <div className="min-h-screen bg-white flex items-center justify-center font-['Source_Sans_Pro']">
-        <Loader2 className="animate-spin h-8 w-8 text-[#1857D6]" />
+        <Loader2 className="animate-spin h-8 w-8 text-[#1853AB]" />
       </div>
     );
   }
@@ -139,7 +139,7 @@ export default function PlatformAnalyticsPage(props: any) {
 
       {loading && !data ? (
         <div className="p-24 text-center">
-          <Loader2 className="animate-spin h-8 w-8 text-[#1857D6] mx-auto mb-4" />
+          <Loader2 className="animate-spin h-8 w-8 text-[#1853AB] mx-auto mb-4" />
           <span className="text-xs text-slate-500">Compiling platform metrics...</span>
         </div>
       ) : data ? (
@@ -159,7 +159,7 @@ export default function PlatformAnalyticsPage(props: any) {
                 </div>
                 <div className="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden flex">
                   <div 
-                    className="bg-[#1857D6] h-1.5" 
+                    className="bg-[#1853AB] h-1.5" 
                     style={{ width: `${data.totalReviews > 0 ? (data.positiveReviews / data.totalReviews) * 100 : 0}%` }}
                   />
                   <div 
@@ -191,7 +191,7 @@ export default function PlatformAnalyticsPage(props: any) {
               <div className="mt-4 pt-3 border-t border-slate-100">
                 <div className="flex justify-between text-[10px] text-slate-500 font-bold mb-1">
                   <span>CONVERSION RATE</span>
-                  <span className="text-[#1857D6]">{data.googleConversionRate}%</span>
+                  <span className="text-[#1853AB]">{data.googleConversionRate}%</span>
                 </div>
                 <div className="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
                   <div 
@@ -219,7 +219,7 @@ export default function PlatformAnalyticsPage(props: any) {
                 </div>
                 <div className="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
                   <div 
-                    className="bg-[#1857D6] h-1.5" 
+                    className="bg-[#1853AB] h-1.5" 
                     style={{ 
                       width: `${data.callbackRequests > 0 
                         ? (data.resolvedRequests / data.callbackRequests) * 100 
@@ -236,7 +236,7 @@ export default function PlatformAnalyticsPage(props: any) {
             {/* REP Leaderboard */}
             <div className="bg-white/80 backdrop-blur-md border border-slate-100 rounded-2xl shadow-[0_4px_20px_rgba(0,0,0,0.02)] overflow-hidden">
               <div className="px-5 py-4 bg-slate-50/20 border-b border-slate-100 flex items-center space-x-2">
-                <Award size={16} className="text-[#1857D6]" />
+                <Award size={16} className="text-[#1853AB]" />
                 <h4 className="text-xs font-bold text-slate-900 uppercase tracking-wider">Representative Leaderboard</h4>
               </div>
               
@@ -274,7 +274,7 @@ export default function PlatformAnalyticsPage(props: any) {
             {/* Active Industries */}
             <div className="bg-white/80 backdrop-blur-md border border-slate-100 rounded-2xl shadow-[0_4px_20px_rgba(0,0,0,0.02)] overflow-hidden">
               <div className="px-5 py-4 bg-slate-50/20 border-b border-slate-100 flex items-center space-x-2">
-                <BarChart size={16} className="text-[#1857D6]" />
+                <BarChart size={16} className="text-[#1853AB]" />
                 <h4 className="text-xs font-bold text-slate-900 uppercase tracking-wider">Industry Performance</h4>
               </div>
               
@@ -312,7 +312,7 @@ export default function PlatformAnalyticsPage(props: any) {
           {/* Top Client Businesses Section */}
           <div className="bg-white/80 backdrop-blur-md border border-slate-100 rounded-2xl shadow-[0_4px_20px_rgba(0,0,0,0.02)] overflow-hidden">
             <div className="px-5 py-4 bg-slate-50/20 border-b border-slate-100 flex items-center space-x-2">
-              <Building2 size={16} className="text-[#1857D6]" />
+              <Building2 size={16} className="text-[#1853AB]" />
               <h4 className="text-xs font-bold text-slate-900 uppercase tracking-wider">Top Performing Client Portals (By Reviews Count)</h4>
             </div>
 
@@ -339,7 +339,7 @@ export default function PlatformAnalyticsPage(props: any) {
                           <td className="px-6 py-3.5 text-center font-bold text-slate-700">{biz.averageRating} ★</td>
                           <td className="px-6 py-3.5 text-center text-slate-900 font-semibold">{biz.reviewsCount}</td>
                           <td className="px-6 py-3.5 text-center text-emerald-600 font-medium">{biz.positiveCount}</td>
-                          <td className="px-6 py-3.5 text-right font-bold text-[#1857D6]">{ratio}%</td>
+                          <td className="px-6 py-3.5 text-right font-bold text-[#1853AB]">{ratio}%</td>
                         </tr>
                       );
                     })}

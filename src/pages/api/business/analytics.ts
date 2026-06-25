@@ -13,13 +13,23 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(401).json({ error: 'Unauthorized. Please sign in.' });
     }
 
-    const businessId = getAuthorizedBusinessId(req, sessionUser);
+    const { role } = sessionUser;
+    const isSuperAdmin = role === 'SUPER_ADMIN';
+    const isRep = role === 'REP';
+
+    let businessId = getAuthorizedBusinessId(req, sessionUser);
+    if (!businessId && (isSuperAdmin || isRep)) {
+      businessId = 'ALL';
+    }
+
     if (!businessId) {
       return res.status(403).json({ error: 'Forbidden. Access denied.' });
     }
 
     const { period } = req.query;
-    const analytics = await getBusinessAnalytics(businessId, period ? String(period) : '30d');
+    const repId = isRep ? sessionUser.id : undefined;
+
+    const analytics = await getBusinessAnalytics(businessId, period ? String(period) : '30d', repId);
     return res.status(200).json({ analytics });
   } catch (error) {
     console.error('Business analytics API error:', error);

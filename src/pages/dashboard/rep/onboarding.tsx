@@ -14,19 +14,14 @@ import {
   X,
   MapPin,
   Phone,
-  Calendar,
-  Lock,
-  Image as ImageIcon,
+  ImageIcon,
   Globe,
   User,
   Map,
-  FileText,
   Download,
   QrCode,
   Check,
-  ChevronRight,
-  Sliders,
-  Play
+  Calendar
 } from 'lucide-react';
 import QRCode from 'qrcode';
 import { jsPDF } from 'jspdf';
@@ -72,7 +67,7 @@ interface Business {
   lastDownloadDate?: string | null;
 }
 
-export default function BusinessesManagementPage(props: any) {
+export default function RepOnboardingPage(props: any) {
   const { user, loading: authLoading } = useAuth();
   const { theme, toggleTheme } = props;
 
@@ -84,21 +79,19 @@ export default function BusinessesManagementPage(props: any) {
 
   // Filter State
   const [searchQuery, setSearchQuery] = useState('');
-  const [categoryFilter, setCategoryFilter] = useState('ALL');
   const [statusFilter, setStatusFilter] = useState('ALL');
 
   // Modal / Drawer State
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [viewingBusiness, setViewingBusiness] = useState<Business | null>(null);
   
-  // Onboarding Form State
+  // Form State
   const [formData, setFormData] = useState({
     name: '',
     password: '',
     industry: 'RESTAURANT',
     phone: '',
     address: '',
-    plan: 'TRIAL',
     googleReviewUrl: '',
     logoUrl: '',
     description: '',
@@ -122,18 +115,21 @@ export default function BusinessesManagementPage(props: any) {
     try {
       setLoading(true);
       setError('');
-      const res = await fetch('/api/super-admin/businesses');
+      const res = await fetch('/api/rep/businesses');
       if (res.ok) {
         const data = await res.json();
-        setBusinesses(data.businesses || []);
+        // Filter businesses on the client to only show businesses onboarded by this representative
+        const allBiz = data.businesses || [];
+        const myBiz = allBiz.filter((b: Business) => b.createdByRep?.id === user?.id);
+        setBusinesses(myBiz);
         
-        // If we are currently viewing a business, refresh its data in the drawer
+        // Refresh details drawer if open
         if (viewingBusiness) {
-          const updatedBiz = (data.businesses || []).find((b: Business) => b.id === viewingBusiness.id);
+          const updatedBiz = myBiz.find((b: Business) => b.id === viewingBusiness.id);
           if (updatedBiz) setViewingBusiness(updatedBiz);
         }
       } else {
-        setError('Failed to fetch businesses.');
+        setError('Failed to fetch onboarded businesses.');
       }
     } catch (err) {
       setError('Network error fetching businesses.');
@@ -143,12 +139,12 @@ export default function BusinessesManagementPage(props: any) {
   };
 
   useEffect(() => {
-    if (user && user.role === 'SUPER_ADMIN') {
+    if (user && (user.role === 'REP' || user.role === 'SUPER_ADMIN')) {
       fetchBusinesses();
     }
   }, [user]);
 
-  // Google review url validator helper
+  // Google link validation warning
   const handleGoogleUrlChange = (url: string) => {
     setFormData(prev => ({ ...prev, googleReviewUrl: url }));
     if (!url) {
@@ -157,7 +153,7 @@ export default function BusinessesManagementPage(props: any) {
     }
     const isGoogle = url.includes('google.com') || url.includes('g.page');
     if (!isGoogle) {
-      setGoogleUrlWarning('Warning: This URL does not look like a standard Google review link. Please verify it.');
+      setGoogleUrlWarning('Warning: This URL does not look like a standard Google review link. Please verify.');
     } else {
       setGoogleUrlWarning('');
     }
@@ -167,7 +163,6 @@ export default function BusinessesManagementPage(props: any) {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // Show instant local preview
     const localReader = new FileReader();
     localReader.onload = () => {
       setLogoPreview(localReader.result as string);
@@ -196,7 +191,7 @@ export default function BusinessesManagementPage(props: any) {
             setFormData(prev => ({ ...prev, logoUrl: data.url }));
           } else {
             const errData = await res.json();
-            setFormError(errData.error || 'Failed to upload logo image.');
+            setFormError(errData.error || 'Failed to upload logo.');
           }
         } catch (err) {
           setFormError('Network error uploading logo.');
@@ -217,7 +212,6 @@ export default function BusinessesManagementPage(props: any) {
       industry: 'RESTAURANT',
       phone: '',
       address: '',
-      plan: 'TRIAL',
       googleReviewUrl: '',
       logoUrl: '',
       description: '',
@@ -245,7 +239,7 @@ export default function BusinessesManagementPage(props: any) {
 
     try {
       setSubmitting(true);
-      const res = await fetch('/api/super-admin/businesses', {
+      const res = await fetch('/api/rep/businesses', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData)
@@ -267,42 +261,7 @@ export default function BusinessesManagementPage(props: any) {
     }
   };
 
-  const handleToggleStatus = async (biz: Business) => {
-    setSuccess('');
-    setError('');
-
-    const nextStatus = biz.status === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE';
-    const confirmMsg = nextStatus === 'INACTIVE'
-      ? `Are you sure you want to set "${biz.name}" status to INACTIVE? Customers will not be able to scan and write reviews.`
-      : `Are you sure you want to set "${biz.name}" status to ACTIVE?`;
-
-    if (!confirm(confirmMsg)) return;
-
-    try {
-      const res = await fetch('/api/super-admin/businesses', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          action: 'status',
-          id: biz.id,
-          status: nextStatus
-        })
-      });
-
-      const data = await res.json();
-
-      if (res.ok) {
-        setSuccess(`Business "${biz.name}" status updated to ${nextStatus}.`);
-        fetchBusinesses();
-      } else {
-        setError(data.error || 'Failed to update status.');
-      }
-    } catch (err) {
-      setError('Network error updating business status.');
-    }
-  };
-
-  // Profile calculations
+  // Completion calculation
   const computeProfileCompletion = (biz: Business) => {
     let pct = 0;
     if (biz.name) pct += 10;
@@ -324,7 +283,6 @@ export default function BusinessesManagementPage(props: any) {
     return { label: 'Live', color: 'bg-emerald-50 text-emerald-700 border-emerald-200' };
   };
 
-  // Generate on-demand business QR Code
   const handleGenerateQr = async (businessId: string) => {
     try {
       setQrGenerating(true);
@@ -348,7 +306,6 @@ export default function BusinessesManagementPage(props: any) {
     }
   };
 
-  // Download branded PDF sticker sheet
   const handleDownloadBrandedSheet = async (biz: Business) => {
     const activeQr = biz.qrInventory?.find(q => q.status === 'ACTIVE');
     if (!activeQr) {
@@ -425,7 +382,7 @@ export default function BusinessesManagementPage(props: any) {
       doc.save(`${biz.name.replace(/\s+/g, '_')}_Review_Sheet.pdf`);
       setQrActionMsg('Download complete!');
 
-      // Track the download in DB
+      // Track download in DB
       await fetch('/api/business/track-download', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -438,12 +395,6 @@ export default function BusinessesManagementPage(props: any) {
     }
   };
 
-  // Category listing
-  const getUniqueCategories = () => {
-    const list = businesses.map(b => b.category || b.industry).filter(Boolean);
-    return Array.from(new Set(list));
-  };
-
   const filteredBusinesses = businesses.filter((biz) => {
     const query = searchQuery.toLowerCase();
     const matchesSearch = 
@@ -451,31 +402,44 @@ export default function BusinessesManagementPage(props: any) {
       biz.businessCode.toLowerCase().includes(query) ||
       (biz.contactPerson || '').toLowerCase().includes(query);
 
-    const matchesCategory = 
-      categoryFilter === 'ALL' || 
-      biz.category === categoryFilter || 
-      biz.industry === categoryFilter;
-
     const matchesStatus = 
       statusFilter === 'ALL' || biz.status === statusFilter;
 
-    return matchesSearch && matchesCategory && matchesStatus;
+    return matchesSearch && matchesStatus;
   });
 
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center font-sans">
+        <Loader2 className="animate-spin h-8 w-8 text-[#1853AB]" />
+      </div>
+    );
+  }
+
+  if (!user || (user.role !== 'REP' && user.role !== 'SUPER_ADMIN')) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-4 font-sans">
+        <AlertTriangle className="h-12 w-12 text-rose-500 mb-4" />
+        <h1 className="text-xl font-bold">Access Denied</h1>
+        <p className="text-slate-500 text-sm mt-1">Field Representative permissions required.</p>
+      </div>
+    );
+  }
+
   return (
-    <DashboardLayout title="Client Businesses & Onboarding" theme={theme} toggleTheme={toggleTheme}>
+    <DashboardLayout title="Business Onboarding & Setup" theme={theme} toggleTheme={toggleTheme}>
       <Head>
-        <title>Businesses & Onboarding - Clout Reputation</title>
+        <title>Business Onboarding - Representative Portal</title>
       </Head>
 
       <div className="mb-6 flex flex-col sm:flex-row justify-between sm:items-center gap-4">
-        <p className="text-xs text-slate-500 mt-0.5">Onboard client businesses, configure profiles, generate QR codes, and monitor completion progress.</p>
+        <p className="text-xs text-slate-500 mt-0.5">Onboard new businesses, configure profile assets, monitor completion status, and download branded sheet materials.</p>
         <button
           onClick={openOnboardModal}
           className="bg-gradient-to-r from-blue-600 to-[#1853AB] hover:from-blue-700 hover:to-indigo-750 text-white text-xs font-bold px-4 py-2.5 rounded-2xl flex items-center gap-1.5 self-start sm:self-auto transition-all shadow-md shadow-blue-500/10 active:scale-[0.98]"
         >
           <Plus size={14} />
-          Onboard Business
+          Onboard New Business
         </button>
       </div>
 
@@ -493,16 +457,16 @@ export default function BusinessesManagementPage(props: any) {
         </div>
       )}
 
-      {/* Main Directory Table */}
+      {/* Main Table Card */}
       <div className="bg-white/80 backdrop-blur-xl border border-slate-100/60 rounded-3xl overflow-hidden shadow-[0_8px_30px_rgba(15,23,42,0.015)]">
-        {/* Filters bar */}
-        <div className="p-6 border-b border-slate-100/60 flex flex-col lg:flex-row justify-between items-center gap-4">
+        {/* Filter Toolbar */}
+        <div className="p-6 border-b border-slate-100/60 flex flex-col sm:flex-row justify-between items-center gap-4">
           <div className="flex items-center space-x-2.5">
             <Store size={16} className="text-[#1853AB]" />
-            <h4 className="font-bold text-xs text-slate-900 uppercase tracking-wider font-sans">Business Directory</h4>
+            <h4 className="font-bold text-xs text-slate-900 uppercase tracking-wider font-sans">Onboarded Directory</h4>
           </div>
 
-          <div className="flex flex-wrap gap-2 w-full lg:w-auto">
+          <div className="flex flex-wrap gap-2 w-full sm:w-auto">
             {/* Search */}
             <div className="relative flex-grow sm:flex-grow-0">
               <span className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -512,22 +476,10 @@ export default function BusinessesManagementPage(props: any) {
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search business, code, rep..."
+                placeholder="Search business, code, contact..."
                 className="pl-9 pr-3 py-1.5 w-full sm:w-56 text-xs border border-slate-200 rounded-xl bg-white/60 focus:border-[#1853AB] focus:outline-none focus:ring-4 focus:ring-blue-500/5 transition-all"
               />
             </div>
-
-            {/* Category Filter */}
-            <select
-              value={categoryFilter}
-              onChange={(e) => setCategoryFilter(e.target.value)}
-              className="px-3 py-1.5 text-xs border border-slate-200 rounded-xl bg-white focus:border-[#1853AB] focus:outline-none focus:ring-4 focus:ring-blue-500/5 transition-all text-slate-700 font-semibold"
-            >
-              <option value="ALL">All Categories</option>
-              {getUniqueCategories().map((cat) => (
-                <option key={cat} value={cat}>{cat}</option>
-              ))}
-            </select>
 
             {/* Status Filter */}
             <select
@@ -548,11 +500,11 @@ export default function BusinessesManagementPage(props: any) {
           {loading && businesses.length === 0 ? (
             <div className="p-12 text-center">
               <Loader2 className="animate-spin h-6 w-6 text-[#1853AB] mx-auto mb-2.5" />
-              <span className="text-xs text-slate-400 font-medium">Loading businesses...</span>
+              <span className="text-xs text-slate-400 font-medium">Loading onboarded businesses...</span>
             </div>
           ) : filteredBusinesses.length === 0 ? (
             <div className="p-12 text-center text-xs text-slate-400">
-              No businesses found matching criteria.
+              No onboarded businesses found.
             </div>
           ) : (
             <table className="min-w-full divide-y divide-slate-100 text-left text-xs font-sans">
@@ -561,7 +513,6 @@ export default function BusinessesManagementPage(props: any) {
                   <th className="px-6 py-3">Business</th>
                   <th className="px-6 py-3">Code & Category</th>
                   <th className="px-6 py-3">Setup Progress</th>
-                  <th className="px-6 py-3">Onboarded By</th>
                   <th className="px-6 py-3">Status</th>
                   <th className="px-6 py-3 text-right">Actions</th>
                 </tr>
@@ -572,7 +523,7 @@ export default function BusinessesManagementPage(props: any) {
                   const setupState = getSetupState(completionPct);
                   return (
                     <tr key={biz.id} className="hover:bg-slate-50/30 transition-colors">
-                      {/* Logo and Name */}
+                      {/* Logo & Name */}
                       <td className="px-6 py-4">
                         <div className="flex items-center space-x-3">
                           {biz.logoUrl ? (
@@ -593,10 +544,10 @@ export default function BusinessesManagementPage(props: any) {
                         </div>
                       </td>
 
-                      {/* Code and Category */}
+                      {/* Code & Category */}
                       <td className="px-6 py-4">
-                        <div className="font-mono font-medium text-slate-600">{biz.businessCode}</div>
-                        <span className="inline-block px-2 py-0.5 bg-slate-50 border border-slate-100 text-slate-500 rounded-md text-[9px] font-bold uppercase tracking-wider mt-1">
+                        <div className="font-mono font-medium text-slate-650">{biz.businessCode}</div>
+                        <span className="inline-block px-2 py-0.5 bg-slate-50 border border-slate-100 text-slate-550 rounded-md text-[9px] font-bold uppercase tracking-wider mt-1">
                           {biz.category || biz.industry}
                         </span>
                       </td>
@@ -619,14 +570,9 @@ export default function BusinessesManagementPage(props: any) {
                         </div>
                       </td>
 
-                      {/* Onboarded Rep */}
-                      <td className="px-6 py-4 text-slate-550 font-medium">
-                        {biz.createdByRep?.name || <span className="text-slate-350 italic">Super Admin</span>}
-                      </td>
-
                       {/* Status */}
                       <td className="px-6 py-4">
-                        <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[9px] font-bold border uppercase tracking-wider ${
+                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[9px] font-bold border uppercase tracking-wider ${
                           biz.status === 'ACTIVE'
                             ? 'bg-emerald-50 text-emerald-700 border-emerald-250'
                             : biz.status === 'PENDING'
@@ -641,29 +587,18 @@ export default function BusinessesManagementPage(props: any) {
                       <td className="px-6 py-4 text-right space-x-1.5 whitespace-nowrap">
                         <button
                           onClick={() => setViewingBusiness(biz)}
-                          className="inline-flex items-center gap-1 px-2.5 py-1.5 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 text-slate-700 font-bold text-[10px] shadow-sm transition-all"
+                          className="inline-flex items-center gap-1 px-3 py-1.5 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 text-slate-700 font-bold text-[10px] shadow-sm transition-all"
                         >
                           Profile Details
                         </button>
                         
                         <Link
                           href={`/dashboard/business?businessId=${biz.id}&readOnly=true`}
-                          className="inline-flex items-center gap-1 px-2.5 py-1.5 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 text-[#1853AB] font-bold text-[10px] shadow-sm transition-all"
+                          className="inline-flex items-center gap-1 px-3 py-1.5 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 text-[#1853AB] font-bold text-[10px] shadow-sm transition-all"
                         >
                           <ExternalLink size={10} />
-                          <span>Portal Dashboard</span>
+                          <span>View Dashboard</span>
                         </Link>
-
-                        <button
-                          onClick={() => handleToggleStatus(biz)}
-                          className={`inline-flex items-center px-2.5 py-1.5 border rounded-xl font-bold text-[10px] shadow-sm transition-all ${
-                            biz.status === 'ACTIVE'
-                              ? 'bg-rose-50 hover:bg-rose-100/70 text-rose-700 border-rose-200'
-                              : 'bg-emerald-50 hover:bg-emerald-100/70 text-emerald-700 border-emerald-200'
-                          }`}
-                        >
-                          {biz.status === 'ACTIVE' ? 'Suspend' : 'Activate'}
-                        </button>
                       </td>
                     </tr>
                   );
@@ -678,7 +613,6 @@ export default function BusinessesManagementPage(props: any) {
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm">
           <div className="bg-white/90 backdrop-blur-xl border border-white/60 rounded-3xl shadow-2xl max-w-lg w-full overflow-hidden animate-in fade-in zoom-in-95 duration-200 flex flex-col max-h-[90vh]">
-            {/* Modal Header */}
             <div className="px-6 py-4 border-b border-slate-100/60 flex items-center justify-between">
               <h3 className="font-bold text-sm text-slate-900 flex items-center gap-1.5">
                 <Store size={16} className="text-[#1853AB]" />
@@ -692,7 +626,6 @@ export default function BusinessesManagementPage(props: any) {
               </button>
             </div>
 
-            {/* Modal Body / Form */}
             <form onSubmit={handleOnboardSubmit} className="flex-1 overflow-y-auto">
               <div className="p-6 space-y-5 text-xs">
                 {formError && (
@@ -722,13 +655,13 @@ export default function BusinessesManagementPage(props: any) {
                     <div>
                       <input
                         type="file"
-                        id="logo-upload"
+                        id="logo-upload-rep"
                         accept="image/*"
                         onChange={handleFileChange}
                         className="hidden"
                       />
                       <label 
-                        htmlFor="logo-upload"
+                        htmlFor="logo-upload-rep"
                         className="px-3.5 py-2 border border-slate-200 rounded-xl bg-white hover:bg-slate-50 text-slate-700 font-semibold cursor-pointer shadow-sm inline-block"
                       >
                         Upload Logo Image
@@ -881,19 +814,6 @@ export default function BusinessesManagementPage(props: any) {
                     </div>
                   )}
                 </div>
-
-                <div>
-                  <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">Subscription Plan</label>
-                  <select
-                    value={formData.plan}
-                    onChange={(e) => setFormData({ ...formData, plan: e.target.value })}
-                    className="w-full text-xs p-3 border border-slate-200 rounded-2xl focus:border-[#1853AB] focus:outline-none focus:ring-4 focus:ring-blue-500/5 bg-white"
-                  >
-                    <option value="TRIAL">Trial (30 days)</option>
-                    <option value="BASIC">Basic (180 days)</option>
-                    <option value="PRO">Pro (365 days)</option>
-                  </select>
-                </div>
               </div>
 
               {/* Modal Actions */}
@@ -911,7 +831,7 @@ export default function BusinessesManagementPage(props: any) {
                   className="px-4 py-2.5 bg-gradient-to-r from-blue-600 to-[#1853AB] text-white font-bold rounded-2xl shadow-md shadow-blue-500/10 active:scale-[0.98] transition-all flex items-center gap-1 border-none cursor-pointer"
                 >
                   {submitting && <Loader2 className="animate-spin h-3.5 w-3.5" />}
-                  <span>Create & Onboard</span>
+                  <span>Onboard & Setup</span>
                 </button>
               </div>
             </form>
@@ -1023,7 +943,7 @@ export default function BusinessesManagementPage(props: any) {
                 </div>
               </div>
 
-              {/* Core Profile */}
+              {/* Corporate details */}
               <div className="space-y-4">
                 <h4 className="font-bold text-[10px] text-slate-400 uppercase tracking-widest pb-1 border-b border-slate-100">Corporate Details</h4>
                 
@@ -1092,12 +1012,11 @@ export default function BusinessesManagementPage(props: any) {
                 </div>
               </div>
 
-              {/* QR Code and Reputation Portal Asset */}
+              {/* QR settings */}
               <div className="space-y-4">
                 <h4 className="font-bold text-[10px] text-slate-400 uppercase tracking-widest pb-1 border-b border-slate-100">QR Code Portal Settings</h4>
                 
                 <div className="space-y-4">
-                  {/* Google link */}
                   <div>
                     <span className="text-[10px] text-slate-400 font-medium block">Google Reviews URL</span>
                     <a href={viewingBusiness.googleReviewUrl || '#'} target="_blank" rel="noreferrer" className="text-[#1853AB] font-semibold hover:underline flex items-center gap-0.5 mt-0.5 truncate max-w-sm">
@@ -1105,7 +1024,6 @@ export default function BusinessesManagementPage(props: any) {
                     </a>
                   </div>
 
-                  {/* Active QR code display */}
                   <div className="p-4 bg-slate-50 border border-slate-100 rounded-2xl flex justify-between items-center">
                     <div>
                       <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider block">Active QR Code UUID</span>
@@ -1131,7 +1049,6 @@ export default function BusinessesManagementPage(props: any) {
                     </button>
                   </div>
 
-                  {/* Download stats and actions */}
                   {viewingBusiness.qrInventory?.find(q => q.status === 'ACTIVE') && (
                     <div className="p-4 bg-indigo-50/30 border border-indigo-100/50 rounded-2xl space-y-3">
                       <div className="flex justify-between items-center text-[10px] font-bold text-indigo-750">
@@ -1173,3 +1090,4 @@ export default function BusinessesManagementPage(props: any) {
     </DashboardLayout>
   );
 }
+

@@ -26,29 +26,60 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     // POST Request: Onboard business
     if (req.method === 'POST') {
-      const { name, password, industry, phone, address, plan, googleReviewUrl } = req.body;
+      const { 
+        name, 
+        password, 
+        industry, 
+        phone, 
+        address, 
+        plan, 
+        googleReviewUrl,
+        logoUrl,
+        description,
+        contactPerson,
+        category,
+        website,
+        googleMapsUrl
+      } = req.body;
 
-      if (!name || !password || !industry) {
-        return res.status(400).json({ error: 'Business name, password, and industry are required.' });
+      const finalName = name?.trim() || `New Business - ${Math.floor(100000 + Math.random() * 900000)}`;
+      const finalPassword = password || '123456';
+      const finalIndustry = industry || 'OTHER';
+
+      // Validate URL format and Google Review Link structure if googleReviewUrl is provided
+      if (googleReviewUrl) {
+        const urlRegex = /^https?:\/\/.+/i;
+        if (!urlRegex.test(googleReviewUrl)) {
+          return res.status(400).json({ error: 'Invalid Google Review URL format. Must start with http:// or https://' });
+        }
+        if (!googleReviewUrl.includes('google.com') && !googleReviewUrl.includes('g.page')) {
+          return res.status(400).json({ error: 'Invalid Google Review URL. Must be a Google domain link.' });
+        }
       }
 
       // Validate industry enum
-      if (!Object.values(Industry).includes(industry)) {
+      if (finalIndustry && !Object.values(Industry).includes(finalIndustry as Industry)) {
         return res.status(400).json({ error: `Invalid industry. Must be one of: ${Object.values(Industry).join(', ')}` });
       }
 
       // Hash password
-      const passwordHash = await hashPassword(password);
+      const passwordHash = await hashPassword(finalPassword);
       
       const result = await onboardBusiness({
-        name,
+        name: finalName,
         passwordHash,
-        industry: industry as Industry,
+        industry: finalIndustry as Industry,
         phone: phone || null,
         address: address || null,
         googleReviewUrl: googleReviewUrl || null,
         plan: plan ? (plan as SubscriptionPlan) : SubscriptionPlan.TRIAL,
-        createdByRepId: sessionUser.id // Created by super admin
+        createdByRepId: sessionUser.id,
+        logoUrl: logoUrl || null,
+        description: description || null,
+        contactPerson: contactPerson || null,
+        category: category || null,
+        website: website || null,
+        googleMapsUrl: googleMapsUrl || null
       });
       
       // Log platform activity

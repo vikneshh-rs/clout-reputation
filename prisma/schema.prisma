@@ -31,18 +31,16 @@ enum Industry {
 }
 
 enum BusinessStatus {
+  PENDING
   ACTIVE
-  SUSPENDED
-  EXPIRED
+  INACTIVE
 }
 
 enum QRStatus {
-  UNASSIGNED
-  ASSIGNED
-  DAMAGED
-  REPLACED
-  INACTIVE
+  ACTIVE
+  ARCHIVED
 }
+
 
 enum CallbackStatus {
   PENDING
@@ -82,6 +80,7 @@ model User {
   assignmentLogs     AssignmentLog[]
   qrBatches          QRBatch[]
   createdBusinesses  Business[]      @relation("RepCreatedBusinesses")
+  resolvedRecoveryRequests RecoveryRequest[] @relation("RecoveryResolver")
 }
 
 model Business {
@@ -95,8 +94,13 @@ model Business {
   googleReviewUrl String?
   phone           String?
   address         String?
+  description     String?
+  contactPerson   String?
+  category        String?
+  website         String?
+  googleMapsUrl   String?
   isActive        Boolean        @default(true)
-  status          BusinessStatus @default(ACTIVE)
+  status          BusinessStatus @default(PENDING)
   deletedAt       DateTime?
   enableGoogleReviewRedirect Boolean @default(true)
   enableManagerCallback      Boolean @default(true)
@@ -114,6 +118,8 @@ model Business {
   qrScans         QRScan[]
   qrInventory     QRInventory[]
   assignmentLogs  AssignmentLog[]
+  recoveryRequests RecoveryRequest[]
+  funnelEvents    FunnelEvent[]
 
   @@index([createdByRepId])
   @@index([createdAt])
@@ -130,12 +136,15 @@ model Review {
   redirectedToGoogle Boolean          @default(false)
   googleCtaViewed    Boolean          @default(false)
   googleCtaClicked   Boolean          @default(false)
+  sentiment          String?          // Positive, Neutral, Negative
+  themes             String?          // Comma-separated theme list
   createdAt          DateTime         @default(now())
   
   // Relations
   businessId         String
   business           Business         @relation(fields: [businessId], references: [id], onDelete: Cascade)
   callbackRequest    CallbackRequest?
+  recoveryRequest    RecoveryRequest?
 
   @@index([businessId])
   @@index([createdAt])
@@ -203,7 +212,7 @@ model QRScan {
 model QRInventory {
   id                 String      @id @default(uuid())
   qrCode             String      @unique
-  status             QRStatus    @default(UNASSIGNED)
+  status             QRStatus    @default(ACTIVE)
   assignedBusinessId String?
   assignedBy         String?
   assignedAt         DateTime?
@@ -251,4 +260,72 @@ model QRBatch {
   generatedAt DateTime @default(now())
 
   creator     User     @relation(fields: [generatedBy], references: [id], onDelete: Cascade)
+}
+
+// ==========================================
+// RECOVERY & FUNNEL INTELLIGENCE
+// ==========================================
+
+enum RecoveryStatus {
+  NEW
+  CONTACTED
+  RESOLVED
+  CLOSED
+}
+
+enum RecoveryPriority {
+  LOW
+  MEDIUM
+  HIGH
+}
+
+model RecoveryRequest {
+  id                String           @id @default(uuid())
+  businessId        String
+  reviewId          String           @unique
+  customerName      String
+  whatsappNumber    String
+  rating            Int
+  feedback          String?
+  callbackRequested Boolean        @default(false)
+  status            RecoveryStatus   @default(NEW)
+  priority          RecoveryPriority @default(MEDIUM)
+  internalNotes     String?
+  resolvedById      String?
+  resolvedAt        DateTime?
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+
+  business          Business         @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  review            Review           @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+  resolvedBy        User?            @relation("RecoveryResolver", fields: [resolvedById], references: [id], onDelete: SetNull)
+
+  @@index([businessId])
+  @@index([status])
+  @@index([priority])
+  @@index([createdAt])
+}
+
+enum FunnelStage {
+  SCAN
+  START
+  SUBMIT
+  REDIRECT
+}
+
+model FunnelEvent {
+  id              String      @id @default(uuid())
+  businessId      String
+  stage           FunnelStage
+  timestamp       DateTime    @default(now())
+  userAgent       String?
+  deviceType      String?
+  qrAssetCode     String?
+  reviewSessionId String
+
+  business        Business    @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  @@index([businessId])
+  @@index([stage])
+  @@index([timestamp])
 }

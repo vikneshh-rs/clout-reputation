@@ -21,8 +21,27 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         getQrInventoryStats(),
         getQrBatches()
       ]);
+
+      const mappedBatches = batches.map(b => ({
+        id: b.id,
+        name: b.batchName,
+        createdAt: b.generatedAt.toISOString ? b.generatedAt.toISOString() : b.generatedAt,
+        _count: {
+          codes: b.quantity
+        }
+      }));
+
+      const mappedInventory = inventory.map(item => {
+        const batch = batches.find(b => {
+          return item.qrCode >= b.startSerial && item.qrCode <= b.endSerial;
+        });
+        return {
+          ...item,
+          batch: batch ? { id: batch.id, name: batch.batchName } : null
+        };
+      });
       
-      return res.status(200).json({ inventory, stats, batches });
+      return res.status(200).json({ inventory: mappedInventory, stats, batches: mappedBatches });
     }
 
     if (req.method === 'POST') {

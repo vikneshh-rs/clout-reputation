@@ -209,7 +209,7 @@ export default function RepsManagementPage(props: any) {
   if (authLoading) {
     return (
       <div className="min-h-screen bg-white flex items-center justify-center font-['Source_Sans_Pro']">
-        <Loader2 className="animate-spin h-8 w-8 text-[#1857D6]" />
+        <Loader2 className="animate-spin h-8 w-8 text-[#1853AB]" />
       </div>
     );
   }
@@ -235,7 +235,7 @@ export default function RepsManagementPage(props: any) {
         <p className="text-xs text-zinc-500 mt-0.5">Create and manage accounts for field onboarding representatives.</p>
         <button
           onClick={openCreateModal}
-          className="bg-[#1857D6] hover:bg-[#154fc4] text-white text-xs font-semibold px-4 py-2 rounded flex items-center gap-1.5 self-start sm:self-auto transition-colors"
+          className="bg-[#1853AB] hover:bg-[#134289] text-white text-xs font-semibold px-4 py-2 rounded flex items-center gap-1.5 self-start sm:self-auto transition-colors"
         >
           <Plus size={14} />
           Add Representative
@@ -261,7 +261,7 @@ export default function RepsManagementPage(props: any) {
         {/* Table Filter Header */}
         <div className="p-4 bg-slate-50/20 border-b border-slate-100 flex flex-col sm:flex-row justify-between items-center gap-4">
           <div className="flex items-center space-x-2">
-            <Users size={16} className="text-[#1857D6]" />
+            <Users size={16} className="text-[#1853AB]" />
             <h4 className="font-bold text-xs text-slate-900 uppercase tracking-wider font-sans">Representative Accounts</h4>
           </div>
 
@@ -274,7 +274,7 @@ export default function RepsManagementPage(props: any) {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search by name or username"
-              className="pl-8 pr-3 py-1.5 w-full text-xs border border-zinc-250 rounded bg-white focus:border-[#1857D6] focus:outline-none"
+              className="pl-8 pr-3 py-1.5 w-full text-xs border border-zinc-250 rounded bg-white focus:border-[#1853AB] focus:outline-none"
             />
           </div>
         </div>
@@ -283,7 +283,7 @@ export default function RepsManagementPage(props: any) {
         <div className="overflow-x-auto">
           {loading && reps.length === 0 ? (
             <div className="p-12 text-center">
-              <Loader2 className="animate-spin h-6 w-6 text-[#1857D6] mx-auto mb-2" />
+              <Loader2 className="animate-spin h-6 w-6 text-[#1853AB] mx-auto mb-2" />
               <span className="text-xs text-zinc-450">Loading representatives...</span>
             </div>
           ) : filteredReps.length === 0 ? (
@@ -370,7 +370,7 @@ export default function RepsManagementPage(props: any) {
             {/* Modal Header */}
             <div className="px-6 py-4 border-b border-zinc-150 bg-zinc-50 flex items-center justify-between">
               <h3 className="font-bold text-sm text-black flex items-center gap-1.5">
-                <ShieldCheck size={16} className="text-[#1857D6]" />
+                <ShieldCheck size={16} className="text-[#1853AB]" />
                 {modalMode === 'CREATE' ? 'Add Representative' : 'Edit Representative'}
               </h3>
               <button 
@@ -397,7 +397,7 @@ export default function RepsManagementPage(props: any) {
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                     placeholder="e.g. Jane Doe"
-                    className="w-full p-2 border border-zinc-200 rounded focus:border-[#1857D6] focus:outline-none"
+                    className="w-full p-2 border border-zinc-200 rounded focus:border-[#1853AB] focus:outline-none"
                     required
                   />
                 </div>
@@ -409,7 +409,7 @@ export default function RepsManagementPage(props: any) {
                     value={formData.username}
                     onChange={(e) => setFormData({ ...formData, username: e.target.value })}
                     placeholder="e.g. janedoe"
-                    className="w-full p-2 border border-zinc-200 rounded focus:border-[#1857D6] focus:outline-none"
+                    className="w-full p-2 border border-zinc-200 rounded focus:border-[#1853AB] focus:outline-none"
                     required
                   />
                 </div>
@@ -428,7 +428,7 @@ export default function RepsManagementPage(props: any) {
                     value={formData.password}
                     onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                     placeholder={modalMode === 'CREATE' ? 'Enter secure password' : 'Enter new password'}
-                    className="w-full p-2 border border-zinc-200 rounded focus:border-[#1857D6] focus:outline-none"
+                    className="w-full p-2 border border-zinc-200 rounded focus:border-[#1853AB] focus:outline-none"
                     required={modalMode === 'CREATE'}
                   />
                 </div>
@@ -446,7 +446,7 @@ export default function RepsManagementPage(props: any) {
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="px-4 py-2 bg-[#1857D6] hover:bg-[#154fc4] text-white text-xs font-semibold rounded transition-colors flex items-center gap-1"
+                  className="px-4 py-2 bg-[#1853AB] hover:bg-[#134289] text-white text-xs font-semibold rounded transition-colors flex items-center gap-1"
                 >
                   {submitting && <Loader2 className="animate-spin h-3.5 w-3.5" />}
                   <span>{modalMode === 'CREATE' ? 'Add Rep' : 'Save Changes'}</span>

@@ -9,6 +9,8 @@ async function main() {
   // Delete in order to satisfy foreign keys
   await prisma.activityLog.deleteMany({});
   await prisma.callbackRequest.deleteMany({});
+  await prisma.recoveryRequest.deleteMany({});
+  await prisma.funnelEvent.deleteMany({});
   await prisma.review.deleteMany({});
   await prisma.assignmentLog.deleteMany({});
   await prisma.qRInventory.deleteMany({});
@@ -136,7 +138,7 @@ async function main() {
   console.log('✅ Created Business Subscriptions');
 
   // 4. Create QRInventory records
-  // Create ASSIGNED QRs
+  // Create ACTIVE QRs for businesses
   const qrCodes = ['QR-BELLA', 'QR-LUXE', 'QR-PARIS'];
   const businesses = [b1, b2, b3];
 
@@ -147,10 +149,9 @@ async function main() {
     const qrInventory = await prisma.qRInventory.create({
       data: {
         qrCode,
-        status: QRStatus.ASSIGNED,
-        assignedBusinessId: biz.id,
-        assignedBy: repAdmin.id,
-        assignedAt: new Date(),
+        status: QRStatus.ACTIVE,
+        business: { connect: { id: biz.id } },
+        rep: { connect: { id: repAdmin.id } },
       },
     });
 
@@ -165,17 +166,7 @@ async function main() {
     });
   }
 
-  // Create UNASSIGNED QRs (QR-000001 to QR-000020)
-  for (let i = 1; i <= 20; i++) {
-    const numStr = String(i).padStart(6, '0');
-    await prisma.qRInventory.create({
-      data: {
-        qrCode: `QR-${numStr}`,
-        status: QRStatus.UNASSIGNED,
-      },
-    });
-  }
-  console.log('✅ Seeded QR inventory with assigned and unassigned QR codes');
+  console.log('✅ Seeded QR inventory with active QR codes');
 
   // 5. Create Reviews
   const reviewsData = [
@@ -195,6 +186,22 @@ async function main() {
   ];
 
   for (const r of reviewsData) {
+    const isPositive = r.rating >= 4;
+    const sentiment = isPositive ? 'Positive' : 'Negative';
+    let themes = '';
+    if (r.comment) {
+      const commentLower = r.comment.toLowerCase();
+      if (commentLower.includes('food') || commentLower.includes('pasta') || commentLower.includes('croissant') || commentLower.includes('tiramisu') || commentLower.includes('pizza')) {
+        themes = 'Food Quality';
+      } else if (commentLower.includes('staff') || commentLower.includes('manager') || commentLower.includes('rude') || commentLower.includes('friendly') || commentLower.includes('service')) {
+        themes = 'Service';
+      } else if (commentLower.includes('atmosphere') || commentLower.includes('decor') || commentLower.includes('wine')) {
+        themes = 'Ambience';
+      } else if (commentLower.includes('time') || commentLower.includes('wait') || commentLower.includes('delay') || commentLower.includes('slow')) {
+        themes = 'Waiting Time';
+      }
+    }
+
     const review = await prisma.review.create({
       data: {
         rating: r.rating,
@@ -204,6 +211,8 @@ async function main() {
         requestCallback: r.callback,
         callbackStatus: r.callback ? CallbackStatus.PENDING : CallbackStatus.RESOLVED,
         businessId: r.bId,
+        sentiment,
+        themes: themes || (isPositive ? 'Service' : 'Waiting Time')
       },
     });
 
@@ -217,8 +226,91 @@ async function main() {
         },
       });
     }
+
+    // Every rating < 4 automatically creates a Recovery Request
+    if (r.rating < 4) {
+      const priority = (r.rating <= 2 || r.callback) ? 'HIGH' : 'MEDIUM';
+      await prisma.recoveryRequest.create({
+        data: {
+          businessId: r.bId,
+          reviewId: review.id,
+          customerName: r.name || 'Anonymous Guest',
+          whatsappNumber: r.phone || '+15550000',
+          rating: r.rating,
+          feedback: r.comment,
+          callbackRequested: r.callback,
+          status: 'NEW',
+          priority: priority as any,
+          createdAt: new Date(Date.now() - 3600 * 1000 * 24 * 2) // 2 days ago
+        }
+      });
+    }
   }
-  console.log(`✅ Seeded ${reviewsData.length} Reviews and corresponding CallbackRequests successfully!`);
+  console.log(`✅ Seeded ${reviewsData.length} Reviews, CallbackRequests, and RecoveryRequests successfully!`);
+
+  // 5.5 Seed FunnelEvents for analytics
+  console.log('🌱 Seeding FunnelEvents...');
+  const funnelData = [
+    { bId: b1.id, scans: 140, starts: 110, submits: 65, redirects: 35 },
+    { bId: b2.id, scans: 95, starts: 70, submits: 45, redirects: 20 },
+    { bId: b3.id, scans: 60, starts: 45, submits: 25, redirects: 15 }
+  ];
+
+  for (const data of funnelData) {
+    for (let day = 0; day < 12; day++) {
+      const date = new Date(Date.now() - day * 24 * 3600 * 1000);
+      const ratio = 1 - (day * 0.04);
+      
+      const scansCount = Math.max(1, Math.floor(data.scans * ratio / 12));
+      const startsCount = Math.max(1, Math.floor(data.starts * ratio / 12));
+      const submitsCount = Math.max(1, Math.floor(data.submits * ratio / 12));
+      const redirectsCount = Math.max(0, Math.floor(data.redirects * ratio / 12));
+      
+      const sessionIdBase = `sess-${data.bId.substring(0, 4)}-d${day}`;
+
+      for (let i = 0; i < scansCount; i++) {
+        await prisma.funnelEvent.create({
+          data: {
+            businessId: data.bId,
+            stage: 'SCAN',
+            timestamp: date,
+            reviewSessionId: `${sessionIdBase}-s${i}`
+          }
+        });
+      }
+      for (let i = 0; i < startsCount; i++) {
+        await prisma.funnelEvent.create({
+          data: {
+            businessId: data.bId,
+            stage: 'START',
+            timestamp: date,
+            reviewSessionId: `${sessionIdBase}-st${i}`
+          }
+        });
+      }
+      for (let i = 0; i < submitsCount; i++) {
+        await prisma.funnelEvent.create({
+          data: {
+            businessId: data.bId,
+            stage: 'SUBMIT',
+            timestamp: date,
+            reviewSessionId: `${sessionIdBase}-sub${i}`
+          }
+        });
+      }
+      for (let i = 0; i < redirectsCount; i++) {
+        await prisma.funnelEvent.create({
+          data: {
+            businessId: data.bId,
+            stage: 'REDIRECT',
+            timestamp: date,
+            reviewSessionId: `${sessionIdBase}-r${i}`
+          }
+        });
+      }
+    }
+  }
+  console.log('✅ Seeded FunnelEvents successfully!');
 
   // 6. Seed Activity Logs
   const activityLogs = [

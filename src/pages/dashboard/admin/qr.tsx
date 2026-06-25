@@ -4,17 +4,14 @@ import DashboardLayout from '@/components/DashboardLayout';
 import { useAuth } from '@/context/AuthContext';
 import { 
   QrCode, 
-  Plus, 
   Search, 
   Download, 
-  FileText, 
   AlertTriangle, 
   Loader2, 
   CheckCircle,
-  Layers,
-  Database,
-  Link,
-  Building2
+  Building2,
+  Users,
+  Calendar
 } from 'lucide-react';
 import QRCode from 'qrcode';
 import { jsPDF } from 'jspdf';
@@ -22,113 +19,43 @@ import { jsPDF } from 'jspdf';
 interface QRRecord {
   id: string;
   qrCode: string;
-  status: 'UNASSIGNED' | 'ASSIGNED' | 'DAMAGED' | 'REPLACED' | 'INACTIVE';
+  status: 'ACTIVE' | 'ARCHIVED';
   business?: {
-    name: string;
-  } | null;
-  batch?: {
     id: string;
     name: string;
+    slug: string;
+    logoUrl: string | null;
+    createdByRep?: {
+      name: string;
+    } | null;
+  } | null;
+  rep?: {
+    name: string;
   } | null;
   createdAt: string;
-}
-
-interface QRBatch {
-  id: string;
-  name: string;
-  createdAt: string;
-  _count?: {
-    codes: number;
-  };
 }
 
 interface QRStats {
   total: number;
-  unassigned: number;
-  assigned: number;
-  damaged: number;
-  replaced: number;
-  inactive: number;
+  active: number;
+  archived: number;
 }
 
-export default function QrInventoryPage(props: any) {
+export default function QrAssetsPage(props: any) {
   const { user, loading: authLoading } = useAuth();
   const { theme, toggleTheme } = props;
 
   // State
   const [inventory, setInventory] = useState<QRRecord[]>([]);
-  const [batches, setBatches] = useState<QRBatch[]>([]);
   const [stats, setStats] = useState<QRStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
-
-  // Form State
-  const [batchName, setBatchName] = useState('');
-  const [startSerial, setStartSerial] = useState('QR-001000');
-  const [quantity, setQuantity] = useState<number | string>('100');
-  const [generating, setGenerating] = useState(false);
-  const [validationError, setValidationError] = useState('');
+  const [downloadingId, setDownloadingId] = useState<string | null>(null);
 
   // Filter State
   const [statusFilter, setStatusFilter] = useState('ALL');
   const [searchQuery, setSearchQuery] = useState('');
-  const [batchFilter, setBatchFilter] = useState('ALL');
-
-  // Assignment modal state
-  const [assigningQr, setAssigningQr] = useState<QRRecord | null>(null);
-  const [selectedBusinessId, setSelectedBusinessId] = useState('');
-  const [businesses, setBusinesses] = useState<{ id: string; name: string; industry: string }[]>([]);
-  const [assignLoading, setAssignLoading] = useState(false);
-  const [assignError, setAssignError] = useState('');
-
-  const fetchBusinesses = async () => {
-    try {
-      const res = await fetch('/api/super-admin/businesses');
-      if (res.ok) {
-        const data = await res.json();
-        setBusinesses(data.businesses || []);
-        if (data.businesses && data.businesses.length > 0) {
-          setSelectedBusinessId(data.businesses[0].id);
-        }
-      }
-    } catch (err) {
-      console.error('Failed to fetch businesses:', err);
-    }
-  };
-
-  const handleAssignSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!assigningQr || !selectedBusinessId) return;
-
-    setAssignLoading(true);
-    setAssignError('');
-
-    try {
-      const res = await fetch('/api/rep/assign', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          action: 'ASSIGN',
-          qrCode: assigningQr.qrCode,
-          businessId: selectedBusinessId
-        })
-      });
-
-      if (res.ok) {
-        setSuccess(`Successfully assigned QR "${assigningQr.qrCode}" to business.`);
-        setAssigningQr(null);
-        fetchInventory();
-      } else {
-        const data = await res.json();
-        setAssignError(data.error || 'Failed to assign QR code.');
-      }
-    } catch (err) {
-      setAssignError('Network error during assignment.');
-    } finally {
-      setAssignLoading(false);
-    }
-  };
 
   const fetchInventory = async () => {
     try {
@@ -138,19 +65,17 @@ export default function QrInventoryPage(props: any) {
       const params = new URLSearchParams();
       if (statusFilter !== 'ALL') params.append('status', statusFilter);
       if (searchQuery) params.append('search', searchQuery);
-      if (batchFilter !== 'ALL') params.append('batchId', batchFilter);
 
       const res = await fetch(`/api/super-admin/inventory?${params.toString()}`);
       if (res.ok) {
         const data = await res.json();
         setInventory(data.inventory || []);
         setStats(data.stats || null);
-        setBatches(data.batches || []);
       } else {
-        setError('Failed to fetch QR inventory.');
+        setError('Failed to fetch QR assets.');
       }
     } catch (err) {
-      setError('Network error fetching QR inventory.');
+      setError('Network error fetching QR assets.');
     } finally {
       setLoading(false);
     }
@@ -160,383 +85,214 @@ export default function QrInventoryPage(props: any) {
     if (user && user.role === 'SUPER_ADMIN') {
       fetchInventory();
     }
-  }, [user, statusFilter, searchQuery, batchFilter]);
+  }, [user, statusFilter, searchQuery]);
 
-  const handleGenerateBatch = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setValidationError('');
-    setError('');
-    setSuccess('');
-
-    if (!batchName.trim()) {
-      setValidationError('Batch Name is required.');
-      return;
-    }
-
-    if (!startSerial.trim() || !startSerial.startsWith('QR-')) {
-      setValidationError('Starting QR Number must begin with "QR-" followed by numbers (e.g. QR-001000).');
-      return;
-    }
-
-    const qty = parseInt(String(quantity), 10);
-    if (isNaN(qty) || qty < 1 || qty > 1000) {
-      setValidationError('Batch size must be between 1 and 1000 QR codes.');
-      return;
-    }
+  const downloadBrandedSheet = async (qr: QRRecord) => {
+    if (!qr.business) return;
+    const businessId = qr.business.id;
+    const businessName = qr.business.name;
+    const logoUrl = qr.business.logoUrl;
+    const slug = qr.business.slug;
+    const code = qr.qrCode;
 
     try {
-      setGenerating(true);
-      const res = await fetch('/api/super-admin/generate-qr-batch', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          batchName,
-          startSerial,
-          quantity: qty
-        })
+      setDownloadingId(qr.id);
+      setError('');
+      
+      const doc = new jsPDF({
+        orientation: 'portrait',
+        unit: 'mm',
+        format: [105, 148] // A6 flyer size
       });
 
-      const data = await res.json();
+      const width = 105;
+      const height = 148;
 
-      if (res.ok) {
-        setSuccess(data.message || 'QR batch generated successfully.');
-        setBatchName('');
-        // Increment start serial for next time
-        const numPart = startSerial.substring(3);
-        const nextNum = parseInt(numPart, 10) + qty;
-        const paddedNextNum = String(nextNum).padStart(numPart.length, '0');
-        setStartSerial(`QR-${paddedNextNum}`);
-        
-        fetchInventory();
-      } else {
-        setError(data.error || 'Failed to generate QR batch.');
-      }
-    } catch (err) {
-      setError('Network error generating batch.');
-    } finally {
-      setGenerating(false);
-    }
-  };
+      // 1. Subtle, clean border with rounded corners of 5mm
+      doc.setDrawColor(229, 231, 235); // #E5E7EB
+      doc.setLineWidth(0.5);
+      doc.roundedRect(6, 6, width - 12, height - 12, 5, 5, 'S');
 
-  const downloadSingleQr = async (code: string) => {
-    try {
-      const url = `${window.location.origin}/r/${code}`;
-      const dataUrl = await QRCode.toDataURL(url, { width: 300, margin: 2 });
-      const link = document.createElement('a');
-      link.href = dataUrl;
-      link.download = `${code}.png`;
-      link.click();
-    } catch (err) {
-      console.error('Failed to generate single QR download', err);
-    }
-  };
-
-  const downloadBatchPdf = async (selectedBatchId: string, selectedBatchName: string) => {
-    try {
-      setError('');
-      setSuccess('');
-      
-      // Fetch codes belonging to this batch
-      const res = await fetch(`/api/super-admin/inventory?batchId=${selectedBatchId}`);
-      if (!res.ok) {
-        setError('Failed to fetch batch details for PDF export.');
-        return;
-      }
-      const data = await res.json();
-      const codes = (data.inventory || []).map((q: QRRecord) => q.qrCode);
-      
-      if (codes.length === 0) {
-        setError('No QR codes found in this batch to export.');
-        return;
-      }
-
-      const doc = new jsPDF();
-      const margin = 10;
-      const cols = 3;
-      const rows = 6;
-      const cardWidth = (210 - (margin * 2)) / cols; // ~63.3mm
-      const cardHeight = (297 - (margin * 2)) / rows; // ~46.1mm
-      
-      let colIndex = 0;
-      let rowIndex = 0;
-
-      for (let i = 0; i < codes.length; i++) {
-        const code = codes[i];
-        const url = `${window.location.origin}/r/${code}`;
-        const qrDataUrl = await QRCode.toDataURL(url, { width: 150, margin: 1 });
-
-        if (rowIndex >= rows) {
-          doc.addPage();
-          rowIndex = 0;
-          colIndex = 0;
+      // 2. Business Name (elegant serif font, size 24pt or scaled down)
+      let fontFamily = 'times';
+      try {
+        const availableFonts = doc.getFontList();
+        if (availableFonts && availableFonts['Playfair Display']) {
+          fontFamily = 'Playfair Display';
+        } else if (availableFonts && availableFonts['Cormorant Garamond']) {
+          fontFamily = 'Cormorant Garamond';
         }
-
-        const x = margin + colIndex * cardWidth;
-        const y = margin + rowIndex * cardHeight;
-
-        // Draw card border
-        doc.setDrawColor(220, 220, 220);
-        doc.rect(x + 2, y + 2, cardWidth - 4, cardHeight - 4);
-
-        // Draw brand text
-        doc.setTextColor(24, 87, 214); // #1857D6
-        doc.setFontSize(8);
-        doc.setFont('helvetica', 'bold');
-        doc.text('CLOUT REPUTATION', x + cardWidth / 2, y + 10, { align: 'center' });
-
-        // Draw QR Code
-        const qrSize = 22;
-        doc.addImage(qrDataUrl, 'PNG', x + (cardWidth - qrSize) / 2, y + 12, qrSize, qrSize);
-
-        // Draw scan instruction & serial number
-        doc.setTextColor(80, 80, 80);
-        doc.setFontSize(7);
-        doc.setFont('helvetica', 'normal');
-        doc.text('Scan to Review', x + cardWidth / 2, y + 38, { align: 'center' });
-
-        doc.setTextColor(0, 0, 0);
-        doc.setFontSize(9);
-        doc.setFont('helvetica', 'bold');
-        doc.text(code, x + cardWidth / 2, y + 42, { align: 'center' });
-
-        colIndex++;
-        if (colIndex >= cols) {
-          colIndex = 0;
-          rowIndex++;
-        }
+      } catch (e) {
+        console.warn('Error checking font list', e);
       }
 
-      doc.save(`${selectedBatchName.replace(/\s+/g, '_')}_Stickers.pdf`);
-      setSuccess(`PDF sticker sheet downloaded for batch: ${selectedBatchName}`);
+      doc.setFont(fontFamily, 'bold');
+      
+      let fontSize = 24;
+      let nameLines: string[] = [];
+      const maxTextWidth = 85; // Allow margins
+      
+      while (fontSize >= 14) {
+        doc.setFontSize(fontSize);
+        nameLines = doc.splitTextToSize(businessName, maxTextWidth);
+        const lineHeightInMm = fontSize * 1.15 * 0.3528;
+        const totalHeight = nameLines.length * lineHeightInMm;
+        // We want the text to fit comfortably in the y = 8 to 36 region (max height ~18mm)
+        if (totalHeight <= 18 || fontSize === 14) {
+          break;
+        }
+        fontSize -= 2;
+      }
+
+      const lineHeightInMm = fontSize * 1.15 * 0.3528;
+      // Midpoint of vertical area (6 to 38) is 22.
+      // Offset by half of total lines height, adjusting for baseline.
+      const yStart = 22 - ((nameLines.length - 1) * lineHeightInMm / 2);
+      
+      doc.setTextColor(17, 24, 39); // Neutral 900
+      doc.text(nameLines, width / 2, yStart, { align: 'center' });
+
+      // 3. QR Code: occupying approx 70-75% of printable card width (e.g. 76mm is ~72.38%)
+      const targetUrl = `${window.location.origin}/r/${slug || code}`;
+      const qrDataUrl = await QRCode.toDataURL(targetUrl, { width: 400, margin: 1 });
+      doc.addImage(qrDataUrl, 'PNG', 14.5, 38, 76, 76);
+
+      // 4. "Scan to Review" centered in Helvetica-Bold (sans-serif, size 16pt, neutral gray `#4B5563`)
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(16);
+      doc.setTextColor(75, 85, 99); // #4B5563
+      doc.text('Scan to Review', width / 2, 132, { align: 'center' });
+
+      // Save PDF
+      doc.save(`${businessName.replace(/\s+/g, '_')}_Review_Sheet.pdf`);
+      setSuccess(`Downloaded branded PDF sheet for ${businessName}.`);
+
+      // Log download to ActivityLog
+      await fetch('/api/business/track-download', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ businessId })
+      });
+
     } catch (err) {
       console.error(err);
-      setError('Error generating PDF sticker sheets.');
+      setError('Error generating branded PDF review sheet.');
+    } finally {
+      setDownloadingId(null);
     }
   };
 
   if (authLoading) {
     return (
-      <div className="min-h-screen bg-white flex items-center justify-center font-['Source_Sans_Pro']">
-        <Loader2 className="animate-spin h-8 w-8 text-[#1857D6]" />
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center font-sans">
+        <Loader2 className="animate-spin h-8 w-8 text-[#1853AB]" />
       </div>
     );
   }
 
   if (!user || user.role !== 'SUPER_ADMIN') {
     return (
-      <div className="min-h-screen bg-white flex flex-col items-center justify-center p-4 font-['Source_Sans_Pro']">
-        <AlertTriangle className="h-12 w-12 text-red-650 mb-4" />
+      <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-4 font-sans">
+        <AlertTriangle className="h-12 w-12 text-rose-500 mb-4" />
         <h1 className="text-xl font-bold">Access Denied</h1>
-        <p className="text-zinc-500 text-sm mt-1">Super Admin permissions required.</p>
+        <p className="text-slate-500 text-sm mt-1">Super Admin permissions required.</p>
       </div>
     );
   }
 
   return (
-    <DashboardLayout title="QR Inventory & Batches" theme={theme} toggleTheme={toggleTheme}>
+    <DashboardLayout title="QR Assets Management" theme={theme} toggleTheme={toggleTheme}>
       <Head>
-        <title>QR Inventory & Batches - Clout Reputation</title>
-        
+        <title>QR Assets - Clout Reputation</title>
       </Head>
 
-      <div className="mb-6">
-        <p className="text-xs text-zinc-500 mt-0.5">Generate, track, and export QR codes for business reviews.</p>
+      <div className="mb-6 flex justify-between items-center">
+        <div>
+          <h2 className="text-xl font-bold text-slate-900 font-sans">System QR Assets</h2>
+          <p className="text-xs text-slate-500 mt-0.5">Track and download branded review portals and codes.</p>
+        </div>
       </div>
 
       {error && (
-        <div className="mb-6 p-3 rounded bg-red-50 border border-red-200 text-red-750 text-xs flex items-start">
+        <div className="mb-6 p-4 rounded-xl bg-rose-50 border border-rose-200/50 text-rose-700 text-xs flex items-start">
           <AlertTriangle className="mr-2 h-4 w-4 flex-shrink-0 mt-0.5" />
           <span>{error}</span>
         </div>
       )}
 
       {success && (
-        <div className="mb-6 p-3 rounded bg-emerald-50 border border-emerald-200 text-emerald-750 text-xs flex items-start">
+        <div className="mb-6 p-4 rounded-xl bg-emerald-50 border border-emerald-200/50 text-emerald-700 text-xs flex items-start">
           <CheckCircle className="mr-2 h-4 w-4 flex-shrink-0 mt-0.5" />
           <span>{success}</span>
         </div>
       )}
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
-        {/* Left Side: Batch Generator Form */}
-        <div className="bg-white/80 backdrop-blur-md p-6 rounded-2xl border border-slate-100 shadow-[0_4px_20px_rgba(0,0,0,0.02)] lg:col-span-1 h-fit">
-          <div className="flex items-center space-x-2 mb-4 pb-2 border-b border-slate-100">
-            <Plus size={16} className="text-[#1857D6]" />
-            <h3 className="font-bold text-sm text-slate-900 font-sans">Generate QR Batch</h3>
-          </div>
-
-          <form onSubmit={handleGenerateBatch} className="space-y-4">
+      {/* Stats row */}
+      {stats && (
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-8 animate-fadeIn">
+          <div className="bg-white/80 backdrop-blur-md border border-slate-100/60 p-6 rounded-3xl flex justify-between items-center shadow-[0_8px_30px_rgba(15,23,42,0.015)]">
             <div>
-              <label className="block text-[10px] font-bold text-zinc-550 uppercase tracking-wider mb-1">Batch Name</label>
-              <input 
-                type="text"
-                value={batchName}
-                onChange={(e) => setBatchName(e.target.value)}
-                placeholder="e.g. June 2026 Batch"
-                className="w-full text-xs p-2 border border-zinc-200 rounded focus:border-[#1857D6] focus:outline-none"
-                required
-              />
+              <span className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest">Total QR Assets</span>
+              <span className="block text-2xl font-extrabold text-slate-900 mt-1">{stats.total}</span>
             </div>
-
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className="block text-[10px] font-bold text-zinc-550 uppercase tracking-wider mb-1">Starting Serial</label>
-                <input 
-                  type="text"
-                  value={startSerial}
-                  onChange={(e) => setStartSerial(e.target.value)}
-                  placeholder="e.g. QR-001000"
-                  className="w-full text-xs p-2 border border-zinc-200 rounded focus:border-[#1857D6] focus:outline-none"
-                  required
-                />
-              </div>
-
-              <div>
-                <label className="block text-[10px] font-bold text-zinc-550 uppercase tracking-wider mb-1">Quantity</label>
-                <input 
-                  type="number"
-                  value={quantity}
-                  onChange={(e) => setQuantity(e.target.value)}
-                  placeholder="100"
-                  min="1"
-                  max="1000"
-                  className="w-full text-xs p-2 border border-zinc-200 rounded focus:border-[#1857D6] focus:outline-none"
-                  required
-                />
-              </div>
+            <div className="p-3 bg-blue-50/70 text-[#1853AB] rounded-2xl">
+              <QrCode size={20} />
             </div>
-
-            {validationError && (
-              <p className="text-red-650 text-[11px] font-semibold">{validationError}</p>
-            )}
-
-            <button
-              type="submit"
-              disabled={generating}
-              className="w-full py-2 bg-[#1857D6] hover:bg-[#154fc4] text-white text-xs font-semibold rounded transition-colors flex items-center justify-center space-x-2"
-            >
-              {generating ? (
-                <>
-                  <Loader2 className="animate-spin h-3.5 w-3.5" />
-                  <span>Generating Batch...</span>
-                </>
-              ) : (
-                <>
-                  <QrCode size={14} />
-                  <span>Create Batch</span>
-                </>
-              )}
-            </button>
-          </form>
-        </div>
-
-        {/* Right Side: QR Batches List & Stats */}
-        <div className="lg:col-span-2 space-y-6">
-          {/* Inventory Stats */}
-          {stats && (
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-              <div className="bg-white/80 backdrop-blur-md border border-slate-100 p-4 rounded-2xl text-center shadow-[0_4px_20px_rgba(0,0,0,0.02)]">
-                <span className="block text-[9px] font-bold text-slate-400 uppercase tracking-wider font-sans">Total QRs</span>
-                <span className="block text-lg font-bold text-slate-900 mt-1">{stats.total}</span>
-              </div>
-              <div className="bg-white/80 backdrop-blur-md border border-slate-100 p-4 rounded-2xl text-center shadow-[0_4px_20px_rgba(0,0,0,0.02)]">
-                <span className="block text-[9px] font-bold text-slate-400 uppercase tracking-wider font-sans">Unassigned</span>
-                <span className="block text-lg font-bold text-zinc-600 mt-1">{stats.unassigned}</span>
-              </div>
-              <div className="bg-white/80 backdrop-blur-md border border-slate-100 p-4 rounded-2xl text-center shadow-[0_4px_20px_rgba(0,0,0,0.02)]">
-                <span className="block text-[9px] font-bold text-slate-400 uppercase tracking-wider font-sans">Assigned</span>
-                <span className="block text-lg font-bold text-[#1857D6] mt-1">{stats.assigned}</span>
-              </div>
-              <div className="bg-white/80 backdrop-blur-md border border-slate-100 p-4 rounded-2xl text-center shadow-[0_4px_20px_rgba(0,0,0,0.02)]">
-                <span className="block text-[9px] font-bold text-slate-400 uppercase tracking-wider font-sans">Damaged/Other</span>
-                <span className="block text-lg font-bold text-amber-600 mt-1">{stats.damaged + stats.replaced + stats.inactive}</span>
-              </div>
+          </div>
+          <div className="bg-white/80 backdrop-blur-md border border-slate-100/60 p-6 rounded-3xl flex justify-between items-center shadow-[0_8px_30px_rgba(15,23,42,0.015)]">
+            <div>
+              <span className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest">Active QRs</span>
+              <span className="block text-2xl font-extrabold text-emerald-650 mt-1">{stats.active}</span>
             </div>
-          )}
-
-          {/* Batches PDF Export Section */}
-          <div className="bg-white/80 backdrop-blur-md p-5 rounded-2xl border border-slate-100 shadow-[0_4px_20px_rgba(0,0,0,0.02)]">
-            <div className="flex items-center space-x-2 mb-4 pb-2 border-b border-slate-100">
-              <Layers size={16} className="text-[#1857D6]" />
-              <h3 className="font-bold text-sm text-slate-900 font-sans">Download Printable Sticker Sheets</h3>
+            <div className="p-3 bg-emerald-50/70 text-emerald-650 rounded-2xl">
+              <CheckCircle size={20} />
             </div>
-            
-            {batches.length === 0 ? (
-              <p className="text-xs text-zinc-400 text-center py-4">No batches generated yet.</p>
-            ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-[200px] overflow-y-auto pr-2">
-                {batches.map((batch) => (
-                  <div key={batch.id} className="flex items-center justify-between p-3 bg-slate-50/30 border border-slate-100 rounded-xl text-xs">
-                    <div>
-                      <p className="font-semibold text-slate-900 font-sans">{batch.name}</p>
-                      <p className="text-[10px] text-zinc-400 mt-0.5">
-                        {batch._count?.codes || 0} QR Codes • {new Date(batch.createdAt).toLocaleDateString()}
-                      </p>
-                    </div>
-                    <button
-                      onClick={() => downloadBatchPdf(batch.id, batch.name)}
-                      className="p-1.5 bg-white border border-zinc-250 hover:bg-zinc-100 text-[#1857D6] rounded transition-colors flex items-center gap-1"
-                      title="Download PDF sticker sheet"
-                    >
-                      <FileText size={12} />
-                      <span className="text-[10px] font-semibold">PDF</span>
-                    </button>
-                  </div>
-                ))}
-              </div>
-            )}
+          </div>
+          <div className="bg-white/80 backdrop-blur-md border border-slate-100/60 p-6 rounded-3xl flex justify-between items-center shadow-[0_8px_30px_rgba(15,23,42,0.015)]">
+            <div>
+              <span className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest">Archived QRs</span>
+              <span className="block text-2xl font-extrabold text-slate-400 mt-1">{stats.archived}</span>
+            </div>
+            <div className="p-3 bg-slate-100 text-slate-500 rounded-2xl">
+              <AlertTriangle size={20} />
+            </div>
           </div>
         </div>
-      </div>
+      )}
 
-      {/* Main Inventory Section */}
-      <div className="bg-white/80 backdrop-blur-md border border-slate-100 rounded-2xl overflow-hidden shadow-[0_4px_20px_rgba(0,0,0,0.02)]">
-        {/* Filters bar */}
-        <div className="p-4 bg-slate-50/20 border-b border-slate-100 flex flex-col sm:flex-row gap-4 items-center justify-between">
-          <div className="flex items-center space-x-2">
-            <Database size={16} className="text-[#1857D6]" />
-            <h4 className="font-bold text-xs text-slate-900 uppercase tracking-wider font-sans">Inventory List</h4>
+      {/* Main Table Card */}
+      <div className="bg-white/80 backdrop-blur-xl border border-slate-100/60 rounded-3xl overflow-hidden shadow-[0_8px_30px_rgba(15,23,42,0.015)]">
+        {/* Filters */}
+        <div className="p-6 border-b border-slate-100/60 flex flex-col sm:flex-row gap-4 items-center justify-between">
+          <div className="flex items-center space-x-2.5">
+            <Building2 size={16} className="text-[#1853AB]" />
+            <h4 className="font-bold text-xs text-slate-900 uppercase tracking-wider font-sans">Assets List</h4>
           </div>
 
           <div className="flex flex-wrap gap-2 w-full sm:w-auto">
             {/* Search */}
             <div className="relative flex-grow sm:flex-grow-0">
-              <span className="absolute inset-y-0 left-0 pl-2.5 flex items-center pointer-events-none">
-                <Search size={12} className="text-zinc-400" />
+              <span className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <Search size={13} className="text-slate-400" />
               </span>
               <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search code (e.g. QR-001)"
-                className="pl-8 pr-3 py-1.5 w-full sm:w-48 text-xs border border-zinc-250 rounded bg-white focus:border-[#1857D6] focus:outline-none"
+                placeholder="Search business or code..."
+                className="pl-9 pr-3 py-1.5 w-full sm:w-56 text-xs border border-slate-200 rounded-xl bg-white/60 focus:border-[#1853AB] focus:outline-none focus:ring-4 focus:ring-blue-500/5 focus:bg-white transition-all"
               />
             </div>
-
-            {/* Batch Filter */}
-            <select
-              value={batchFilter}
-              onChange={(e) => setBatchFilter(e.target.value)}
-              className="px-2.5 py-1.5 text-xs border border-zinc-250 rounded bg-white focus:border-[#1857D6] focus:outline-none"
-            >
-              <option value="ALL">All Batches</option>
-              {batches.map((b) => (
-                <option key={b.id} value={b.id}>{b.name}</option>
-              ))}
-            </select>
 
             {/* Status Filter */}
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              className="px-2.5 py-1.5 text-xs border border-zinc-250 rounded bg-white focus:border-[#1857D6] focus:outline-none"
+              className="px-3 py-1.5 text-xs border border-slate-200 rounded-xl bg-white focus:border-[#1853AB] focus:outline-none focus:ring-4 focus:ring-blue-500/5 transition-all text-slate-700 font-semibold"
             >
               <option value="ALL">All Statuses</option>
-              <option value="UNASSIGNED">Unassigned</option>
-              <option value="ASSIGNED">Assigned</option>
-              <option value="DAMAGED">Damaged</option>
-              <option value="REPLACED">Replaced</option>
-              <option value="INACTIVE">Inactive</option>
+              <option value="ACTIVE">Active</option>
+              <option value="ARCHIVED">Archived</option>
             </select>
           </div>
         </div>
@@ -545,70 +301,93 @@ export default function QrInventoryPage(props: any) {
         <div className="overflow-x-auto">
           {loading && inventory.length === 0 ? (
             <div className="p-12 text-center">
-              <Loader2 className="animate-spin h-6 w-6 text-[#1857D6] mx-auto mb-2" />
-              <span className="text-xs text-zinc-450">Loading QR codes...</span>
+              <Loader2 className="animate-spin h-6 w-6 text-[#1853AB] mx-auto mb-2.5" />
+              <span className="text-xs text-slate-400 font-medium">Loading QR assets...</span>
             </div>
           ) : inventory.length === 0 ? (
-            <div className="p-12 text-center text-xs text-zinc-400">
-              No QR codes match the selected filters.
+            <div className="p-12 text-center text-xs text-slate-400">
+              No QR assets match the selected filters.
             </div>
           ) : (
-            <table className="min-w-full divide-y divide-zinc-150 text-left text-xs">
-              <thead className="bg-zinc-50 text-zinc-400 uppercase font-bold tracking-wider text-[10px] border-b border-zinc-150">
+            <table className="min-w-full divide-y divide-slate-100 text-left text-xs font-sans">
+              <thead className="bg-slate-50/50 text-slate-400 uppercase font-bold tracking-wider text-[10px] border-b border-slate-100">
                 <tr>
-                  <th className="px-6 py-3">QR Code</th>
-                  <th className="px-6 py-3">Batch Name</th>
-                  <th className="px-6 py-3">Status</th>
-                  <th className="px-6 py-3">Assigned Business</th>
+                  <th className="px-6 py-3">Business</th>
+                  <th className="px-6 py-3">Representative</th>
+                  <th className="px-6 py-3">QR Status</th>
                   <th className="px-6 py-3">Created Date</th>
                   <th className="px-6 py-3 text-right">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-zinc-150 bg-white">
+              <tbody className="divide-y divide-slate-100 bg-transparent">
                 {inventory.map((qr) => (
-                  <tr key={qr.id} className="hover:bg-zinc-50/50 transition-colors">
-                    <td className="px-6 py-3.5 font-bold text-black">{qr.qrCode}</td>
-                    <td className="px-6 py-3.5 text-zinc-650">{qr.batch?.name || 'N/A'}</td>
-                    <td className="px-6 py-3.5">
-                      <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold ${
-                        qr.status === 'ASSIGNED'
-                          ? 'bg-blue-50 text-blue-750 border border-blue-150'
-                          : qr.status === 'UNASSIGNED'
-                          ? 'bg-zinc-50 text-zinc-700 border border-zinc-200'
-                          : 'bg-amber-50 text-amber-700 border border-amber-200'
+                  <tr key={qr.id} className="hover:bg-slate-50/30 transition-colors">
+                    {/* Business Name and Logo */}
+                    <td className="px-6 py-4">
+                      <div className="flex items-center space-x-3">
+                        {qr.business?.logoUrl ? (
+                          <img 
+                            src={qr.business.logoUrl} 
+                            alt={qr.business.name} 
+                            className="w-9 h-9 rounded-xl object-cover border border-slate-100" 
+                          />
+                        ) : (
+                          <div className="p-2 bg-slate-50 border border-slate-200/50 rounded-xl text-[#1853AB]">
+                            <Building2 size={16} />
+                          </div>
+                        )}
+                        <div>
+                          <strong className="block text-slate-900 font-bold">{qr.business?.name || 'Unassigned'}</strong>
+                          <span className="block text-[10px] text-slate-400 font-mono mt-0.5">{qr.qrCode}</span>
+                        </div>
+                      </div>
+                    </td>
+
+                    {/* Representative */}
+                    <td className="px-6 py-4 text-slate-500 font-medium">
+                      <div className="flex items-center gap-1.5">
+                        <Users size={12} className="text-slate-400" />
+                        <span>{qr.rep?.name || qr.business?.createdByRep?.name || 'System'}</span>
+                      </div>
+                    </td>
+
+                    {/* QR Status */}
+                    <td className="px-6 py-4">
+                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[9px] font-bold border uppercase tracking-wider ${
+                        qr.status === 'ACTIVE'
+                          ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                          : 'bg-slate-100 text-slate-500 border-slate-200'
                       }`}>
                         {qr.status}
                       </span>
                     </td>
-                    <td className="px-6 py-3.5 text-zinc-750 font-medium">
-                      {qr.business?.name || <span className="text-zinc-350 italic">None</span>}
+
+                    {/* Created Date */}
+                    <td className="px-6 py-4 text-slate-400">
+                      <div className="flex items-center gap-1.5">
+                        <Calendar size={12} className="text-slate-400" />
+                        <span>{new Date(qr.createdAt).toLocaleDateString()}</span>
+                      </div>
                     </td>
-                    <td className="px-6 py-3.5 text-zinc-450">
-                      {new Date(qr.createdAt).toLocaleDateString()}
-                    </td>
-                    <td className="px-6 py-3.5 text-right flex justify-end space-x-2 items-center">
-                      <button
-                        onClick={() => downloadSingleQr(qr.qrCode)}
-                        className="inline-flex items-center space-x-1 p-1 bg-white border border-zinc-250 rounded hover:bg-zinc-50 text-[#1857D6] font-semibold text-[10px]"
-                        title="Download PNG QR image"
-                      >
-                        <Download size={10} />
-                        <span>PNG</span>
-                      </button>
-                      {qr.status === 'UNASSIGNED' && (
+
+                    {/* Actions */}
+                    <td className="px-6 py-4 text-right">
+                      {qr.business ? (
                         <button
-                          onClick={() => {
-                            setAssigningQr(qr);
-                            if (businesses.length === 0) {
-                              fetchBusinesses();
-                            }
-                          }}
-                          className="inline-flex items-center space-x-1 p-1 bg-white border border-zinc-250 rounded hover:bg-zinc-50 text-emerald-600 font-semibold text-[10px]"
-                          title="Assign to business"
+                          onClick={() => downloadBrandedSheet(qr)}
+                          disabled={downloadingId === qr.id}
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 text-[#1853AB] font-bold text-[10px] active:scale-[0.98] transition-all cursor-pointer shadow-sm disabled:opacity-50"
+                          title="Download Printable Review Sheet"
                         >
-                          <Link size={10} />
-                          <span>Assign</span>
+                          {downloadingId === qr.id ? (
+                            <Loader2 className="animate-spin h-3 w-3" />
+                          ) : (
+                            <Download size={11} />
+                          )}
+                          <span>Printable Sheet</span>
                         </button>
+                      ) : (
+                        <span className="text-slate-300 italic text-[10px]">No Business</span>
                       )}
                     </td>
                   </tr>
@@ -617,81 +396,6 @@ export default function QrInventoryPage(props: any) {
             </table>
           )}
         </div>
-
-        {/* Assignment Modal */}
-        {assigningQr && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-            <div className="bg-white rounded-2xl border border-slate-100 shadow-xl max-w-md w-full overflow-hidden animate-in fade-in zoom-in duration-200">
-              <div className="p-6 border-b border-slate-100 flex justify-between items-center">
-                <div className="flex items-center space-x-2.5">
-                  <div className="p-2 bg-blue-50/70 text-[#1857D6] rounded-xl">
-                    <Building2 size={18} />
-                  </div>
-                  <h3 className="font-bold text-sm text-slate-900">Assign QR Code</h3>
-                </div>
-                <button
-                  onClick={() => setAssigningQr(null)}
-                  className="text-zinc-450 hover:text-black text-xs font-semibold bg-transparent border-none cursor-pointer"
-                >
-                  ✕
-                </button>
-              </div>
-              
-              <form onSubmit={handleAssignSubmit} className="p-6 space-y-4">
-                {assignError && (
-                  <div className="p-3 bg-rose-50 border border-rose-200/50 rounded-xl text-rose-700 text-xs">
-                    {assignError}
-                  </div>
-                )}
-                
-                <div className="p-3 bg-slate-50 border border-slate-100 rounded-xl text-xs space-y-1 font-sans">
-                  <div>Sticker Code: <strong className="font-mono text-black">{assigningQr.qrCode}</strong></div>
-                  <div>Status: <span className="text-zinc-550 font-bold uppercase">{assigningQr.status}</span></div>
-                </div>
-
-                <div className="space-y-1">
-                  <label htmlFor="modalBizSelect" className="block text-xs font-bold text-slate-400 uppercase tracking-wider font-sans">
-                    Select Business
-                  </label>
-                  <select
-                    id="modalBizSelect"
-                    value={selectedBusinessId}
-                    onChange={(e) => setSelectedBusinessId(e.target.value)}
-                    className="w-full text-xs border border-slate-200 rounded-xl bg-white px-3 py-2 focus:border-[#1857D6] focus:outline-none"
-                  >
-                    {businesses.length === 0 ? (
-                      <option value="">Loading active businesses...</option>
-                    ) : (
-                      businesses.map((biz) => (
-                        <option key={biz.id} value={biz.id}>
-                          {biz.name} ({biz.industry.replace('_', ' ')})
-                        </option>
-                      ))
-                    )}
-                  </select>
-                </div>
-
-                <div className="pt-4 flex space-x-3 justify-end">
-                  <button
-                    type="button"
-                    onClick={() => setAssigningQr(null)}
-                    className="px-4 py-2 text-xs border border-slate-200 rounded-xl hover:bg-slate-50 font-semibold transition-colors bg-white text-zinc-650 cursor-pointer"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    disabled={assignLoading || !selectedBusinessId}
-                    className="px-4 py-2 text-xs bg-[#1857D6] hover:bg-[#154fc4] text-white rounded-xl font-semibold transition-colors disabled:opacity-50 cursor-pointer border-none flex items-center justify-center"
-                  >
-                    {assignLoading ? <Loader2 className="animate-spin h-3.5 w-3.5 mr-1.5" /> : null}
-                    Assign Sticker
-                  </button>
-                </div>
-              </form>
-            </div>
-          </div>
-        )}
       </div>
     </DashboardLayout>
   );

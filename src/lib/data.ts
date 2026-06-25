@@ -1,5 +1,6 @@
 import { db } from './db';
 import bcrypt from 'bcryptjs';
+import crypto from 'crypto';
 import {
   User,
   Business,
@@ -17,7 +18,12 @@ import {
   QRStatus,
   CallbackStatus,
   SubscriptionStatus,
-  SubscriptionPlan
+  SubscriptionPlan,
+  RecoveryStatus,
+  RecoveryPriority,
+  RecoveryRequest,
+  FunnelStage,
+  FunnelEvent
 } from '@prisma/client';
 
 // Caching variables for user/business profile lookups
@@ -38,9 +44,9 @@ export function generateUniqueCode(length = 8): string {
 
 // In-Memory Mock Data Store (seeded with the same data as prisma/seed.ts)
 let mockBusinesses: Business[] = [
-  { id: 'b1', name: 'Bella Italia', slug: 'bella-italia', businessCode: 'CR-000001', passwordHash: '', industry: Industry.RESTAURANT, logoUrl: 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=100&auto=format&fit=crop', googleReviewUrl: 'https://search.google.com/local/writereview?placeid=ChIJ313_placeholder1', phone: '+15550212', address: '123 Pizza Way, Rome', isActive: true, status: BusinessStatus.ACTIVE, deletedAt: null, enableGoogleReviewRedirect: true, enableManagerCallback: true, createdByRepId: 'u-rep1', createdAt: new Date(), updatedAt: new Date() },
-  { id: 'b2', name: 'Luxe Salon', slug: 'luxe-salon', businessCode: 'CR-000002', passwordHash: '', industry: Industry.SALON, logoUrl: 'https://images.unsplash.com/photo-1560066984-138dadb4c035?w=100&auto=format&fit=crop', googleReviewUrl: 'https://search.google.com/local/writereview?placeid=ChIJ313_placeholder2', phone: '+15550213', address: '456 Beauty Blvd, New York', isActive: true, status: BusinessStatus.ACTIVE, deletedAt: null, enableGoogleReviewRedirect: true, enableManagerCallback: true, createdByRepId: 'u-rep1', createdAt: new Date(), updatedAt: new Date() },
-  { id: 'b3', name: 'Cafe Paris', slug: 'cafe-paris', businessCode: 'CR-000003', passwordHash: '', industry: Industry.CAFE, logoUrl: 'https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?w=100&auto=format&fit=crop', googleReviewUrl: 'https://search.google.com/local/writereview?placeid=ChIJ313_placeholder3', phone: '+15550214', address: '789 Croissant St, Paris', isActive: true, status: BusinessStatus.ACTIVE, deletedAt: null, enableGoogleReviewRedirect: true, enableManagerCallback: true, createdByRepId: 'u-rep2', createdAt: new Date(), updatedAt: new Date() },
+  { id: 'b1', name: 'Bella Italia', slug: 'bella-italia', businessCode: 'CR-000001', passwordHash: '', industry: Industry.RESTAURANT, logoUrl: 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=100&auto=format&fit=crop', googleReviewUrl: 'https://search.google.com/local/writereview?placeid=ChIJ313_placeholder1', phone: '+15550212', address: '123 Pizza Way, Rome', isActive: true, status: BusinessStatus.ACTIVE, deletedAt: null, enableGoogleReviewRedirect: true, enableManagerCallback: true, createdByRepId: 'u-rep1', createdAt: new Date(), updatedAt: new Date(), description: 'Authentic Italian cuisine in the heart of Rome.', contactPerson: 'Giovanni Rossi', category: 'Restaurant', website: 'https://bellaitalia.com', googleMapsUrl: 'https://maps.google.com/?cid=bella-italia' },
+  { id: 'b2', name: 'Luxe Salon', slug: 'luxe-salon', businessCode: 'CR-000002', passwordHash: '', industry: Industry.SALON, logoUrl: 'https://images.unsplash.com/photo-1560066984-138dadb4c035?w=100&auto=format&fit=crop', googleReviewUrl: 'https://search.google.com/local/writereview?placeid=ChIJ313_placeholder2', phone: '+15550213', address: '456 Beauty Blvd, New York', isActive: true, status: BusinessStatus.ACTIVE, deletedAt: null, enableGoogleReviewRedirect: true, enableManagerCallback: true, createdByRepId: 'u-rep1', createdAt: new Date(), updatedAt: new Date(), description: 'Premium hair and beauty treatments.', contactPerson: 'Sarah Jenkins', category: 'Salon', website: 'https://luxesalon.com', googleMapsUrl: 'https://maps.google.com/?cid=luxe-salon' },
+  { id: 'b3', name: 'Cafe Paris', slug: 'cafe-paris', businessCode: 'CR-000003', passwordHash: '', industry: Industry.CAFE, logoUrl: 'https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?w=100&auto=format&fit=crop', googleReviewUrl: 'https://search.google.com/local/writereview?placeid=ChIJ313_placeholder3', phone: '+15550214', address: '789 Croissant St, Paris', isActive: true, status: BusinessStatus.ACTIVE, deletedAt: null, enableGoogleReviewRedirect: true, enableManagerCallback: true, createdByRepId: 'u-rep2', createdAt: new Date(), updatedAt: new Date(), description: 'Fresh croissants and specialty coffee.', contactPerson: 'Jean-Luc Picard', category: 'Cafe', website: 'https://cafeparis.com', googleMapsUrl: 'https://maps.google.com/?cid=cafe-paris' },
 ];
 
 let mockUsers: User[] = [
@@ -74,6 +80,8 @@ let mockReviews: Review[] = Array.from({ length: 27 }).map((_, index) => {
     googleCtaClicked: rating >= 4 && index % 2 === 0,
     businessId: `b${bIndex + 1}`,
     createdAt: new Date(Date.now() - index * 24 * 60 * 60 * 1000), // Day-by-day increments
+    sentiment: rating >= 4 ? 'Positive' : 'Negative',
+    themes: rating <= 2 ? 'Waiting Time' : rating === 3 ? 'Pricing' : 'Food Quality',
   };
 });
 
@@ -98,6 +106,107 @@ function seedMockCallbackRequests() {
   });
 }
 seedMockCallbackRequests();
+
+let mockRecoveryRequests: RecoveryRequest[] = [];
+let mockFunnelEvents: FunnelEvent[] = [];
+
+function seedMockRecoveryRequests() {
+  if (mockRecoveryRequests.length > 0) return;
+  mockReviews.forEach((r) => {
+    if (r.rating < 4) {
+      const isHigh = r.rating <= 2 || r.requestCallback;
+      mockRecoveryRequests.push({
+        id: `rr-${r.id}`,
+        businessId: r.businessId,
+        reviewId: r.id,
+        customerName: r.customerName || 'Anonymous Guest',
+        whatsappNumber: r.customerPhone || '+15550000',
+        rating: r.rating,
+        feedback: r.comment || '',
+        callbackRequested: r.requestCallback,
+        status: RecoveryStatus.NEW,
+        priority: isHigh ? RecoveryPriority.HIGH : RecoveryPriority.MEDIUM,
+        internalNotes: null,
+        resolvedById: null,
+        resolvedAt: null,
+        createdAt: r.createdAt,
+        updatedAt: r.createdAt
+      });
+    }
+  });
+}
+seedMockRecoveryRequests();
+
+function seedMockFunnelEvents() {
+  if (mockFunnelEvents.length > 0) return;
+  
+  ['b1', 'b2', 'b3'].forEach((bId) => {
+    for (let day = 0; day < 15; day++) {
+      const date = new Date(Date.now() - day * 24 * 3600 * 1000);
+      const ratio = 1 - day * 0.05;
+      
+      const scans = Math.max(2, Math.floor(15 * ratio));
+      const starts = Math.max(1, Math.floor(11 * ratio));
+      const submits = Math.max(1, Math.floor(7 * ratio));
+      const redirects = Math.max(0, Math.floor(4 * ratio));
+      
+      const sessionIdBase = `sess-${bId}-d${day}`;
+      
+      for (let i = 0; i < scans; i++) {
+        mockFunnelEvents.push({
+          id: `mfe-scan-${bId}-${day}-${i}`,
+          businessId: bId,
+          stage: FunnelStage.SCAN,
+          timestamp: date,
+          userAgent: 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_4 like Mac OS X) AppleWebKit/605.1.15',
+          deviceType: 'Mobile',
+          qrAssetCode: 'QR-CODE',
+          reviewSessionId: `${sessionIdBase}-${i}`
+        });
+      }
+      
+      for (let i = 0; i < starts; i++) {
+        mockFunnelEvents.push({
+          id: `mfe-start-${bId}-${day}-${i}`,
+          businessId: bId,
+          stage: FunnelStage.START,
+          timestamp: date,
+          userAgent: 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_4 like Mac OS X) AppleWebKit/605.1.15',
+          deviceType: 'Mobile',
+          qrAssetCode: 'QR-CODE',
+          reviewSessionId: `${sessionIdBase}-${i}`
+        });
+      }
+      
+      for (let i = 0; i < submits; i++) {
+        mockFunnelEvents.push({
+          id: `mfe-submit-${bId}-${day}-${i}`,
+          businessId: bId,
+          stage: FunnelStage.SUBMIT,
+          timestamp: date,
+          userAgent: 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_4 like Mac OS X) AppleWebKit/605.1.15',
+          deviceType: 'Mobile',
+          qrAssetCode: 'QR-CODE',
+          reviewSessionId: `${sessionIdBase}-${i}`
+        });
+      }
+      
+      for (let i = 0; i < redirects; i++) {
+        mockFunnelEvents.push({
+          id: `mfe-redirect-${bId}-${day}-${i}`,
+          businessId: bId,
+          stage: FunnelStage.REDIRECT,
+          timestamp: date,
+          userAgent: 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_4 like Mac OS X) AppleWebKit/605.1.15',
+          deviceType: 'Mobile',
+          qrAssetCode: 'QR-CODE',
+          reviewSessionId: `${sessionIdBase}-${i}`
+        });
+      }
+    }
+  });
+}
+seedMockFunnelEvents();
 
 let mockScans: QRScan[] = [];
 
@@ -169,14 +278,18 @@ let mockQrBatches: any[] = [
 function seedMockInventory() {
   if (mockQrInventory.length > 0) return;
 
-  // 1. Map existing businesses to inventory (ASSIGNED status)
-  const qrCodes = ['QR-BELLA', 'QR-LUXE', 'QR-PARIS'];
+  const qrCodes = [
+    'b1b1b1b1-1111-1111-1111-111111111111',
+    'b2b2b2b2-2222-2222-2222-222222222222',
+    'b3b3b3b3-3333-3333-3333-333333333333'
+  ];
+
   mockBusinesses.forEach((biz, idx) => {
     const invId = `inv-${biz.id}`;
     mockQrInventory.push({
       id: invId,
       qrCode: qrCodes[idx],
-      status: QRStatus.ASSIGNED,
+      status: QRStatus.ACTIVE,
       assignedBusinessId: biz.id,
       assignedBy: biz.createdByRepId,
       assignedAt: biz.createdAt,
@@ -193,21 +306,6 @@ function seedMockInventory() {
       createdAt: biz.createdAt
     });
   });
-
-  // 2. Generate 100 unassigned pre-printed QR Codes: QR-000001 to QR-000100
-  for (let i = 1; i <= 100; i++) {
-    const numStr = String(i).padStart(6, '0');
-    mockQrInventory.push({
-      id: `inv-unassigned-${i}`,
-      qrCode: `QR-${numStr}`,
-      status: QRStatus.UNASSIGNED,
-      assignedBusinessId: null,
-      assignedBy: null,
-      assignedAt: null,
-      replacementQrId: null,
-      createdAt: new Date()
-    });
-  }
 }
 seedMockInventory();
 
@@ -390,7 +488,9 @@ export async function getSuperAdminStats() {
 
       const [
         totalBusinesses,
+        activeBusinesses,
         totalReps,
+        activeReps,
         totalReviews,
         avgRatingResult,
         activeSubscriptions,
@@ -400,16 +500,20 @@ export async function getSuperAdminStats() {
         reviewsThisMonth,
         businessesThisMonth,
         callbacksThisMonth,
-        googleRedirectClicksThisMonth
+        googleRedirectClicksThisMonth,
+        recoveryRequestsCount,
+        resolvedRecoveryRequestsCount
       ] = await Promise.all([
         db.business.count({ where: { deletedAt: null } }),
+        db.business.count({ where: { deletedAt: null, status: BusinessStatus.ACTIVE } }),
         db.user.count({ where: { role: UserRole.REP } }),
+        db.user.count({ where: { role: UserRole.REP, isActive: true } }),
         db.review.count(),
         db.review.aggregate({ _avg: { rating: true } }),
         db.subscription.count({ where: { status: SubscriptionStatus.ACTIVE } }),
         db.subscription.count({ where: { status: SubscriptionStatus.EXPIRED } }),
-        db.qRInventory.count({ where: { status: QRStatus.ASSIGNED } }),
-        db.qRInventory.count({ where: { status: QRStatus.UNASSIGNED } }),
+        db.qRInventory.count({ where: { status: QRStatus.ACTIVE } }),
+        db.qRInventory.count({ where: { status: QRStatus.ARCHIVED } }),
         db.review.count({ where: { createdAt: { gte: startOfMonth } } }),
         db.business.count({ where: { createdAt: { gte: startOfMonth }, deletedAt: null } }),
         db.callbackRequest.count({ where: { createdAt: { gte: startOfMonth } } }),
@@ -418,16 +522,24 @@ export async function getSuperAdminStats() {
             createdAt: { gte: startOfMonth },
             googleCtaClicked: true
           }
-        })
+        }),
+        db.recoveryRequest.count(),
+        db.recoveryRequest.count({ where: { status: 'RESOLVED' } })
       ]);
 
       const averagePlatformRating = avgRatingResult._avg.rating
         ? parseFloat(avgRatingResult._avg.rating.toFixed(2))
         : 0;
 
+      const recoveryResolutionRate = recoveryRequestsCount > 0 
+        ? parseFloat(((resolvedRecoveryRequestsCount / recoveryRequestsCount) * 100).toFixed(1))
+        : 0.0;
+
       return {
         totalBusinesses,
+        activeBusinesses,
         totalReps,
+        activeReps,
         totalReviews,
         averagePlatformRating,
         activeSubscriptions,
@@ -437,7 +549,10 @@ export async function getSuperAdminStats() {
         reviewsThisMonth,
         businessesThisMonth,
         callbacksThisMonth,
-        googleRedirectClicksThisMonth
+        googleRedirectClicksThisMonth,
+        recoveryRequestsCount,
+        resolvedRecoveryRequestsCount,
+        recoveryResolutionRate
       };
     },
     async () => {
@@ -446,7 +561,9 @@ export async function getSuperAdminStats() {
       startOfMonth.setHours(0, 0, 0, 0);
 
       const totalBusinesses = mockBusinesses.filter(b => b.deletedAt === null).length;
+      const activeBusinesses = mockBusinesses.filter(b => b.deletedAt === null && b.status === BusinessStatus.ACTIVE).length;
       const totalReps = mockUsers.filter(u => u.role === UserRole.REP).length;
+      const activeReps = mockUsers.filter(u => u.role === UserRole.REP && u.isActive).length;
       const totalReviews = mockReviews.length;
 
       const totalRating = mockReviews.reduce((acc, r) => acc + r.rating, 0);
@@ -455,17 +572,25 @@ export async function getSuperAdminStats() {
       const activeSubscriptions = mockSubscriptions.filter(s => s.status === SubscriptionStatus.ACTIVE).length;
       const expiredSubscriptions = mockSubscriptions.filter(s => s.status === SubscriptionStatus.EXPIRED).length;
 
-      const assignedQRs = mockQrInventory.filter(q => q.status === QRStatus.ASSIGNED).length;
-      const unassignedQRs = mockQrInventory.filter(q => q.status === QRStatus.UNASSIGNED).length;
+      const assignedQRs = mockQrInventory.filter(q => q.status === QRStatus.ACTIVE).length;
+      const unassignedQRs = mockQrInventory.filter(q => q.status === QRStatus.ARCHIVED).length;
 
       const reviewsThisMonth = mockReviews.filter(r => r.createdAt >= startOfMonth).length;
       const businessesThisMonth = mockBusinesses.filter(b => b.createdAt >= startOfMonth && b.deletedAt === null).length;
       const callbacksThisMonth = mockCallbackRequests.filter(c => c.createdAt >= startOfMonth).length;
       const googleRedirectClicksThisMonth = mockReviews.filter(r => r.createdAt >= startOfMonth && r.googleCtaClicked).length;
 
+      const recoveryRequestsCount = mockRecoveryRequests.length;
+      const resolvedRecoveryRequestsCount = mockRecoveryRequests.filter(rr => rr.status === RecoveryStatus.RESOLVED).length;
+      const recoveryResolutionRate = recoveryRequestsCount > 0 
+        ? parseFloat(((resolvedRecoveryRequestsCount / recoveryRequestsCount) * 100).toFixed(1))
+        : 0.0;
+
       return {
         totalBusinesses,
+        activeBusinesses,
         totalReps,
+        activeReps,
         totalReviews,
         averagePlatformRating,
         activeSubscriptions,
@@ -475,7 +600,10 @@ export async function getSuperAdminStats() {
         reviewsThisMonth,
         businessesThisMonth,
         callbacksThisMonth,
-        googleRedirectClicksThisMonth
+        googleRedirectClicksThisMonth,
+        recoveryRequestsCount,
+        resolvedRecoveryRequestsCount,
+        recoveryResolutionRate
       };
     }
   );
@@ -485,7 +613,7 @@ export async function getSuperAdminStats() {
 export async function getAllBusinesses(includeDeleted = false) {
   return runQuery(
     async () => {
-      return await db.business.findMany({
+      const businesses = await db.business.findMany({
         where: includeDeleted ? {} : { isActive: true },
         orderBy: { createdAt: 'desc' },
         include: {
@@ -495,9 +623,27 @@ export async function getAllBusinesses(includeDeleted = false) {
           subscriptions: {
             orderBy: { createdAt: 'desc' },
             take: 1
+          },
+          qrInventory: {
+            orderBy: { createdAt: 'desc' }
           }
         }
       });
+
+      // Compute download stats for each business dynamically
+      const mapped = await Promise.all(businesses.map(async (biz) => {
+        const logs = await db.activityLog.findMany({
+          where: { action: 'QR_DOWNLOAD', entityType: 'BUSINESS', entityId: biz.id },
+          orderBy: { createdAt: 'desc' }
+        });
+        return {
+          ...biz,
+          totalDownloads: logs.length,
+          lastDownloadDate: logs.length > 0 ? logs[0].createdAt.toISOString() : null
+        };
+      }));
+
+      return mapped;
     },
     async () => {
       return mockBusinesses
@@ -505,10 +651,17 @@ export async function getAllBusinesses(includeDeleted = false) {
         .map(b => {
           const rep = mockUsers.find(u => u.id === b.createdByRepId) || null;
           const subscriptions = mockSubscriptions.filter(s => s.businessId === b.id);
+          const qrInventory = mockQrInventory.filter(q => q.assignedBusinessId === b.id);
+          const logs = mockLogs.filter(log => log.action === 'QR_DOWNLOAD' && log.entityType === 'BUSINESS' && log.entityId === b.id)
+            .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+          
           return {
             ...b,
             createdByRep: rep ? { id: rep.id, name: rep.name } : null,
-            subscriptions
+            subscriptions,
+            qrInventory,
+            totalDownloads: logs.length,
+            lastDownloadDate: logs.length > 0 ? logs[0].createdAt.toISOString() : null
           };
         }).sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
     }
@@ -537,6 +690,12 @@ export async function onboardBusiness(data: {
   googleReviewUrl?: string | null;
   plan?: SubscriptionPlan;
   createdByRepId: string;
+  description?: string | null;
+  contactPerson?: string | null;
+  category?: string | null;
+  website?: string | null;
+  googleMapsUrl?: string | null;
+  logoUrl?: string | null;
 }) {
   return runQuery(
     async () => {
@@ -568,7 +727,13 @@ export async function onboardBusiness(data: {
             phone: data.phone || null,
             address: data.address || null,
             googleReviewUrl: data.googleReviewUrl || null,
-            status: BusinessStatus.ACTIVE,
+            description: data.description || null,
+            contactPerson: data.contactPerson || null,
+            category: data.category || null,
+            website: data.website || null,
+            googleMapsUrl: data.googleMapsUrl || null,
+            logoUrl: data.logoUrl || null,
+            status: BusinessStatus.PENDING,
             createdByRepId: data.createdByRepId
           }
         });
@@ -610,12 +775,17 @@ export async function onboardBusiness(data: {
         businessCode,
         passwordHash: data.passwordHash,
         industry: data.industry,
-        logoUrl: null,
+        logoUrl: data.logoUrl || null,
         googleReviewUrl: data.googleReviewUrl || null,
         phone: data.phone || null,
         address: data.address || null,
+        description: data.description || null,
+        contactPerson: data.contactPerson || null,
+        category: data.category || null,
+        website: data.website || null,
+        googleMapsUrl: data.googleMapsUrl || null,
         isActive: true,
-        status: BusinessStatus.ACTIVE,
+        status: BusinessStatus.PENDING,
         deletedAt: null,
         enableGoogleReviewRedirect: true,
         enableManagerCallback: true,
@@ -652,6 +822,12 @@ export async function updateBusinessDetails(
     enableGoogleReviewRedirect?: boolean;
     enableManagerCallback?: boolean;
     logoUrl?: string | null;
+    description?: string | null;
+    contactPerson?: string | null;
+    category?: string | null;
+    website?: string | null;
+    googleMapsUrl?: string | null;
+    status?: BusinessStatus;
   }
 ) {
   return runQuery(
@@ -671,6 +847,12 @@ export async function updateBusinessDetails(
         if (data.enableGoogleReviewRedirect !== undefined) biz.enableGoogleReviewRedirect = data.enableGoogleReviewRedirect;
         if (data.enableManagerCallback !== undefined) biz.enableManagerCallback = data.enableManagerCallback;
         if (data.logoUrl !== undefined) biz.logoUrl = data.logoUrl;
+        if (data.description !== undefined) biz.description = data.description;
+        if (data.contactPerson !== undefined) biz.contactPerson = data.contactPerson;
+        if (data.category !== undefined) biz.category = data.category;
+        if (data.website !== undefined) biz.website = data.website;
+        if (data.googleMapsUrl !== undefined) biz.googleMapsUrl = data.googleMapsUrl;
+        if (data.status !== undefined) biz.status = data.status;
         biz.updatedAt = new Date();
       }
       return biz || null;
@@ -687,8 +869,8 @@ export async function updateBusinessStatus(id: string, status: BusinessStatus, a
       });
 
       let action = 'Business Activated';
-      if (status === BusinessStatus.SUSPENDED) action = 'Business Suspended';
-      if (status === BusinessStatus.EXPIRED) action = 'Business Subscription Expired';
+      if (status === BusinessStatus.INACTIVE) action = 'Business Deactivated';
+      if (status === BusinessStatus.PENDING) action = 'Business Onboarding Pending';
 
       await db.activityLog.create({
         data: {
@@ -709,8 +891,8 @@ export async function updateBusinessStatus(id: string, status: BusinessStatus, a
       }
 
       let action = 'Business Activated';
-      if (status === BusinessStatus.SUSPENDED) action = 'Business Suspended';
-      if (status === BusinessStatus.EXPIRED) action = 'Business Subscription Expired';
+      if (status === BusinessStatus.INACTIVE) action = 'Business Deactivated';
+      if (status === BusinessStatus.PENDING) action = 'Business Onboarding Pending';
 
       mockLogs.push({
         id: `log-${Math.random().toString(36).substring(2, 9)}`,
@@ -916,108 +1098,7 @@ function getPeriodStartDate(period: string): Date {
   return new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000); // default 30d
 }
 
-export async function getBusinessAnalytics(businessId: string, period = '30d') {
-  return runQuery(
-    async () => {
-      const start = getPeriodStartDate(period);
-      const end = new Date();
 
-      const [scans, reviews, callbacks] = await Promise.all([
-        db.qRScan.findMany({
-          where: { businessId, scannedAt: { gte: start, lte: end } }
-        }),
-        db.review.findMany({
-          where: { businessId, createdAt: { gte: start, lte: end } }
-        }),
-        db.callbackRequest.findMany({
-          where: { review: { businessId }, createdAt: { gte: start, lte: end } }
-        })
-      ]);
-
-      return computeAnalytics(scans, reviews, callbacks, start, end);
-    },
-    async () => {
-      const start = getPeriodStartDate(period);
-      const end = new Date();
-
-      const scans = mockScans.filter(s => s.businessId === businessId && s.scannedAt >= start && s.scannedAt <= end);
-      const reviews = mockReviews.filter(r => r.businessId === businessId && r.createdAt >= start && r.createdAt <= end);
-      const callbacks = mockCallbackRequests.filter(c => {
-        const review = mockReviews.find(r => r.id === c.reviewId);
-        return review?.businessId === businessId && c.createdAt >= start && c.createdAt <= end;
-      });
-
-      return computeAnalytics(scans, reviews, callbacks, start, end);
-    }
-  );
-}
-
-function computeAnalytics(scans: QRScan[], reviews: Review[], callbacks: CallbackRequest[], start: Date, end: Date) {
-  const totalReviews = reviews.length;
-
-  // Average Rating
-  const averageRating = totalReviews > 0
-    ? parseFloat((reviews.reduce((acc, r) => acc + r.rating, 0) / totalReviews).toFixed(1))
-    : 0.0;
-
-  // Positive/Negative counts
-  const positiveReviews = reviews.filter(r => r.rating >= 4).length;
-  const negativeReviews = reviews.filter(r => r.rating <= 3).length;
-
-  // Google redirect analytics
-  const googleRedirectClicks = reviews.filter(r => r.googleCtaClicked).length;
-  const googleConversionRate = positiveReviews > 0
-    ? parseFloat(((googleRedirectClicks / positiveReviews) * 100).toFixed(1))
-    : 0.0;
-
-  // Callback analytics
-  const callbackRequests = callbacks.length;
-  const resolvedRequests = callbacks.filter(c => c.status === CallbackStatus.RESOLVED).length;
-
-  // Daily Trend calculation for the period range
-  const dailyTrendMap: Record<string, number> = {};
-  const reviewTrendMap: Record<string, number> = {};
-
-  const diffTime = Math.abs(end.getTime() - start.getTime());
-  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) || 1;
-
-  for (let i = diffDays - 1; i >= 0; i--) {
-    const d = new Date(end.getTime() - i * 24 * 60 * 60 * 1000);
-    const dateStr = d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
-    dailyTrendMap[dateStr] = 0;
-    reviewTrendMap[dateStr] = 0;
-  }
-
-  scans.forEach(s => {
-    const dateStr = s.scannedAt.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
-    if (dailyTrendMap[dateStr] !== undefined) {
-      dailyTrendMap[dateStr]++;
-    }
-  });
-
-  reviews.forEach(r => {
-    const dateStr = r.createdAt.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
-    if (reviewTrendMap[dateStr] !== undefined) {
-      reviewTrendMap[dateStr]++;
-    }
-  });
-
-  const dailyTrend = Object.entries(dailyTrendMap).map(([date, count]) => ({ date, count }));
-  const reviewTrend = Object.entries(reviewTrendMap).map(([date, count]) => ({ date, count }));
-
-  return {
-    totalReviews,
-    averageRating,
-    positiveReviews,
-    negativeReviews,
-    googleRedirectClicks,
-    googleConversionRate,
-    callbackRequests,
-    resolvedRequests,
-    dailyTrend,
-    reviewTrend
-  };
-}
 
 export async function getSuperAdminAnalytics() {
   return runQuery(
@@ -1146,10 +1227,41 @@ export async function createReview(data: {
   customerPhone?: string | null;
   requestCallback?: boolean;
   businessId: string;
+  reviewSessionId?: string | null;
 }) {
+  const isPositive = data.rating >= 4;
+  const sentiment = isPositive ? 'Positive' : 'Negative';
+  
+  // Keyword mapping logic
+  let matchedThemes: string[] = [];
+  if (data.comment) {
+    const commentLower = data.comment.toLowerCase();
+    const themeKeywords = {
+      'Food Quality': ['food', 'taste', 'delicious', 'yummy', 'pizza', 'burger', 'dish', 'meal', 'cook', 'flavor', 'menu', 'pasta', 'tiramisu', 'croissant'],
+      'Ambience': ['ambience', 'decor', 'music', 'lighting', 'clean', 'beautiful', 'atmosphere', 'vibe', 'cozy', 'seating', 'wine'],
+      'Service': ['service', 'staff', 'waiter', 'waitress', 'friendly', 'polite', 'hospitable', 'quick', 'fast', 'prompt', 'attentive'],
+      'Waiting Time': ['wait', 'delay', 'slow', 'time', 'late', 'queue'],
+      'Staff Behaviour': ['rude', 'behaviour', 'behavior', 'attitude', 'ignore', 'unprofessional'],
+      'Pricing': ['price', 'expensive', 'cost', 'bill', 'overpriced', 'charge', 'value'],
+      'Cleanliness': ['dirty', 'cleanliness', 'hair', 'dust', 'mess', 'unhygienic', 'bathroom', 'table', 'plate']
+    };
+    
+    Object.entries(themeKeywords).forEach(([theme, keywords]) => {
+      if (keywords.some(kw => commentLower.includes(kw))) {
+        matchedThemes.push(theme);
+      }
+    });
+  }
+  
+  if (matchedThemes.length === 0) {
+    matchedThemes.push(isPositive ? 'Service' : 'Waiting Time');
+  }
+  const themes = matchedThemes.join(', ');
+
   return runQuery(
     async () => {
-      return await db.review.create({
+      // 1. Create Review
+      const review = await db.review.create({
         data: {
           rating: data.rating,
           comment: data.comment || null,
@@ -1160,13 +1272,47 @@ export async function createReview(data: {
           redirectedToGoogle: false,
           googleCtaViewed: false,
           googleCtaClicked: false,
+          sentiment,
+          themes,
           businessId: data.businessId
         }
       });
+
+      // 2. Create RecoveryRequest if rating < 4
+      if (data.rating < 4) {
+        const priority = (data.rating <= 2 || data.requestCallback) ? 'HIGH' : 'MEDIUM';
+        await db.recoveryRequest.create({
+          data: {
+            businessId: data.businessId,
+            reviewId: review.id,
+            customerName: data.customerName || 'Anonymous Guest',
+            whatsappNumber: data.customerPhone || '+15550000',
+            rating: data.rating,
+            feedback: data.comment || '',
+            callbackRequested: data.requestCallback || false,
+            status: 'NEW',
+            priority: priority as any
+          }
+        });
+      }
+
+      // 3. Log SUBMIT stage to funnel if reviewSessionId is provided
+      if (data.reviewSessionId) {
+        await db.funnelEvent.create({
+          data: {
+            businessId: data.businessId,
+            stage: 'SUBMIT',
+            reviewSessionId: data.reviewSessionId
+          }
+        }).catch(err => console.error('Failed to log SUBMIT event in DB:', err));
+      }
+
+      return review;
     },
     async () => {
-      const newReview: Review = {
-        id: `rev-${Math.random().toString(36).substring(2, 9)}`,
+      const reviewId = `rev-${Math.random().toString(36).substring(2, 9)}`;
+      const newReview = {
+        id: reviewId,
         rating: data.rating,
         comment: data.comment || null,
         customerName: data.customerName || null,
@@ -1176,10 +1322,47 @@ export async function createReview(data: {
         redirectedToGoogle: false,
         googleCtaViewed: false,
         googleCtaClicked: false,
+        sentiment,
+        themes,
         businessId: data.businessId,
         createdAt: new Date()
       };
       mockReviews.push(newReview);
+
+      if (data.rating < 4) {
+        const priority = (data.rating <= 2 || data.requestCallback) ? 'HIGH' : 'MEDIUM';
+        mockRecoveryRequests.push({
+          id: `rr-${reviewId}`,
+          businessId: data.businessId,
+          reviewId,
+          customerName: data.customerName || 'Anonymous Guest',
+          whatsappNumber: data.customerPhone || '+15550000',
+          rating: data.rating,
+          feedback: data.comment || '',
+          callbackRequested: data.requestCallback || false,
+          status: RecoveryStatus.NEW,
+          priority: priority as any,
+          internalNotes: null,
+          resolvedById: null,
+          resolvedAt: null,
+          createdAt: new Date(),
+          updatedAt: new Date()
+        });
+      }
+
+      if (data.reviewSessionId) {
+        mockFunnelEvents.push({
+          id: `mfe-submit-${data.businessId}-${Date.now()}`,
+          businessId: data.businessId,
+          stage: FunnelStage.SUBMIT,
+          timestamp: new Date(),
+          userAgent: null,
+          deviceType: null,
+          qrAssetCode: null,
+          reviewSessionId: data.reviewSessionId
+        });
+      }
+
       return newReview;
     }
   );
@@ -1462,7 +1645,7 @@ export async function generateQrInventory(quantity: number, adminId: string) {
         const numStr = String(startNum + i).padStart(6, '0');
         newRecords.push({
           qrCode: `QR-${numStr}`,
-          status: QRStatus.UNASSIGNED
+          status: QRStatus.ACTIVE
         });
       }
 
@@ -1502,7 +1685,7 @@ export async function generateQrInventory(quantity: number, adminId: string) {
         mockQrInventory.push({
           id: `inv-gen-${startNum + i}`,
           qrCode: `QR-${numStr}`,
-          status: QRStatus.UNASSIGNED,
+          status: QRStatus.ACTIVE,
           assignedBusinessId: null,
           assignedBy: null,
           assignedAt: null,
@@ -1529,14 +1712,14 @@ export async function assignQrToBusiness(data: {
         if (!qrRecord) {
           throw new Error('QR Code does not exist in inventory.');
         }
-        if (qrRecord.status !== QRStatus.UNASSIGNED) {
-          throw new Error(`QR Code is already in status: ${qrRecord.status}`);
+        if (qrRecord.assignedBusinessId) {
+          throw new Error(`QR Code is already assigned to a business.`);
         }
 
         const updatedQr = await tx.qRInventory.update({
           where: { qrCode: data.qrCode },
           data: {
-            status: QRStatus.ASSIGNED,
+            status: QRStatus.ACTIVE,
             assignedBusinessId: data.businessId,
             assignedBy: data.repId,
             assignedAt: new Date()
@@ -1560,11 +1743,11 @@ export async function assignQrToBusiness(data: {
       if (!qrRecord) {
         throw new Error('QR Code does not exist in inventory.');
       }
-      if (qrRecord.status !== QRStatus.UNASSIGNED) {
-        throw new Error(`QR Code is already in status: ${qrRecord.status}`);
+      if (qrRecord.assignedBusinessId) {
+        throw new Error(`QR Code is already assigned to a business.`);
       }
 
-      qrRecord.status = QRStatus.ASSIGNED;
+      qrRecord.status = QRStatus.ACTIVE;
       qrRecord.assignedBusinessId = data.businessId;
       qrRecord.assignedBy = data.repId;
       qrRecord.assignedAt = new Date();
@@ -1595,81 +1778,64 @@ export async function replaceDamagedQr(data: {
         const oldQr = await tx.qRInventory.findUnique({
           where: { qrCode: data.oldQrCode }
         });
-        if (!oldQr || oldQr.status !== QRStatus.ASSIGNED) {
-          throw new Error('Old QR code is not in ASSIGNED status.');
-        }
-
-        const newQr = await tx.qRInventory.findUnique({
-          where: { qrCode: data.newQrCode }
-        });
-        if (!newQr) {
-          throw new Error('New QR code does not exist in inventory.');
-        }
-        if (newQr.status !== QRStatus.UNASSIGNED) {
-          throw new Error(`New QR code is in status: ${newQr.status}, expected UNASSIGNED.`);
+        if (!oldQr || oldQr.status !== QRStatus.ACTIVE) {
+          throw new Error('Old QR code is not in ACTIVE status.');
         }
 
         const businessId = oldQr.assignedBusinessId!;
 
-        const updatedNewQr = await tx.qRInventory.update({
-          where: { qrCode: data.newQrCode },
+        // Set old QR to ARCHIVED
+        const updatedOldQr = await tx.qRInventory.update({
+          where: { qrCode: data.oldQrCode },
+          data: { status: QRStatus.ARCHIVED }
+        });
+
+        // Create new QR as ACTIVE
+        const newQr = await tx.qRInventory.create({
           data: {
-            status: QRStatus.ASSIGNED,
+            qrCode: data.newQrCode || crypto.randomUUID(),
+            status: QRStatus.ACTIVE,
             assignedBusinessId: businessId,
             assignedBy: data.repId,
             assignedAt: new Date()
           }
         });
 
-        const updatedOldQr = await tx.qRInventory.update({
-          where: { qrCode: data.oldQrCode },
-          data: {
-            status: QRStatus.REPLACED,
-            assignedBusinessId: null,
-            replacementQrId: updatedNewQr.id
-          }
-        });
-
         await tx.assignmentLog.create({
           data: {
-            qrInventoryId: updatedNewQr.id,
+            qrInventoryId: newQr.id,
             businessId,
             assignedBy: data.repId,
             action: 'REPLACED'
           }
         });
 
-        return { success: true, oldQr: updatedOldQr, newQr: updatedNewQr };
+        return { success: true, oldQr: updatedOldQr, newQr };
       });
     },
     async () => {
       const oldQr = mockQrInventory.find(q => q.qrCode === data.oldQrCode);
-      if (!oldQr || oldQr.status !== QRStatus.ASSIGNED) {
-        throw new Error('Old QR code is not in ASSIGNED status.');
-      }
-
-      const newQr = mockQrInventory.find(q => q.qrCode === data.newQrCode);
-      if (!newQr) {
-        throw new Error('New QR code does not exist in inventory.');
-      }
-      if (newQr.status !== QRStatus.UNASSIGNED) {
-        throw new Error(`New QR code is in status: ${newQr.status}, expected UNASSIGNED.`);
+      if (!oldQr || oldQr.status !== QRStatus.ACTIVE) {
+        throw new Error('Old QR code is not in ACTIVE status.');
       }
 
       const businessId = oldQr.assignedBusinessId;
+      oldQr.status = QRStatus.ARCHIVED;
 
-      newQr.status = QRStatus.ASSIGNED;
-      newQr.assignedBusinessId = businessId;
-      newQr.assignedBy = data.repId;
-      newQr.assignedAt = new Date();
+      const newQr = {
+        id: `inv-${Math.random().toString(36).substring(2, 9)}`,
+        qrCode: data.newQrCode || crypto.randomUUID(),
+        status: QRStatus.ACTIVE,
+        assignedBusinessId: businessId,
+        assignedBy: data.repId,
+        assignedAt: new Date(),
+        replacementQrId: null,
+        createdAt: new Date()
+      };
+      mockQrInventory.push(newQr);
 
-      oldQr.status = QRStatus.REPLACED;
-      oldQr.assignedBusinessId = null;
-      oldQr.replacementQrId = newQr.id;
-
-      const logId = `log-${Math.random().toString(36).substring(2, 9)}`;
       mockAssignmentLogs.push({
-        id: logId,
+        id: `log-${Math.random().toString(36).substring(2, 9)}`,
         qrInventoryId: newQr.id,
         businessId,
         assignedBy: data.repId,
@@ -1683,54 +1849,21 @@ export async function replaceDamagedQr(data: {
 }
 
 export async function toggleQrInactive(qrCode: string, inactive: boolean, repId: string) {
+  const targetStatus = inactive ? QRStatus.ARCHIVED : QRStatus.ACTIVE;
   return runQuery(
     async () => {
-      const qrRecord = await db.qRInventory.findUnique({
-        where: { qrCode }
-      });
-      if (!qrRecord || (qrRecord.status !== QRStatus.ASSIGNED && qrRecord.status !== QRStatus.INACTIVE)) {
-        throw new Error('QR code is not in an active or inactive state.');
-      }
-
-      const targetStatus = inactive ? QRStatus.INACTIVE : QRStatus.ASSIGNED;
       const updated = await db.qRInventory.update({
         where: { qrCode },
         data: { status: targetStatus }
       });
-
-      const actionStr = inactive ? 'UNASSIGNED' : 'ASSIGNED';
-      await db.assignmentLog.create({
-        data: {
-          qrInventoryId: qrRecord.id,
-          businessId: qrRecord.assignedBusinessId!,
-          assignedBy: repId,
-          action: actionStr
-        }
-      });
-
       return updated;
     },
     async () => {
       const qrRecord = mockQrInventory.find(q => q.qrCode === qrCode);
-      if (!qrRecord || (qrRecord.status !== QRStatus.ASSIGNED && qrRecord.status !== QRStatus.INACTIVE)) {
-        throw new Error('QR code is not in an active or inactive state.');
+      if (qrRecord) {
+        qrRecord.status = targetStatus;
       }
-
-      const targetStatus = inactive ? QRStatus.INACTIVE : QRStatus.ASSIGNED;
-      qrRecord.status = targetStatus;
-
-      const actionStr = inactive ? 'UNASSIGNED' : 'ASSIGNED';
-      const logId = `log-${Math.random().toString(36).substring(2, 9)}`;
-      mockAssignmentLogs.push({
-        id: logId,
-        qrInventoryId: qrRecord.id,
-        businessId: qrRecord.assignedBusinessId,
-        assignedBy: repId,
-        action: actionStr,
-        createdAt: new Date()
-      });
-
-      return qrRecord;
+      return qrRecord || null;
     }
   );
 }
@@ -1785,27 +1918,60 @@ export async function getRepAssignmentsHistory(repId: string, search?: string | 
   );
 }
 
-// REP stats card counting how many businesses onboarded
 export async function getRepStats(repId: string) {
   return runQuery(
     async () => {
-      const [onboardedCount, assignmentsCount] = await Promise.all([
+      const [onboardedCount, activeBusinessesCount, recoveryRequestsCount] = await Promise.all([
         db.business.count({
           where: { createdByRepId: repId }
         }),
-        db.assignmentLog.count({
-          where: { assignedBy: repId }
+        db.business.count({
+          where: { createdByRepId: repId, status: BusinessStatus.ACTIVE }
+        }),
+        db.recoveryRequest.count({
+          where: { business: { createdByRepId: repId } }
         })
       ]);
-      return { onboardedCount, assignmentsCount };
+
+      const repBusinesses = await db.business.findMany({
+        where: { createdByRepId: repId },
+        select: { id: true }
+      });
+      const bizIds = repBusinesses.map(b => b.id);
+
+      const qrDownloadsCount = await db.activityLog.count({
+        where: {
+          action: 'QR_DOWNLOAD',
+          entityType: 'BUSINESS',
+          entityId: { in: bizIds }
+        }
+      });
+
+      return { onboardedCount, assignmentsCount: recoveryRequestsCount, activeBusinessesCount, qrDownloadsCount };
     },
     async () => {
-      const onboardedCount = mockBusinesses.filter(b => b.createdByRepId === repId).length;
-      const assignmentsCount = mockAssignmentLogs.filter(log => log.assignedBy === repId).length;
-      return { onboardedCount, assignmentsCount };
+      const repBusinesses = mockBusinesses.filter(b => b.createdByRepId === repId);
+      const bizIds = repBusinesses.map(b => b.id);
+      const onboardedCount = repBusinesses.length;
+      const activeBusinessesCount = repBusinesses.filter(b => b.status === BusinessStatus.ACTIVE).length;
+      
+      const recoveryRequestsCount = mockRecoveryRequests.filter(rr => {
+        const b = mockBusinesses.find(biz => biz.id === rr.businessId);
+        return b?.createdByRepId === repId;
+      }).length;
+
+      const qrDownloadsCount = mockLogs.filter(l =>
+        l.action === 'QR_DOWNLOAD' &&
+        l.entityType === 'BUSINESS' &&
+        l.entityId &&
+        bizIds.includes(l.entityId)
+      ).length;
+
+      return { onboardedCount, assignmentsCount: recoveryRequestsCount, activeBusinessesCount, qrDownloadsCount };
     }
   );
 }
+
 
 export async function getQrInventory(filters?: { status?: QRStatus | null; search?: string | null; businessId?: string | null; batchId?: string | null }) {
   return runQuery(
@@ -1820,18 +1986,6 @@ export async function getQrInventory(filters?: { status?: QRStatus | null; searc
         whereClause.assignedBusinessId = filters.businessId;
       }
 
-      if (filters?.batchId && filters.batchId !== 'ALL') {
-        const batch = await db.qRBatch.findUnique({
-          where: { id: filters.batchId }
-        });
-        if (batch) {
-          whereClause.qrCode = {
-            gte: batch.startSerial,
-            lte: batch.endSerial
-          };
-        }
-      }
-
       if (filters?.search) {
         const query = filters.search.trim();
         whereClause.OR = [
@@ -1842,10 +1996,18 @@ export async function getQrInventory(filters?: { status?: QRStatus | null; searc
 
       return await db.qRInventory.findMany({
         where: whereClause,
-        orderBy: { qrCode: 'asc' },
+        orderBy: { createdAt: 'desc' },
         take: 200,
         include: {
-          business: { select: { name: true } }
+          business: {
+            select: {
+              name: true,
+              slug: true,
+              logoUrl: true,
+              createdByRep: { select: { name: true } }
+            }
+          },
+          rep: { select: { name: true } }
         }
       });
     },
@@ -1860,18 +2022,19 @@ export async function getQrInventory(filters?: { status?: QRStatus | null; searc
         list = list.filter(q => q.assignedBusinessId === filters.businessId);
       }
 
-      if (filters?.batchId && filters.batchId !== 'ALL') {
-        const batch = mockQrBatches.find(b => b.id === filters.batchId);
-        if (batch) {
-          list = list.filter(q => q.qrCode >= batch.startSerial && q.qrCode <= batch.endSerial);
-        }
-      }
-
       const mapped = list.map(q => {
         const business = mockBusinesses.find(b => b.id === q.assignedBusinessId);
+        const rep = mockUsers.find(u => u.id === q.assignedBy);
+        const bizCreatorRep = business ? mockUsers.find(u => u.id === business.createdByRepId) : null;
         return {
           ...q,
-          business: business ? { name: business.name } : null
+          business: business ? {
+            name: business.name,
+            slug: business.slug,
+            logoUrl: business.logoUrl,
+            createdByRep: bizCreatorRep ? { name: bizCreatorRep.name } : null
+          } : null,
+          rep: rep ? { name: rep.name } : null
         };
       });
 
@@ -1880,10 +2043,10 @@ export async function getQrInventory(filters?: { status?: QRStatus | null; searc
         return mapped.filter(q =>
           q.qrCode.toLowerCase().includes(query) ||
           (q.business?.name || '').toLowerCase().includes(query)
-        ).sort((a, b) => a.qrCode.localeCompare(b.qrCode));
+        ).sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
       }
 
-      return mapped.sort((a, b) => a.qrCode.localeCompare(b.qrCode));
+      return mapped.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
     }
   );
 }
@@ -1891,26 +2054,20 @@ export async function getQrInventory(filters?: { status?: QRStatus | null; searc
 export async function getQrInventoryStats() {
   return runQuery(
     async () => {
-      const [total, assigned, unassigned, damaged, replaced, inactive] = await Promise.all([
+      const [total, active, archived] = await Promise.all([
         db.qRInventory.count(),
-        db.qRInventory.count({ where: { status: QRStatus.ASSIGNED } }),
-        db.qRInventory.count({ where: { status: QRStatus.UNASSIGNED } }),
-        db.qRInventory.count({ where: { status: QRStatus.DAMAGED } }),
-        db.qRInventory.count({ where: { status: QRStatus.REPLACED } }),
-        db.qRInventory.count({ where: { status: QRStatus.INACTIVE } })
+        db.qRInventory.count({ where: { status: QRStatus.ACTIVE } }),
+        db.qRInventory.count({ where: { status: QRStatus.ARCHIVED } })
       ]);
 
-      return { total, assigned, unassigned, damaged, replaced, inactive };
+      return { total, active, archived, assigned: active, unassigned: 0, damaged: 0, replaced: 0, inactive: archived };
     },
     async () => {
       const total = mockQrInventory.length;
-      const assigned = mockQrInventory.filter(q => q.status === QRStatus.ASSIGNED).length;
-      const unassigned = mockQrInventory.filter(q => q.status === QRStatus.UNASSIGNED).length;
-      const damaged = mockQrInventory.filter(q => q.status === QRStatus.DAMAGED).length;
-      const replaced = mockQrInventory.filter(q => q.status === QRStatus.REPLACED).length;
-      const inactive = mockQrInventory.filter(q => q.status === QRStatus.INACTIVE).length;
+      const active = mockQrInventory.filter(q => q.status === QRStatus.ACTIVE).length;
+      const archived = mockQrInventory.filter(q => q.status === QRStatus.ARCHIVED).length;
 
-      return { total, assigned, unassigned, damaged, replaced, inactive };
+      return { total, active, archived, assigned: active, unassigned: 0, damaged: 0, replaced: 0, inactive: archived };
     }
   );
 }
@@ -2019,7 +2176,7 @@ export async function generateQrBatchCustom(batchName: string, startSerial: stri
         await tx.qRInventory.createMany({
           data: codesToCheck.map(code => ({
             qrCode: code,
-            status: QRStatus.UNASSIGNED
+            status: QRStatus.ACTIVE
           }))
         });
 
@@ -2054,7 +2211,7 @@ export async function generateQrBatchCustom(batchName: string, startSerial: stri
         mockQrInventory.push({
           id: `inv-gen-${code}`,
           qrCode: code,
-          status: QRStatus.UNASSIGNED,
+          status: QRStatus.ACTIVE,
           assignedBusinessId: null,
           assignedBy: null,
           assignedAt: null,
@@ -2488,7 +2645,7 @@ export async function updateSubscription(
 
       let bizStatus: BusinessStatus = BusinessStatus.ACTIVE;
       if (targetStatus === SubscriptionStatus.EXPIRED) {
-        bizStatus = BusinessStatus.EXPIRED;
+        bizStatus = BusinessStatus.INACTIVE;
       }
 
       await db.business.update({
@@ -2551,7 +2708,7 @@ export async function updateSubscription(
       if (biz) {
         let bizStatus: BusinessStatus = BusinessStatus.ACTIVE;
         if (targetStatus === SubscriptionStatus.EXPIRED) {
-          bizStatus = BusinessStatus.EXPIRED;
+          bizStatus = BusinessStatus.INACTIVE;
         }
         biz.status = bizStatus;
         biz.isActive = bizStatus === BusinessStatus.ACTIVE;
@@ -2571,3 +2728,614 @@ export async function updateSubscription(
     }
   );
 }
+
+// ==========================================
+// BUSINESS ONBOARDING / DYNAMIC QR FUNCTIONS
+// ==========================================
+
+export async function generateQrForBusiness(businessId: string, userId: string) {
+  const qrCode = crypto.randomUUID();
+
+  return runQuery(
+    async () => {
+      // Find current active QRs and archive them
+      await db.qRInventory.updateMany({
+        where: { assignedBusinessId: businessId, status: QRStatus.ACTIVE },
+        data: { status: QRStatus.ARCHIVED }
+      });
+
+      // Create new QR record
+      const qr = await db.qRInventory.create({
+        data: {
+          qrCode,
+          status: QRStatus.ACTIVE,
+          assignedBusinessId: businessId,
+          assignedBy: userId,
+          assignedAt: new Date()
+        }
+      });
+
+      // Log the assignment
+      await db.assignmentLog.create({
+        data: {
+          qrInventoryId: qr.id,
+          businessId,
+          assignedBy: userId,
+          action: 'ASSIGNED'
+        }
+      });
+
+      return qr;
+    },
+    async () => {
+      // Mock update: set existing active QRs for this business to ARCHIVED
+      mockQrInventory.forEach(q => {
+        if (q.assignedBusinessId === businessId && q.status === QRStatus.ACTIVE) {
+          q.status = QRStatus.ARCHIVED;
+        }
+      });
+
+      // Create new mock QR Inventory entry
+      const invId = `inv-${Math.random().toString(36).substring(2, 9)}`;
+      const qr = {
+        id: invId,
+        qrCode,
+        status: QRStatus.ACTIVE,
+        assignedBusinessId: businessId,
+        assignedBy: userId,
+        assignedAt: new Date(),
+        replacementQrId: null,
+        createdAt: new Date()
+      };
+      mockQrInventory.push(qr);
+
+      // Create mock AssignmentLog entry
+      mockAssignmentLogs.push({
+        id: `log-${Math.random().toString(36).substring(2, 9)}`,
+        qrInventoryId: invId,
+        businessId,
+        assignedBy: userId,
+        action: 'ASSIGNED',
+        createdAt: new Date()
+      });
+
+      return qr;
+    }
+  );
+}
+
+export async function trackQrDownload(businessId: string, userId: string) {
+  return runQuery(
+    async () => {
+      return await db.activityLog.create({
+        data: {
+          userId,
+          action: 'QR_DOWNLOAD',
+          entityType: 'BUSINESS',
+          entityId: businessId
+        }
+      });
+    },
+    async () => {
+      const log = {
+        id: `log-${Math.random().toString(36).substring(2, 9)}`,
+        userId,
+        action: 'QR_DOWNLOAD',
+        entityType: 'BUSINESS',
+        entityId: businessId,
+        metadata: null,
+        createdAt: new Date()
+      };
+      mockLogs.push(log);
+      return log;
+    }
+  );
+}
+
+export async function getQrDownloadStats(businessId: string) {
+  return runQuery(
+    async () => {
+      const logs = await db.activityLog.findMany({
+        where: { action: 'QR_DOWNLOAD', entityType: 'BUSINESS', entityId: businessId },
+        orderBy: { createdAt: 'desc' }
+      });
+      const totalDownloads = logs.length;
+      const lastDownloadDate = logs.length > 0 ? logs[0].createdAt : null;
+      return { totalDownloads, lastDownloadDate };
+    },
+    async () => {
+      const logs = mockLogs.filter(log => log.action === 'QR_DOWNLOAD' && log.entityType === 'BUSINESS' && log.entityId === businessId)
+        .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+      const totalDownloads = logs.length;
+      const lastDownloadDate = logs.length > 0 ? logs[0].createdAt : null;
+      return { totalDownloads, lastDownloadDate };
+    }
+  );
+}
+
+export async function resolveBusinessByIdentifier(identifier: string) {
+  return runQuery(
+    async () => {
+      // 1. Try to find by slug first
+      let business = await db.business.findUnique({
+        where: { slug: identifier },
+        include: { qrInventory: { where: { status: QRStatus.ACTIVE }, take: 1 } }
+      });
+
+      if (business) {
+        const activeQr = business.qrInventory.length > 0 ? business.qrInventory[0] : null;
+        return { business, qrCode: activeQr?.qrCode || 'NO_QR', qrStatus: activeQr?.status || 'Not Generated' };
+      }
+
+      // 2. Try to find by QR code UUID
+      const qrRecord = await db.qRInventory.findUnique({
+        where: { qrCode: identifier },
+        include: { business: true }
+      });
+
+      if (qrRecord && qrRecord.business) {
+        return { business: qrRecord.business, qrCode: qrRecord.qrCode, qrStatus: qrRecord.status };
+      }
+
+      return null;
+    },
+    async () => {
+      // Mock resolution
+      // 1. Try slug
+      let business = mockBusinesses.find(b => b.slug === identifier);
+      if (business) {
+        const activeQr = mockQrInventory.find(q => q.assignedBusinessId === business.id && q.status === QRStatus.ACTIVE);
+        return {
+          business,
+          qrCode: activeQr?.qrCode || 'NO_QR',
+          qrStatus: activeQr?.status || 'Not Generated'
+        };
+      }
+
+      // 2. Try QR Code UUID
+      const qrRecord = mockQrInventory.find(q => q.qrCode === identifier);
+      if (qrRecord) {
+        const biz = mockBusinesses.find(b => b.id === qrRecord.assignedBusinessId);
+        if (biz) {
+          return { business: biz, qrCode: qrRecord.qrCode, qrStatus: qrRecord.status };
+        }
+      }
+
+      return null;
+    }
+  );
+}
+
+// ==========================================
+// FUNNEL TRACKING & CUSTOMER RECOVERY
+// ==========================================
+
+export async function logFunnelEvent(stage: FunnelStage, businessId: string, reviewSessionId: string, userAgent?: string | null) {
+  function getDeviceType(ua: string | null): string {
+    if (!ua) return 'Desktop';
+    const u = ua.toLowerCase();
+    if (u.includes('ipad') || u.includes('tablet')) return 'Tablet';
+    if (u.includes('mobile') || u.includes('phone') || u.includes('android')) return 'Mobile';
+    return 'Desktop';
+  }
+  const deviceType = getDeviceType(userAgent || null);
+
+  return runQuery(
+    async () => {
+      return await db.funnelEvent.create({
+        data: {
+          businessId,
+          stage,
+          reviewSessionId,
+          userAgent: userAgent || null,
+          deviceType
+        }
+      });
+    },
+    async () => {
+      const fe = {
+        id: `fe-${Math.random().toString(36).substring(2, 9)}`,
+        businessId,
+        stage,
+        timestamp: new Date(),
+        userAgent: userAgent || null,
+        deviceType,
+        qrAssetCode: null,
+        reviewSessionId
+      };
+      mockFunnelEvents.push(fe);
+      return fe;
+    }
+  );
+}
+
+export async function getRecoveryRequests(filters: { businessId?: string, status?: string, searchQuery?: string, priority?: string, createdByRepId?: string }) {
+  return runQuery(
+    async () => {
+      const where: any = {};
+      if (filters.businessId) {
+        where.businessId = filters.businessId;
+      }
+      if (filters.status) {
+        where.status = filters.status;
+      }
+      if (filters.priority) {
+        where.priority = filters.priority;
+      }
+      if (filters.createdByRepId) {
+        where.business = { createdByRepId: filters.createdByRepId };
+      }
+      if (filters.searchQuery) {
+        where.OR = [
+          { customerName: { contains: filters.searchQuery, mode: 'insensitive' } },
+          { whatsappNumber: { contains: filters.searchQuery, mode: 'insensitive' } }
+        ];
+      }
+      return await db.recoveryRequest.findMany({
+        where,
+        include: { business: true, review: true, resolvedBy: true },
+        orderBy: [
+          { priority: 'desc' },
+          { createdAt: 'desc' }
+        ]
+      });
+    },
+    async () => {
+      let list = [...mockRecoveryRequests];
+      if (filters.businessId) {
+        list = list.filter(rr => rr.businessId === filters.businessId);
+      }
+      if (filters.status) {
+        list = list.filter(rr => rr.status === filters.status);
+      }
+      if (filters.priority) {
+        list = list.filter(rr => rr.priority === filters.priority);
+      }
+      if (filters.createdByRepId) {
+        list = list.filter(rr => {
+          const biz = mockBusinesses.find(b => b.id === rr.businessId);
+          return biz?.createdByRepId === filters.createdByRepId;
+        });
+      }
+      if (filters.searchQuery) {
+        const q = filters.searchQuery.toLowerCase();
+        list = list.filter(rr => rr.customerName.toLowerCase().includes(q) || rr.whatsappNumber.includes(q));
+      }
+      
+      list.forEach(rr => {
+        if (rr.resolvedById) {
+          const u = mockUsers.find(user => user.id === rr.resolvedById);
+          (rr as any).resolvedBy = u ? { id: u.id, name: u.name, email: u.email } : null;
+        } else {
+          (rr as any).resolvedBy = null;
+        }
+      });
+
+      const priorityVal = { 'HIGH': 3, 'MEDIUM': 2, 'LOW': 1 };
+      return list.sort((a, b) => {
+        const pDiff = (priorityVal[b.priority] || 0) - (priorityVal[a.priority] || 0);
+        if (pDiff !== 0) return pDiff;
+        return b.createdAt.getTime() - a.createdAt.getTime();
+      });
+    }
+  );
+}
+
+export async function getRecoveryRequestDetails(id: string) {
+  return runQuery(
+    async () => {
+      return await db.recoveryRequest.findUnique({
+        where: { id },
+        include: { business: true, review: true, resolvedBy: true }
+      });
+    },
+    async () => {
+      const rr = mockRecoveryRequests.find(item => item.id === id);
+      if (!rr) return null;
+      
+      const biz = mockBusinesses.find(b => b.id === rr.businessId);
+      const rev = mockReviews.find(r => r.id === rr.reviewId);
+      const resolver = rr.resolvedById ? mockUsers.find(u => u.id === rr.resolvedById) : null;
+      
+      return {
+        ...rr,
+        business: biz || null,
+        review: rev || null,
+        resolvedBy: resolver ? { id: resolver.id, name: resolver.name, email: resolver.email } : null
+      };
+    }
+  );
+}
+
+export async function updateRecoveryStatusAndNotes(id: string, status: RecoveryStatus, internalNotes?: string | null, userId?: string) {
+  const isResolved = status === 'RESOLVED';
+  return runQuery(
+    async () => {
+      const data: any = { status };
+      if (internalNotes !== undefined) {
+        data.internalNotes = internalNotes;
+      }
+      if (isResolved) {
+        data.resolvedById = userId || null;
+        data.resolvedAt = new Date();
+      }
+      return await db.recoveryRequest.update({
+        where: { id },
+        data,
+        include: { business: true, review: true, resolvedBy: true }
+      });
+    },
+    async () => {
+      const rr = mockRecoveryRequests.find(item => item.id === id);
+      if (!rr) throw new Error('Recovery request not found.');
+      
+      rr.status = status;
+      if (internalNotes !== undefined) {
+        rr.internalNotes = internalNotes;
+      }
+      if (isResolved) {
+        rr.resolvedById = userId || null;
+        rr.resolvedAt = new Date();
+      }
+      rr.updatedAt = new Date();
+      
+      const biz = mockBusinesses.find(b => b.id === rr.businessId);
+      const rev = mockReviews.find(r => r.id === rr.reviewId);
+      const resolver = rr.resolvedById ? mockUsers.find(u => u.id === rr.resolvedById) : null;
+      
+      return {
+        ...rr,
+        business: biz || null,
+        review: rev || null,
+        resolvedBy: resolver ? { id: resolver.id, name: resolver.name, email: resolver.email } : null
+      };
+    }
+  );
+}
+
+export async function getRecoveryStats(businessId?: string, createdByRepId?: string) {
+  return runQuery(
+    async () => {
+      const where: any = {};
+      if (businessId) {
+        where.businessId = businessId;
+      }
+      if (createdByRepId) {
+        where.business = { createdByRepId };
+      }
+      
+      const list = await db.recoveryRequest.findMany({ where });
+      const total = list.length;
+      const open = list.filter(rr => rr.status === 'NEW' || rr.status === 'CONTACTED').length;
+      const resolved = list.filter(rr => rr.status === 'RESOLVED').length;
+      const closed = list.filter(rr => rr.status === 'CLOSED').length;
+      const resolutionRate = total > 0 ? parseFloat(((resolved / total) * 100).toFixed(1)) : 0.0;
+      
+      return { total, open, resolved, closed, resolutionRate };
+    },
+    async () => {
+      let list = [...mockRecoveryRequests];
+      if (businessId) {
+        list = list.filter(rr => rr.businessId === businessId);
+      }
+      if (createdByRepId) {
+        list = list.filter(rr => {
+          const b = mockBusinesses.find(biz => biz.id === rr.businessId);
+          return b?.createdByRepId === createdByRepId;
+        });
+      }
+      const total = list.length;
+      const open = list.filter(rr => rr.status === RecoveryStatus.NEW || rr.status === RecoveryStatus.CONTACTED).length;
+      const resolved = list.filter(rr => rr.status === RecoveryStatus.RESOLVED).length;
+      const closed = list.filter(rr => rr.status === RecoveryStatus.CLOSED).length;
+      const resolutionRate = total > 0 ? parseFloat(((resolved / total) * 100).toFixed(1)) : 0.0;
+      
+      return { total, open, resolved, closed, resolutionRate };
+    }
+  );
+}
+
+export async function getBusinessAnalytics(businessId: string | null | undefined, period = '30d', createdByRepId?: string) {
+  return runQuery(
+    async () => {
+      const start = getPeriodStartDate(period);
+      const end = new Date();
+
+      const whereScan: any = { scannedAt: { gte: start, lte: end } };
+      const whereReview: any = { createdAt: { gte: start, lte: end } };
+      const whereCallback: any = { createdAt: { gte: start, lte: end } };
+      const whereRecovery: any = { createdAt: { gte: start, lte: end } };
+      const whereFunnel: any = { timestamp: { gte: start, lte: end } };
+
+      if (businessId && businessId !== 'ALL') {
+        whereScan.businessId = businessId;
+        whereReview.businessId = businessId;
+        whereCallback.review = { businessId };
+        whereRecovery.businessId = businessId;
+        whereFunnel.businessId = businessId;
+      } else if (createdByRepId) {
+        whereScan.business = { createdByRepId };
+        whereReview.business = { createdByRepId };
+        whereCallback.review = { business: { createdByRepId } };
+        whereRecovery.business = { createdByRepId };
+        whereFunnel.business = { createdByRepId };
+      }
+
+      const [scans, reviews, callbacks, recoveryRequests, funnelEvents] = await Promise.all([
+        db.qRScan.findMany({ where: whereScan }),
+        db.review.findMany({ where: whereReview }),
+        db.callbackRequest.findMany({ where: whereCallback }),
+        db.recoveryRequest.findMany({ where: whereRecovery }),
+        db.funnelEvent.findMany({ where: whereFunnel })
+      ]);
+
+      return computeAnalytics(scans, reviews, callbacks, recoveryRequests, funnelEvents, start, end);
+    },
+    async () => {
+      const start = getPeriodStartDate(period);
+      const end = new Date();
+
+      const scans = mockScans.filter(s => {
+        if (businessId && businessId !== 'ALL') return s.businessId === businessId;
+        if (createdByRepId) {
+          const b = mockBusinesses.find(biz => biz.id === s.businessId);
+          return b?.createdByRepId === createdByRepId && s.scannedAt >= start && s.scannedAt <= end;
+        }
+        return s.scannedAt >= start && s.scannedAt <= end;
+      });
+      const reviews = mockReviews.filter(r => {
+        if (businessId && businessId !== 'ALL') return r.businessId === businessId;
+        if (createdByRepId) {
+          const b = mockBusinesses.find(biz => biz.id === r.businessId);
+          return b?.createdByRepId === createdByRepId && r.createdAt >= start && r.createdAt <= end;
+        }
+        return r.createdAt >= start && r.createdAt <= end;
+      });
+      const callbacks = mockCallbackRequests.filter(c => {
+        const review = mockReviews.find(r => r.id === c.reviewId);
+        if (businessId && businessId !== 'ALL') return review?.businessId === businessId;
+        if (createdByRepId) {
+          const b = mockBusinesses.find(biz => biz.id === review?.businessId);
+          return b?.createdByRepId === createdByRepId && c.createdAt >= start && c.createdAt <= end;
+        }
+        return c.createdAt >= start && c.createdAt <= end;
+      });
+      const recoveryRequests = mockRecoveryRequests.filter(rr => {
+        if (businessId && businessId !== 'ALL') return rr.businessId === businessId;
+        if (createdByRepId) {
+          const b = mockBusinesses.find(biz => biz.id === rr.businessId);
+          return b?.createdByRepId === createdByRepId && rr.createdAt >= start && rr.createdAt <= end;
+        }
+        return rr.createdAt >= start && rr.createdAt <= end;
+      });
+      const funnelEvents = mockFunnelEvents.filter(fe => {
+        if (businessId && businessId !== 'ALL') return fe.businessId === businessId;
+        if (createdByRepId) {
+          const b = mockBusinesses.find(biz => biz.id === fe.businessId);
+          return b?.createdByRepId === createdByRepId && fe.timestamp >= start && fe.timestamp <= end;
+        }
+        return fe.timestamp >= start && fe.timestamp <= end;
+      });
+
+      return computeAnalytics(scans, reviews, callbacks, recoveryRequests, funnelEvents, start, end);
+    }
+  );
+}
+
+function computeAnalytics(
+  scans: QRScan[], 
+  reviews: Review[], 
+  callbacks: CallbackRequest[], 
+  recoveryRequests: RecoveryRequest[], 
+  funnelEvents: FunnelEvent[],
+  start: Date, 
+  end: Date
+) {
+  const totalReviews = reviews.length;
+
+  // Average Rating
+  const averageRating = totalReviews > 0
+    ? parseFloat((reviews.reduce((acc, r) => acc + r.rating, 0) / totalReviews).toFixed(1))
+    : 0.0;
+
+  // Positive/Negative counts
+  const positiveReviews = reviews.filter(r => r.rating >= 4).length;
+  const negativeReviews = reviews.filter(r => r.rating <= 3).length;
+
+  // Google redirect analytics
+  const googleRedirectClicks = reviews.filter(r => r.googleCtaClicked).length;
+  const googleConversionRate = positiveReviews > 0
+    ? parseFloat(((googleRedirectClicks / positiveReviews) * 100).toFixed(1))
+    : 0.0;
+
+  // Recovery analytics
+  const recoveryRequestsCount = recoveryRequests.length;
+  const resolvedRecoveryRequests = recoveryRequests.filter(rr => rr.status === 'RESOLVED').length;
+  const openRecoveryRequests = recoveryRequests.filter(rr => rr.status === 'NEW' || rr.status === 'CONTACTED').length;
+  const resolutionRate = recoveryRequestsCount > 0
+    ? parseFloat(((resolvedRecoveryRequests / recoveryRequestsCount) * 100).toFixed(1))
+    : 0.0;
+
+  // Funnel Analytics
+  const scanEventsCount = funnelEvents.filter(fe => fe.stage === 'SCAN').length;
+  const startEventsCount = funnelEvents.filter(fe => fe.stage === 'START').length;
+  const submitEventsCount = funnelEvents.filter(fe => fe.stage === 'SUBMIT').length;
+  const redirectEventsCount = funnelEvents.filter(fe => fe.stage === 'REDIRECT').length;
+
+  // Reputation Intelligence Themes
+  const themePraises: Record<string, number> = {};
+  const themeComplaints: Record<string, number> = {};
+
+  reviews.forEach(r => {
+    if (!r.themes) return;
+    const splitThemes = r.themes.split(',').map(t => t.trim());
+    splitThemes.forEach(t => {
+      if (!t) return;
+      if (r.rating >= 4) {
+        themePraises[t] = (themePraises[t] || 0) + 1;
+      } else {
+        themeComplaints[t] = (themeComplaints[t] || 0) + 1;
+      }
+    });
+  });
+
+  // Daily Trend calculation for the period range
+  const dailyTrendMap: Record<string, number> = {};
+  const reviewTrendMap: Record<string, number> = {};
+
+  const diffTime = Math.abs(end.getTime() - start.getTime());
+  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) || 1;
+
+  for (let i = diffDays - 1; i >= 0; i--) {
+    const d = new Date(end.getTime() - i * 24 * 60 * 60 * 1000);
+    const dateStr = d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+    dailyTrendMap[dateStr] = 0;
+    reviewTrendMap[dateStr] = 0;
+  }
+
+  funnelEvents.forEach(fe => {
+    if (fe.stage === 'SCAN') {
+      const dateStr = fe.timestamp.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+      if (dailyTrendMap[dateStr] !== undefined) {
+        dailyTrendMap[dateStr]++;
+      }
+    }
+  });
+
+  reviews.forEach(r => {
+    const dateStr = r.createdAt.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+    if (reviewTrendMap[dateStr] !== undefined) {
+      reviewTrendMap[dateStr]++;
+    }
+  });
+
+  const dailyTrend = Object.entries(dailyTrendMap).map(([date, count]) => ({ date, count }));
+  const reviewTrend = Object.entries(reviewTrendMap).map(([date, count]) => ({ date, count }));
+
+  return {
+    totalReviews,
+    averageRating,
+    positiveReviews,
+    negativeReviews,
+    googleRedirectClicks,
+    googleConversionRate,
+    recoveryRequestsCount,
+    resolvedRecoveryRequests,
+    openRecoveryRequests,
+    resolutionRate,
+    funnel: {
+      scans: scanEventsCount,
+      starts: startEventsCount,
+      submits: submitEventsCount,
+      redirects: redirectEventsCount
+    },
+    themes: {
+      praises: themePraises,
+      complaints: themeComplaints
+    },
+    dailyTrend,
+    reviewTrend
+  };
+}
+
+

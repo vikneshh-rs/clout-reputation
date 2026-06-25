@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
@@ -31,24 +31,58 @@ export default function DashboardLayout({ children, title }: DashboardLayoutProp
   const { user, logout } = useAuth();
   const router = useRouter();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [notifications, setNotifications] = useState<{
+    highPriorityCount: number;
+    mediumPriorityCount: number;
+    unresolvedCount: number;
+  } | null>(null);
 
   const businessId = router.query.businessId as string;
   const isReadOnly = router.query.readOnly === 'true';
+
+  useEffect(() => {
+    if (!user) return;
+    const fetchNotifications = async () => {
+      try {
+        const queryParams = new URLSearchParams();
+        if (user.role === 'SUPER_ADMIN' && businessId) {
+          queryParams.append('businessId', businessId);
+        }
+        const res = await fetch(`/api/business/notifications?${queryParams.toString()}`);
+        if (res.ok) {
+          const data = await res.json();
+          setNotifications({
+            highPriorityCount: data.highPriorityCount,
+            mediumPriorityCount: data.mediumPriorityCount,
+            unresolvedCount: data.unresolvedCount,
+          });
+        }
+      } catch (err) {
+        console.error('Error fetching notifications:', err);
+      }
+    };
+
+    fetchNotifications();
+    const interval = setInterval(fetchNotifications, 10000); // refresh every 10s
+    return () => clearInterval(interval);
+  }, [user, businessId]);
 
   const navigation = (user?.role === 'SUPER_ADMIN' && isReadOnly && businessId)
     ? [
         { name: 'Business Dashboard', href: `/dashboard/business?businessId=${businessId}&readOnly=true`, icon: LayoutDashboard },
         { name: 'Reviews Feed', href: `/dashboard/business/reviews?businessId=${businessId}&readOnly=true`, icon: MessageSquare },
+        { name: 'Customer Recovery', href: `/dashboard/business/recovery?businessId=${businessId}&readOnly=true`, icon: PhoneCall },
         { name: 'Profile Settings', href: `/dashboard/business/settings?businessId=${businessId}&readOnly=true`, icon: Settings },
         { name: 'Back to Admin', href: '/dashboard/admin/businesses', icon: ArrowLeft },
       ]
     : user?.role === 'SUPER_ADMIN'
     ? [
         { name: 'Dashboard', href: '/dashboard/admin', icon: LayoutDashboard },
-        { name: 'QR Inventory', href: '/dashboard/admin/qr', icon: QrCode },
+        { name: 'QR Assets', href: '/dashboard/admin/qr', icon: QrCode },
         { name: 'REPs Management', href: '/dashboard/admin/reps', icon: Users },
         { name: 'User Accounts', href: '/dashboard/admin/users', icon: Shield },
         { name: 'Businesses', href: '/dashboard/admin/businesses', icon: Store },
+        { name: 'Customer Recovery', href: '/dashboard/admin/recovery', icon: PhoneCall },
         { name: 'Subscriptions', href: '/dashboard/admin/subscriptions', icon: Clock },
         { name: 'Platform Analytics', href: '/dashboard/admin/analytics', icon: BarChart3 },
         { name: 'Activity Logs', href: '/dashboard/admin/activity', icon: Clock },
@@ -56,12 +90,14 @@ export default function DashboardLayout({ children, title }: DashboardLayoutProp
     : user?.role === 'REP'
     ? [
         { name: 'Rep Dashboard', href: '/dashboard/rep', icon: LayoutDashboard },
-        { name: 'Assign QR Code', href: '/dashboard/rep/assign', icon: QrCode },
+        { name: 'Business Onboarding', href: '/dashboard/rep/onboarding', icon: Store },
+        { name: 'Customer Recovery', href: '/dashboard/rep/recovery', icon: PhoneCall },
         { name: 'Assignment History', href: '/dashboard/rep/history', icon: Clock },
       ]
     : [
         { name: 'Dashboard', href: '/dashboard/business', icon: LayoutDashboard },
         { name: 'Reviews', href: '/dashboard/business/reviews', icon: MessageSquare },
+        { name: 'Customer Recovery', href: '/dashboard/business/recovery', icon: PhoneCall },
         { name: 'Settings', href: '/dashboard/business/settings', icon: Settings },
       ];
 
@@ -80,14 +116,14 @@ export default function DashboardLayout({ children, title }: DashboardLayoutProp
     ? 'bg-violet-100 text-violet-700 border border-violet-200'
     : user?.role === 'REP'
     ? 'bg-emerald-100 text-emerald-700 border border-emerald-200'
-    : 'bg-blue-100 text-[#1857D6] border border-blue-200';
+    : 'bg-blue-100 text-[#1853AB] border border-blue-200';
 
   const SidebarContent = () => (
     <>
       <div className="flex flex-col flex-grow overflow-y-auto">
         {/* Logo */}
         <div className="flex items-center gap-3 px-5 py-5 border-b border-slate-100/50">
-          <div className="h-9 w-9 rounded-xl bg-[#1857D6] flex items-center justify-center shadow-sm shadow-blue-500/20 flex-shrink-0">
+          <div className="h-9 w-9 rounded-xl bg-[#1853AB] flex items-center justify-center shadow-sm shadow-blue-500/20 flex-shrink-0">
             <img src="/logo.png" alt="Clout" className="h-5.5 w-5.5 object-contain brightness-0 invert" />
           </div>
           <div>
@@ -112,7 +148,7 @@ export default function DashboardLayout({ children, title }: DashboardLayoutProp
                 onClick={() => setMobileMenuOpen(false)}
                 className={`group flex items-center px-3.5 py-3 text-xs font-semibold rounded-2xl transition-all duration-300 ease-out ${
                   active
-                    ? 'bg-gradient-to-r from-blue-600 to-[#1857D6] text-white shadow-sm shadow-blue-500/20 scale-[1.02]'
+                    ? 'bg-gradient-to-r from-blue-600 to-[#1853AB] text-white shadow-sm shadow-blue-500/20 scale-[1.02]'
                     : 'text-slate-500 hover:bg-slate-50 hover:text-slate-900 hover:translate-x-1'
                 }`}
               >
@@ -120,6 +156,20 @@ export default function DashboardLayout({ children, title }: DashboardLayoutProp
                   active ? 'text-white' : 'text-slate-400 group-hover:text-slate-600'
                 }`} size={16} />
                 <span className="flex-1">{item.name}</span>
+                {item.name === 'Customer Recovery' && notifications && (
+                  <div className="flex items-center gap-1.5 ml-2 mr-1">
+                    {notifications.highPriorityCount > 0 && (
+                      <span className="inline-flex items-center justify-center px-1.5 py-0.5 text-[9px] font-bold leading-none text-white bg-red-600 rounded-full animate-pulse shadow-sm shadow-red-500/30">
+                        {notifications.highPriorityCount}
+                      </span>
+                    )}
+                    {notifications.mediumPriorityCount > 0 && (
+                      <span className="inline-flex items-center justify-center px-1.5 py-0.5 text-[9px] font-bold leading-none text-white bg-orange-500 rounded-full shadow-sm shadow-orange-500/30">
+                        {notifications.mediumPriorityCount}
+                      </span>
+                    )}
+                  </div>
+                )}
                 {active && <ChevronRight size={12} className="text-white/80 animate-fadeIn" />}
               </Link>
             );
@@ -130,7 +180,7 @@ export default function DashboardLayout({ children, title }: DashboardLayoutProp
       {/* User Footer */}
       <div className="flex-shrink-0 border-t border-slate-100/50 p-3 bg-slate-50/40 backdrop-blur-md">
         <div className="flex items-center px-2.5 py-2.5 rounded-2xl hover:bg-slate-100/60 transition-colors group">
-          <div className="h-8.5 w-8.5 rounded-full bg-gradient-to-br from-[#1857D6] to-blue-400 flex items-center justify-center text-white text-xs font-extrabold flex-shrink-0 shadow-sm">
+          <div className="h-8.5 w-8.5 rounded-full bg-gradient-to-br from-[#1853AB] to-blue-400 flex items-center justify-center text-white text-xs font-extrabold flex-shrink-0 shadow-sm">
             {user?.name ? user.name[0].toUpperCase() : 'A'}
           </div>
           <div className="ml-2.5 flex-1 min-w-0">
@@ -184,7 +234,7 @@ export default function DashboardLayout({ children, title }: DashboardLayoutProp
         {/* Mobile Top Bar */}
         <header className="sticky top-0 z-20 md:hidden flex items-center justify-between h-14 px-4 bg-white/80 backdrop-blur-md border-b border-slate-200/50 shadow-sm">
           <div className="flex items-center gap-2">
-            <div className="h-7 w-7 rounded-lg bg-[#1857D6] flex items-center justify-center shadow-sm">
+            <div className="h-7 w-7 rounded-lg bg-[#1853AB] flex items-center justify-center shadow-sm">
               <img src="/logo.png" alt="Clout" className="h-4 w-4 object-contain brightness-0 invert" />
             </div>
             <span className="text-sm font-bold text-slate-900">Clout Reputation</span>

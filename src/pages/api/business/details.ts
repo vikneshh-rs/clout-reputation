@@ -28,7 +28,20 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       if (sessionUser.role === 'SUPER_ADMIN') {
         return res.status(403).json({ error: 'Access denied. Super Admin view is read-only.' });
       }
-      const { name, googleReviewUrl, phone, address, enableGoogleReviewRedirect, enableManagerCallback, logoUrl } = req.body;
+      const { 
+        name, 
+        googleReviewUrl, 
+        phone, 
+        address, 
+        enableGoogleReviewRedirect, 
+        enableManagerCallback, 
+        logoUrl,
+        description,
+        contactPerson,
+        category,
+        website,
+        googleMapsUrl
+      } = req.body;
 
       if (!name) {
         return res.status(400).json({ error: 'Business name is required.' });
@@ -46,7 +59,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         address: address || null,
         enableGoogleReviewRedirect: enableGoogleReviewRedirect !== undefined ? !!enableGoogleReviewRedirect : undefined,
         enableManagerCallback: enableManagerCallback !== undefined ? !!enableManagerCallback : undefined,
-        logoUrl: logoUrl || null
+        logoUrl: logoUrl || null,
+        description: description || null,
+        contactPerson: contactPerson || null,
+        category: category || null,
+        website: website || null,
+        googleMapsUrl: googleMapsUrl || null
       });
 
       // Capture changes for activity log metadata
@@ -56,6 +74,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       if (currentBusiness.phone !== phone) changes.phone = phone;
       if (currentBusiness.address !== address) changes.address = address;
       if (currentBusiness.logoUrl !== logoUrl) changes.logoUrl = logoUrl;
+      if (currentBusiness.description !== description) changes.description = description;
+      if (currentBusiness.contactPerson !== contactPerson) changes.contactPerson = contactPerson;
+      if (currentBusiness.category !== category) changes.category = category;
+      if (currentBusiness.website !== website) changes.website = website;
+      if (currentBusiness.googleMapsUrl !== googleMapsUrl) changes.googleMapsUrl = googleMapsUrl;
       if (enableGoogleReviewRedirect !== undefined && currentBusiness.enableGoogleReviewRedirect !== enableGoogleReviewRedirect) {
         changes.enableGoogleReviewRedirect = enableGoogleReviewRedirect;
       }

@@ -22,12 +22,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         return res.status(401).json({ error: 'Invalid business name or password' });
       }
 
-      if (!business.isActive || business.status === BusinessStatus.SUSPENDED) {
-        return res.status(403).json({ error: 'Your account has been suspended. Please contact support.' });
-      }
-
-      if (business.status === BusinessStatus.EXPIRED) {
-        return res.status(403).json({ error: 'Your subscription has expired. Please renew.' });
+      if (!business.isActive || business.status === BusinessStatus.INACTIVE) {
+        return res.status(403).json({ error: 'Your account is currently inactive or suspended. Please contact support.' });
       }
 
       const isMatch = await comparePassword(password, business.passwordHash);

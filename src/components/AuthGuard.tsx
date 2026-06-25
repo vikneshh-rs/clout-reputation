@@ -47,7 +47,7 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
   if (isDashboard && (loading || !user)) {
     return (
       <div className="min-h-screen bg-white flex items-center justify-center">
-        <Loader2 className="animate-spin h-8 w-8 text-[#1857D6]" />
+        <Loader2 className="animate-spin h-8 w-8 text-[#1853AB]" />
       </div>
     );
   }
@@ -58,7 +58,7 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
       if (user.role !== 'SUPER_ADMIN') {
         return (
           <div className="min-h-screen bg-white flex items-center justify-center">
-            <Loader2 className="animate-spin h-8 w-8 text-[#1857D6]" />
+            <Loader2 className="animate-spin h-8 w-8 text-[#1853AB]" />
           </div>
         );
       }
@@ -66,7 +66,7 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
       if (user.role !== 'REP' && user.role !== 'SUPER_ADMIN') {
         return (
           <div className="min-h-screen bg-white flex items-center justify-center">
-            <Loader2 className="animate-spin h-8 w-8 text-[#1857D6]" />
+            <Loader2 className="animate-spin h-8 w-8 text-[#1853AB]" />
           </div>
         );
       }
@@ -75,7 +75,7 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
       if (user.role !== 'BUSINESS' && !(user.role === 'SUPER_ADMIN' && isReadOnly)) {
         return (
           <div className="min-h-screen bg-white flex items-center justify-center">
-            <Loader2 className="animate-spin h-8 w-8 text-[#1857D6]" />
+            <Loader2 className="animate-spin h-8 w-8 text-[#1853AB]" />
           </div>
         );
       }

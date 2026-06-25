@@ -1,55 +1,51 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import { validateQrCode, recordQrScan, createReview } from '@/lib/data';
+import { resolveBusinessByIdentifier, recordQrScan, createReview } from '@/lib/data';
 import { BusinessStatus, QRStatus } from '@prisma/client';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  const { qrCode } = req.query;
+  const { qrCode } = req.query; // qrCode param is the identifier (either slug or QR UUID)
 
   if (!qrCode || typeof qrCode !== 'string') {
-    return res.status(400).json({ error: 'QR Code query parameter is required.' });
+    return res.status(400).json({ error: 'Identifier query parameter is required.' });
   }
 
   try {
-    const qrRecord = await validateQrCode(qrCode);
+    const result = await resolveBusinessByIdentifier(qrCode);
 
-    if (!qrRecord) {
-      return res.status(404).json({ error: 'QR code not found.', status: 'NOT_FOUND' });
+    if (!result) {
+      return res.status(404).json({ error: 'Business or review portal not found.', status: 'NOT_FOUND' });
     }
 
-    if (qrRecord.status === QRStatus.UNASSIGNED) {
-      return res.status(400).json({ error: 'This QR code is unassigned.', status: 'UNASSIGNED' });
+    const { business, qrCode: activeQrCode, qrStatus } = result;
+
+    if (qrStatus === 'Not Generated' || activeQrCode === 'NO_QR') {
+      return res.status(400).json({ error: 'This business does not have an active QR code generated.', status: 'NOT_GENERATED' });
     }
 
-    if (qrRecord.status === QRStatus.DAMAGED || qrRecord.status === QRStatus.REPLACED || qrRecord.status === QRStatus.INACTIVE) {
-      return res.status(400).json({ error: 'This QR code is no longer active.', status: qrRecord.status });
+    if (qrStatus === QRStatus.ARCHIVED) {
+      return res.status(400).json({ error: 'This QR code asset has been archived.', status: 'ARCHIVED' });
     }
 
-    if (qrRecord.status !== QRStatus.ASSIGNED || !qrRecord.business) {
-      return res.status(400).json({ error: 'This QR code is not active.', status: qrRecord.status });
+    if (!business.isActive || business.status === BusinessStatus.INACTIVE) {
+      return res.status(403).json({ error: 'This review portal is temporarily inactive.', status: 'INACTIVE' });
     }
 
-    const business = qrRecord.business;
-
-    if (!business.isActive || business.status === BusinessStatus.SUSPENDED) {
-      return res.status(403).json({ error: 'This review portal is temporarily suspended.', status: 'SUSPENDED' });
-    }
-
-    if (business.status === BusinessStatus.EXPIRED) {
-      return res.status(403).json({ error: 'This review portal subscription has expired.', status: 'EXPIRED' });
+    if (business.status === BusinessStatus.PENDING) {
+      return res.status(403).json({ error: 'This review portal setup is incomplete.', status: 'PENDING' });
     }
 
     if (req.method === 'GET') {
-      // Log this scan in database (runs deduplication inside recordQrScan)
+      // Log this scan in database
       const userAgent = req.headers['user-agent'] || null;
       await recordQrScan({
         businessId: business.id,
-        qrCode,
+        qrCode: activeQrCode,
         userAgent: userAgent ? String(userAgent) : null
       });
 
       return res.status(200).json({
-        qrCode: qrRecord.qrCode,
-        status: qrRecord.status,
+        qrCode: activeQrCode,
+        status: qrStatus,
         business: {
           id: business.id,
           name: business.name,

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+﻿import React, { useEffect, useState } from 'react';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 import DashboardLayout from '@/components/DashboardLayout';
@@ -107,7 +107,7 @@ export default function BusinessDashboard(props: any) {
       <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-4 font-sans">
         <AlertCircle className="h-12 w-12 text-rose-500 mb-4" />
         <h1 className="text-xl font-bold">Access Denied</h1>
-        <p className="text-slate-555 text-sm mt-1">Business access credentials required.</p>
+        <p className="text-slate-550 text-sm mt-1">Business access credentials required.</p>
       </div>
     );
   }
@@ -266,7 +266,7 @@ export default function BusinessDashboard(props: any) {
                   Total Reviews
                 </span>
                 <h3 className="text-3xl font-extrabold text-slate-900 leading-none">{data.totalReviews}</h3>
-                <div className="flex items-center gap-1 text-[10px] text-slate-455 font-semibold">
+                <div className="flex items-center gap-1 text-[10px] text-slate-450 font-semibold">
                   <span>Customer responses</span>
                 </div>
               </div>
@@ -285,7 +285,7 @@ export default function BusinessDashboard(props: any) {
                   {data.averageRating}
                   <Star size={16} className="fill-amber-500 text-amber-500 inline-block" />
                 </h3>
-                <div className="flex items-center gap-1 text-[10px] text-slate-455 font-semibold">
+                <div className="flex items-center gap-1 text-[10px] text-slate-450 font-semibold">
                   <span>Out of 5 stars</span>
                 </div>
               </div>
@@ -305,7 +305,7 @@ export default function BusinessDashboard(props: any) {
                   <span>4 & 5 stars reviews</span>
                 </div>
               </div>
-              <div className="p-3.5 bg-emerald-50/80 text-emerald-655 border border-emerald-100/30 rounded-2xl group-hover:scale-115 group-hover:rotate-3 transition-all duration-300 shadow-sm">
+              <div className="p-3.5 bg-emerald-50/80 text-emerald-650 border border-emerald-100/30 rounded-2xl group-hover:scale-115 group-hover:rotate-3 transition-all duration-300 shadow-sm">
                 <ThumbsUp size={20} />
               </div>
             </div>
@@ -321,7 +321,7 @@ export default function BusinessDashboard(props: any) {
                   <span>1, 2 & 3 stars reviews</span>
                 </div>
               </div>
-              <div className="p-3.5 bg-rose-50/80 text-rose-655 border border-rose-100/30 rounded-2xl group-hover:scale-115 group-hover:rotate-3 transition-all duration-300 shadow-sm">
+              <div className="p-3.5 bg-rose-50/80 text-rose-650 border border-rose-100/30 rounded-2xl group-hover:scale-115 group-hover:rotate-3 transition-all duration-300 shadow-sm">
                 <ThumbsDown size={20} />
               </div>
             </div>

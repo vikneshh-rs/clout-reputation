@@ -10,7 +10,10 @@ import {
   AlertCircle,
   PlusCircle,
   RotateCcw,
-  Briefcase
+  Briefcase,
+  CheckCircle,
+  Download,
+  Activity
 } from 'lucide-react';
 
 interface AssignmentLog {
@@ -33,7 +36,7 @@ export default function RepDashboard(props: any) {
   const { theme, toggleTheme } = props;
 
   const [history, setHistory] = useState<AssignmentLog[]>([]);
-  const [stats, setStats] = useState({ onboardedCount: 0, assignmentsCount: 0 });
+  const [stats, setStats] = useState({ onboardedCount: 0, assignmentsCount: 0, activeBusinessesCount: 0, qrDownloadsCount: 0 });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
@@ -45,7 +48,7 @@ export default function RepDashboard(props: any) {
       if (res.ok) {
         const payload = await res.json();
         setHistory(payload.history || []);
-        setStats(payload.stats || { onboardedCount: 0, assignmentsCount: 0 });
+        setStats(payload.stats || { onboardedCount: 0, assignmentsCount: 0, activeBusinessesCount: 0, qrDownloadsCount: 0 });
       } else {
         const errData = await res.json();
         setError(errData.error || 'Failed to fetch history logs.');
@@ -66,7 +69,7 @@ export default function RepDashboard(props: any) {
   if (authLoading) {
     return (
       <div className="min-h-screen bg-slate-50 flex items-center justify-center font-sans">
-        <Loader2 className="animate-spin h-8 w-8 text-[#1857D6]" />
+        <Loader2 className="animate-spin h-8 w-8 text-[#1853AB]" />
       </div>
     );
   }
@@ -93,43 +96,67 @@ export default function RepDashboard(props: any) {
       {/* Welcome banner */}
       <div className="bg-white/80 backdrop-blur-md rounded-2xl border border-slate-100 p-6 mb-8 shadow-[0_4px_20px_rgba(0,0,0,0.02)]">
         <div className="flex items-center space-x-3 mb-2">
-          <div className="p-2.5 bg-blue-50/70 text-[#1857D6] rounded-xl">
+          <div className="p-2.5 bg-blue-50/70 text-[#1853AB] rounded-xl">
             <UserCheck size={20} />
           </div>
           <h2 className="text-lg font-bold tracking-tight text-slate-900 font-sans">Welcome back, {user.name}!</h2>
         </div>
         <p className="text-xs text-slate-500 max-w-xl pl-1">
-          Onboard new businesses instantly by scanning or entering unassigned pre-printed QR code stickers.
+          Onboard new businesses and generate QR Codes to activate their reputation management profiles.
         </p>
       </div>
 
-      {/* KPI Stats Row */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-8">
-        {/* Businesses Onboarded */}
+      {/* KPI Stats Row (4 cards) */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        {/* Assigned Businesses */}
         <div className="bg-white/80 backdrop-blur-md p-6 rounded-2xl border border-slate-100 shadow-[0_4px_20px_rgba(0,0,0,0.02)] hover:shadow-[0_8px_30px_rgba(0,0,0,0.04)] hover:border-slate-200 hover:-translate-y-0.5 transition-all duration-300 flex justify-between items-center group">
           <div className="space-y-2">
-            <span className="block text-[10px] font-bold text-slate-450 uppercase tracking-widest">Businesses Onboarded</span>
+            <span className="block text-[10px] font-bold text-slate-450 uppercase tracking-widest">Assigned Businesses</span>
             <div className="flex items-baseline space-x-1.5 mt-2">
-              <h3 className="text-3xl font-extrabold text-[#1857D6]">{stats.onboardedCount}</h3>
-              <span className="text-xs text-slate-500">accounts registered</span>
+              <h3 className="text-3xl font-extrabold text-[#1853AB]">{stats.onboardedCount}</h3>
             </div>
           </div>
-          <div className="p-3 bg-blue-50/70 text-[#1857D6] rounded-2xl group-hover:scale-105 transition-transform duration-300">
-            <Briefcase size={22} />
+          <div className="p-3 bg-blue-50/70 text-[#1853AB] rounded-2xl group-hover:scale-105 transition-transform duration-300">
+            <Briefcase size={20} />
           </div>
         </div>
 
-        {/* Total QR Assignments */}
+        {/* Active Businesses */}
         <div className="bg-white/80 backdrop-blur-md p-6 rounded-2xl border border-slate-100 shadow-[0_4px_20px_rgba(0,0,0,0.02)] hover:shadow-[0_8px_30px_rgba(0,0,0,0.04)] hover:border-slate-200 hover:-translate-y-0.5 transition-all duration-300 flex justify-between items-center group">
           <div className="space-y-2">
-            <span className="block text-[10px] font-bold text-slate-455 uppercase tracking-widest">Total QR Assignments</span>
+            <span className="block text-[10px] font-bold text-slate-450 uppercase tracking-widest">Active Businesses</span>
             <div className="flex items-baseline space-x-1.5 mt-2">
-              <h3 className="text-3xl font-extrabold text-slate-900">{stats.assignmentsCount}</h3>
-              <span className="text-xs text-slate-500">activations logged</span>
+              <h3 className="text-3xl font-extrabold text-emerald-600">{stats.activeBusinessesCount}</h3>
             </div>
           </div>
-          <div className="p-3 bg-blue-50/70 text-[#1857D6] rounded-2xl group-hover:scale-105 transition-transform duration-300">
-            <QrCode size={22} />
+          <div className="p-3 bg-emerald-50/70 text-emerald-600 rounded-2xl group-hover:scale-105 transition-transform duration-300">
+            <CheckCircle size={20} />
+          </div>
+        </div>
+
+        {/* QR Downloads */}
+        <div className="bg-white/80 backdrop-blur-md p-6 rounded-2xl border border-slate-100 shadow-[0_4px_20px_rgba(0,0,0,0.02)] hover:shadow-[0_8px_30px_rgba(0,0,0,0.04)] hover:border-slate-200 hover:-translate-y-0.5 transition-all duration-300 flex justify-between items-center group">
+          <div className="space-y-2">
+            <span className="block text-[10px] font-bold text-slate-450 uppercase tracking-widest">QR Downloads</span>
+            <div className="flex items-baseline space-x-1.5 mt-2">
+              <h3 className="text-3xl font-extrabold text-indigo-600">{stats.qrDownloadsCount}</h3>
+            </div>
+          </div>
+          <div className="p-3 bg-indigo-50/70 text-indigo-600 rounded-2xl group-hover:scale-105 transition-transform duration-300">
+            <Download size={20} />
+          </div>
+        </div>
+
+        {/* Recent Activity */}
+        <div className="bg-white/80 backdrop-blur-md p-6 rounded-2xl border border-slate-100 shadow-[0_4px_20px_rgba(0,0,0,0.02)] hover:shadow-[0_8px_30px_rgba(0,0,0,0.04)] hover:border-slate-200 hover:-translate-y-0.5 transition-all duration-300 flex justify-between items-center group">
+          <div className="space-y-2">
+            <span className="block text-[10px] font-bold text-slate-450 uppercase tracking-widest">Recent Activity</span>
+            <div className="flex items-baseline space-x-1.5 mt-2">
+              <h3 className="text-3xl font-extrabold text-slate-900">{stats.assignmentsCount}</h3>
+            </div>
+          </div>
+          <div className="p-3 bg-slate-100 text-slate-600 rounded-2xl group-hover:scale-105 transition-transform duration-300">
+            <Activity size={20} />
           </div>
         </div>
       </div>
@@ -178,7 +205,7 @@ export default function RepDashboard(props: any) {
           </div>
           <button
             onClick={() => router.push('/dashboard/rep/history')}
-            className="text-[10px] font-bold text-[#1857D6] hover:underline inline-flex items-center gap-0.5 cursor-pointer"
+            className="text-[10px] font-bold text-[#1853AB] hover:underline inline-flex items-center gap-0.5 cursor-pointer"
           >
             Full Logs <ArrowRight size={10} />
           </button>
@@ -192,7 +219,7 @@ export default function RepDashboard(props: any) {
 
         {loading ? (
           <div className="py-10 flex justify-center items-center">
-            <Loader2 className="animate-spin h-6 w-6 text-[#1857D6]" />
+            <Loader2 className="animate-spin h-6 w-6 text-[#1853AB]" />
           </div>
         ) : stats.assignmentsCount === 0 ? (
           <div className="py-10 text-center text-xs text-slate-400">
@@ -214,7 +241,7 @@ export default function RepDashboard(props: any) {
                     <tr key={log.id} className="hover:bg-slate-50/40 transition-colors">
                       <td className="px-4 py-3 font-semibold text-slate-900">{log.business?.name || 'Unknown Business'}</td>
                       <td className="px-4 py-3 capitalize text-slate-500">{log.business?.industry ? log.business.industry.toLowerCase().replace('_', ' ') : 'N/A'}</td>
-                      <td className="px-4 py-3 font-mono font-bold text-[#1857D6]">{log.qrInventory?.qrCode || 'N/A'}</td>
+                      <td className="px-4 py-3 font-mono font-bold text-[#1853AB]">{log.qrInventory?.qrCode || 'N/A'}</td>
                       <td className="px-4 py-3 text-right text-slate-400">
                         {new Date(log.createdAt).toLocaleDateString()}
                       </td>
