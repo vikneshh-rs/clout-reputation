@@ -246,8 +246,8 @@ export default function LandingPage() {
               {/* Mock Dashboard Layout */}
               <div className="flex-1 flex overflow-hidden">
                 {/* Sidebar */}
-                <div className="w-14 border-r border-slate-200/50 bg-white/20 flex flex-col items-center py-6 space-y-6">
-                  <div className="p-2 bg-[#1853AB]/10 text-[#1853AB] rounded-xl">
+                <div className="w-12 sm:w-14 border-r border-slate-200/50 bg-white/20 flex flex-col items-center py-4 sm:py-6 space-y-4 sm:space-y-6">
+                  <div className="p-1.5 sm:p-2 bg-[#1853AB]/10 text-[#1853AB] rounded-xl">
                     <QrCode size={15} />
                   </div>
                   <div className="text-[#64748B] hover:text-[#1853AB] transition-colors p-1.5">
@@ -323,7 +323,7 @@ export default function LandingPage() {
                     </div>
 
                     {/* QR Scan Speed / Chart Mockup */}
-                    <div className="bg-white/60 border border-slate-200/50 rounded-xl p-3 flex flex-col min-h-0 text-left">
+                    <div className="bg-white/60 border border-slate-200/50 rounded-xl p-3 hidden sm:flex flex-col min-h-0 text-left">
                       <h4 className="text-[8px] font-bold text-[#0F172A] uppercase tracking-widest mb-2.5">Sentiment Funnel Flow</h4>
                       <div className="flex-1 flex flex-col justify-between">
                         <div className="space-y-1.5">
@@ -359,7 +359,7 @@ export default function LandingPage() {
             <motion.div
               animate={{ y: [0, -5, 0] }}
               transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
-              className="absolute -top-10 left-12 z-30 w-44 glass-mac-frosted rounded-2xl p-4 shadow-[0_20px_50px_-10px_rgba(24,83,171,0.18)] border border-white/60 text-center space-y-3 flex flex-col items-center"
+              className="absolute -top-6 left-4 sm:-top-10 sm:left-12 z-30 w-32 sm:w-44 glass-mac-frosted rounded-2xl p-4 shadow-[0_20px_50px_-10px_rgba(24,83,171,0.18)] border border-white/60 text-center space-y-3 flex flex-col items-center"
             >
               {/* High-Fidelity Vector QR Code */}
               <div className="bg-white p-2 rounded-xl border border-slate-100 shadow-inner">
@@ -389,7 +389,7 @@ export default function LandingPage() {
             <motion.div
               animate={{ y: [0, 6, 0] }}
               transition={{ duration: 5, repeat: Infinity, ease: "easeInOut", delay: 0.3 }}
-              className="absolute -right-6 top-[180px] sm:top-[220px] z-20 w-56 glass-mac-frosted rounded-2xl p-4 shadow-[0_15px_35px_-10px_rgba(15,23,42,0.12)] border border-white/60 space-y-3"
+              className="absolute right-1 sm:-right-6 top-[180px] sm:top-[220px] z-20 w-44 sm:w-56 glass-mac-frosted rounded-2xl p-4 shadow-[0_15px_35px_-10px_rgba(15,23,42,0.12)] border border-white/60 space-y-3"
             >
               <div className="flex items-center justify-between border-b border-slate-100/50 pb-1.5 text-left">
                 <span className="text-[7.5px] font-bold text-[#64748B] uppercase tracking-widest">Sentiment Routing</span>
@@ -445,7 +445,7 @@ export default function LandingPage() {
             <motion.div
               animate={{ y: [0, -4, 0] }}
               transition={{ duration: 5.5, repeat: Infinity, ease: "easeInOut", delay: 0.6 }}
-              className="absolute -left-10 bottom-[40px] z-20 w-48 bg-white/30 backdrop-blur-[12px] rounded-2xl p-4 shadow-[0_15px_30px_-10px_rgba(15,23,42,0.06)] border border-white/45 text-left opacity-90"
+              className="absolute left-1 bottom-[30px] sm:-left-10 sm:bottom-[40px] z-20 w-36 sm:w-48 bg-white/30 backdrop-blur-[12px] rounded-2xl p-4 shadow-[0_15px_30px_-10px_rgba(15,23,42,0.06)] border border-white/45 text-left opacity-90"
             >
               <div className="flex items-center justify-between mb-2">
                 <span className="text-[7px] font-bold text-[#64748B] uppercase tracking-widest">Growth Rate</span>
@@ -495,7 +495,7 @@ export default function LandingPage() {
         {/* Asymmetrical Layout: Sandbox Simulator Left, 3 Steps on the Right */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 items-start">
           {/* Simulator Box (Col Span 7) */}
-          <div className="lg:col-span-7 bg-[#F8FAFC]/40 border border-slate-200/60 rounded-3xl p-8 shadow-sm flex flex-col justify-between min-h-[460px] relative overflow-hidden">
+          <div className="lg:col-span-7 bg-[#F8FAFC]/40 border border-slate-200/60 rounded-3xl p-5 sm:p-8 shadow-sm flex flex-col justify-between min-h-[460px] relative overflow-hidden">
             <div className="absolute top-0 right-0 w-60 h-60 bg-[#1853AB]/3 blur-3xl pointer-events-none rounded-full" />
 
             <div className="space-y-6">
@@ -509,7 +509,7 @@ export default function LandingPage() {
                 </p>
               </div>
 
-              <div className="flex items-center space-x-3 pt-2">
+              <div className="flex items-center space-x-2 sm:space-x-3 pt-2">
                 {[1, 2, 3, 4, 5].map((stars) => (
                   <button
                     key={stars}
@@ -687,7 +687,7 @@ export default function LandingPage() {
         </div>
 
         {/* Asymmetrical Mockup Container with Parallax overlays */}
-        <div className="relative w-full max-w-5xl mx-auto h-[620px] flex items-center justify-center">
+        <div className="relative w-full max-w-5xl mx-auto h-[560px] sm:h-[620px] flex items-center justify-center">
           {/* Main Mockup: Tilted macOS window */}
           <motion.div
             style={{ y: showcaseY }}
@@ -816,7 +816,7 @@ export default function LandingPage() {
           {/* Overlapping Floating Component: Private Recovery Funnel */}
           <motion.div
             style={{ y: showcaseOverlapY }}
-            className="absolute z-20 bottom-10 right-0 w-80 glass-mac-frosted rounded-2xl p-5 shadow-2xl border border-white/60 select-none"
+            className="absolute z-20 bottom-[-45px] right-2 sm:bottom-10 sm:right-0 w-[280px] sm:w-80 glass-mac-frosted rounded-2xl p-5 shadow-2xl border border-white/60 select-none"
           >
             <div className="flex items-center space-x-3 mb-4">
               <div className="p-2 bg-[#10B981]/8 text-[#10B981] rounded-lg">
