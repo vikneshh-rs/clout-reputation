@@ -45,7 +45,7 @@ export default function Modal({
       />
       
       {/* Modal Dialog */}
-      <div className={`relative bg-white w-full ${sizes[size]} rounded-[24px] shadow-[0px_25px_60px_rgba(15,23,42,0.15)] overflow-hidden transition-all z-50 border border-[#E5E7EB]`}>
+      <div className={`relative bg-white w-full ${sizes[size]} rounded-[20px] shadow-[0px_25px_60px_rgba(15,23,42,0.15)] overflow-hidden transition-all z-50 border border-[#E5E7EB]`}>
         {/* Header */}
         <div className="flex justify-between items-center px-6 py-5 border-b border-[#EEF2F7]">
           <h3 className="text-lg font-bold text-[#111827] font-sans">

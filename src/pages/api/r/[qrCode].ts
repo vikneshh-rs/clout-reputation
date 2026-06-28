@@ -1,5 +1,5 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import { resolveBusinessByIdentifier, recordQrScan, createReview } from '@/lib/data';
+import { resolveBusinessByIdentifier, recordQrScan, createReview, isSessionSubmitted } from '@/lib/data';
 import { BusinessStatus, QRStatus } from '@prisma/client';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
@@ -58,7 +58,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         }
       });
     } else if (req.method === 'POST') {
-      const { rating, comment } = req.body;
+      const { rating, comment, customerName, customerPhone, requestCallback, reviewSessionId } = req.body;
       
       if (rating === undefined) {
         return res.status(400).json({ error: 'Rating is required.' });
@@ -69,10 +69,22 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         return res.status(400).json({ error: 'Rating must be a number between 1 and 5.' });
       }
 
+      // Check for duplicate submission
+      if (reviewSessionId) {
+        const alreadySubmitted = await isSessionSubmitted(reviewSessionId);
+        if (alreadySubmitted) {
+          return res.status(200).json({ success: true, message: 'Review already submitted for this session.' });
+        }
+      }
+
       const review = await createReview({
         rating: ratingVal,
         comment,
-        businessId: business.id
+        customerName,
+        customerPhone,
+        requestCallback: requestCallback === true,
+        businessId: business.id,
+        reviewSessionId
       });
 
       return res.status(200).json(review);

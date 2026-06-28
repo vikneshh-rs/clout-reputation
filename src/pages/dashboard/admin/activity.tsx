@@ -98,7 +98,7 @@ export default function ActivityLogsPage(props: any) {
   if (authLoading) {
     return (
       <div className="min-h-screen bg-white flex items-center justify-center font-['Source_Sans_Pro']">
-        <Loader2 className="animate-spin h-8 w-8 text-[#1853AB]" />
+        <Loader2 className="animate-spin h-8 w-8 text-[#073afe]" />
       </div>
     );
   }
@@ -123,7 +123,7 @@ export default function ActivityLogsPage(props: any) {
         <p className="text-xs text-slate-500 mt-0.5">Audit trail of all administrative and representative actions across the platform.</p>
         <button
           onClick={fetchLogs}
-          className="inline-flex items-center space-x-1 px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 text-[#1853AB] font-semibold text-[10px] transition-colors self-start sm:self-auto"
+          className="inline-flex items-center space-x-1 px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 text-[#073afe] font-semibold text-[10px] transition-colors self-start sm:self-auto"
           title="Reload logs list"
         >
           <RefreshCw size={12} />
@@ -143,7 +143,7 @@ export default function ActivityLogsPage(props: any) {
         {/* Filter Toolbar */}
         <div className="p-4 bg-slate-50/20 border-b border-slate-100 flex flex-col xl:flex-row justify-between items-center gap-4">
           <div className="flex items-center space-x-2">
-            <Database size={16} className="text-[#1853AB]" />
+            <Database size={16} className="text-[#073afe]" />
             <h4 className="font-bold text-xs text-slate-900 uppercase tracking-wider">Audit Log</h4>
           </div>
 
@@ -158,7 +158,7 @@ export default function ActivityLogsPage(props: any) {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search actor or description"
-                className="pl-8 pr-3 py-1.5 w-full sm:w-56 text-xs border border-slate-200 rounded-xl bg-white focus:border-[#1853AB] focus:outline-none focus:ring-2 focus:ring-[#1853AB]/10"
+                className="pl-8 pr-3 py-1.5 w-full sm:w-56 text-xs border border-slate-200 rounded-xl bg-white focus:border-[#073afe] focus:outline-none focus:ring-2 focus:ring-[#073afe]/10"
               />
             </div>
 
@@ -177,7 +177,7 @@ export default function ActivityLogsPage(props: any) {
             <select
               value={actionTypeFilter}
               onChange={(e) => setActionTypeFilter(e.target.value)}
-              className="text-xs border border-slate-200 rounded-xl bg-white px-2.5 py-1.5 focus:border-[#1853AB] focus:outline-none font-medium text-slate-700"
+              className="text-xs border border-slate-200 rounded-xl bg-white px-2.5 py-1.5 focus:border-[#073afe] focus:outline-none font-medium text-slate-700"
             >
               <option value="ALL">All Actions</option>
               <option value="Business">Business Actions</option>
@@ -191,7 +191,7 @@ export default function ActivityLogsPage(props: any) {
             <select
               value={roleFilter}
               onChange={(e) => setRoleFilter(e.target.value)}
-              className="text-xs border border-slate-200 rounded-xl bg-white px-2.5 py-1.5 focus:border-[#1853AB] focus:outline-none font-medium text-slate-700"
+              className="text-xs border border-slate-200 rounded-xl bg-white px-2.5 py-1.5 focus:border-[#073afe] focus:outline-none font-medium text-slate-700"
             >
               <option value="ALL">All Roles</option>
               <option value="SUPER_ADMIN">Super Admin</option>
@@ -216,7 +216,7 @@ export default function ActivityLogsPage(props: any) {
         <div className="overflow-x-auto font-['Source_Sans_Pro']">
           {loading && logs.length === 0 ? (
             <div className="p-12 text-center">
-              <Loader2 className="animate-spin h-6 w-6 text-[#1853AB] mx-auto mb-2" />
+              <Loader2 className="animate-spin h-6 w-6 text-[#073afe] mx-auto mb-2" />
               <span className="text-xs text-slate-400">Retrieving audit logs...</span>
             </div>
           ) : filteredLogs.length === 0 ? (

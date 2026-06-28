@@ -81,7 +81,7 @@ export default function AdminDashboard(props: any) {
   if (authLoading) {
     return (
       <div className="min-h-screen bg-slate-50 flex items-center justify-center font-sans">
-        <Loader2 className="animate-spin h-8 w-8 text-[#1853AB]" />
+        <Loader2 className="animate-spin h-8 w-8 text-[#073afe]" />
       </div>
     );
   }
@@ -99,7 +99,7 @@ export default function AdminDashboard(props: any) {
   if (loading && !stats) {
     return (
       <div className="min-h-screen bg-slate-50 flex items-center justify-center font-sans">
-        <Loader2 className="animate-spin h-8 w-8 text-[#1853AB]" />
+        <Loader2 className="animate-spin h-8 w-8 text-[#073afe]" />
       </div>
     );
   }
@@ -177,10 +177,10 @@ export default function AdminDashboard(props: any) {
           <div className="bg-white/80 backdrop-blur-md border border-slate-100 rounded-2xl overflow-hidden shadow-[0_4px_20px_rgba(0,0,0,0.02)]">
             <div className="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50/20">
               <div className="flex items-center space-x-2">
-                <Activity size={16} className="text-[#1853AB]" />
+                <Activity size={16} className="text-[#073afe]" />
                 <h4 className="text-sm font-bold text-slate-900">Recent Activity Log</h4>
               </div>
-              <Link href="/dashboard/admin/activity" className="text-xs font-semibold text-[#1853AB] hover:underline flex items-center">
+              <Link href="/dashboard/admin/activity" className="text-xs font-semibold text-[#073afe] hover:underline flex items-center">
                 View All Activity
                 <ArrowRight size={14} className="ml-1" />
               </Link>
@@ -191,7 +191,7 @@ export default function AdminDashboard(props: any) {
                 stats.recentLogs.map((log) => (
                   <div key={log.id} className="p-4 hover:bg-slate-50/30 transition-colors flex justify-between items-center text-xs">
                     <div className="flex items-center space-x-4">
-                      <div className="p-2.5 bg-blue-50/70 text-[#1853AB] rounded-xl">
+                      <div className="p-2.5 bg-blue-50/70 text-[#073afe] rounded-xl">
                         <Activity size={16} />
                       </div>
                       <div className="space-y-1">

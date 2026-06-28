@@ -104,7 +104,7 @@ export default function RepsLoginPage() {
                   required
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
-                  className="block w-full pl-10 pr-3 py-2.5 text-sm bg-white border border-slate-300 text-slate-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1853AB]/20 focus:border-[#1853AB] transition-all"
+                  className="block w-full pl-10 pr-3 py-2.5 text-sm bg-white border border-slate-300 text-slate-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#073afe]/20 focus:border-[#073afe] transition-all"
                   placeholder="dan"
                 />
               </div>
@@ -125,7 +125,7 @@ export default function RepsLoginPage() {
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="block w-full pl-10 pr-3 py-2.5 text-sm bg-white border border-slate-300 text-slate-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1853AB]/20 focus:border-[#1853AB] transition-all"
+                  className="block w-full pl-10 pr-3 py-2.5 text-sm bg-white border border-slate-300 text-slate-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#073afe]/20 focus:border-[#073afe] transition-all"
                   placeholder="••••••••"
                 />
               </div>
@@ -135,7 +135,7 @@ export default function RepsLoginPage() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full flex justify-center items-center py-2.5 px-4 border border-transparent rounded-lg shadow-sm text-sm font-semibold text-white bg-[#1853AB] hover:bg-[#1244ab] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#1853AB] disabled:opacity-50 disabled:cursor-not-allowed transition-all cursor-pointer"
+                className="w-full flex justify-center items-center py-2.5 px-4 border border-transparent rounded-lg shadow-sm text-sm font-semibold text-white bg-[#073afe] hover:bg-[#052ecb] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#073afe] disabled:opacity-50 disabled:cursor-not-allowed transition-all cursor-pointer"
               >
                 {loading ? <Loader2 className="animate-spin h-5 w-5 mr-2" /> : null}
                 Authenticate Representative

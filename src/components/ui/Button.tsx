@@ -15,12 +15,12 @@ export default function Button({
   ...props
 }: ButtonProps) {
   const baseStyle =
-    'inline-flex items-center justify-center text-sm font-semibold h-11 px-4 rounded-xl transition-all duration-200 cursor-pointer focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed';
+    'inline-flex items-center justify-center text-sm font-semibold h-11 px-5 rounded-xl transition-all duration-200 cursor-pointer focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed';
 
   const variants = {
-    primary: 'bg-[#2563EB] hover:bg-[#1D4ED8] text-white focus:ring-[#2563EB]/40 border border-transparent',
+    primary: 'bg-[#073AFE] hover:bg-[#0022D9] text-white focus:ring-[#073AFE]/40 border border-transparent',
     secondary: 'bg-white hover:bg-[#F8FAFC] text-[#111827] border border-[#D1D5DB] focus:ring-slate-500/20',
-    ghost: 'bg-transparent hover:bg-[#EFF6FF] text-[#4B5563] hover:text-[#2563EB] border border-transparent focus:ring-blue-500/10',
+    ghost: 'bg-transparent hover:bg-[#EFF3FF] text-[#4B5563] hover:text-[#073AFE] border border-transparent focus:ring-[#073AFE]/10',
   };
 
   return (

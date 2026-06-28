@@ -69,7 +69,7 @@ export default function RepDashboard(props: any) {
   if (authLoading) {
     return (
       <div className="min-h-screen bg-slate-50 flex items-center justify-center font-sans">
-        <Loader2 className="animate-spin h-8 w-8 text-[#1853AB]" />
+        <Loader2 className="animate-spin h-8 w-8 text-[#073afe]" />
       </div>
     );
   }
@@ -96,7 +96,7 @@ export default function RepDashboard(props: any) {
       {/* Welcome banner */}
       <div className="bg-white/80 backdrop-blur-md rounded-2xl border border-slate-100 p-6 mb-8 shadow-[0_4px_20px_rgba(0,0,0,0.02)]">
         <div className="flex items-center space-x-3 mb-2">
-          <div className="p-2.5 bg-blue-50/70 text-[#1853AB] rounded-xl">
+          <div className="p-2.5 bg-blue-50/70 text-[#073afe] rounded-xl">
             <UserCheck size={20} />
           </div>
           <h2 className="text-lg font-bold tracking-tight text-slate-900 font-sans">Welcome back, {user.name}!</h2>
@@ -113,10 +113,10 @@ export default function RepDashboard(props: any) {
           <div className="space-y-2">
             <span className="block text-[10px] font-bold text-slate-450 uppercase tracking-widest">Assigned Businesses</span>
             <div className="flex items-baseline space-x-1.5 mt-2">
-              <h3 className="text-3xl font-extrabold text-[#1853AB]">{stats.onboardedCount}</h3>
+              <h3 className="text-3xl font-extrabold text-[#073afe]">{stats.onboardedCount}</h3>
             </div>
           </div>
-          <div className="p-3 bg-blue-50/70 text-[#1853AB] rounded-2xl group-hover:scale-105 transition-transform duration-300">
+          <div className="p-3 bg-blue-50/70 text-[#073afe] rounded-2xl group-hover:scale-105 transition-transform duration-300">
             <Briefcase size={20} />
           </div>
         </div>
@@ -205,7 +205,7 @@ export default function RepDashboard(props: any) {
           </div>
           <button
             onClick={() => router.push('/dashboard/rep/history')}
-            className="text-[10px] font-bold text-[#1853AB] hover:underline inline-flex items-center gap-0.5 cursor-pointer"
+            className="text-[10px] font-bold text-[#073afe] hover:underline inline-flex items-center gap-0.5 cursor-pointer"
           >
             Full Logs <ArrowRight size={10} />
           </button>
@@ -219,7 +219,7 @@ export default function RepDashboard(props: any) {
 
         {loading ? (
           <div className="py-10 flex justify-center items-center">
-            <Loader2 className="animate-spin h-6 w-6 text-[#1853AB]" />
+            <Loader2 className="animate-spin h-6 w-6 text-[#073afe]" />
           </div>
         ) : stats.assignmentsCount === 0 ? (
           <div className="py-10 text-center text-xs text-slate-400">
@@ -241,7 +241,7 @@ export default function RepDashboard(props: any) {
                     <tr key={log.id} className="hover:bg-slate-50/40 transition-colors">
                       <td className="px-4 py-3 font-semibold text-slate-900">{log.business?.name || 'Unknown Business'}</td>
                       <td className="px-4 py-3 capitalize text-slate-500">{log.business?.industry ? log.business.industry.toLowerCase().replace('_', ' ') : 'N/A'}</td>
-                      <td className="px-4 py-3 font-mono font-bold text-[#1853AB]">{log.qrInventory?.qrCode || 'N/A'}</td>
+                      <td className="px-4 py-3 font-mono font-bold text-[#073afe]">{log.qrInventory?.qrCode || 'N/A'}</td>
                       <td className="px-4 py-3 text-right text-slate-400">
                         {new Date(log.createdAt).toLocaleDateString()}
                       </td>

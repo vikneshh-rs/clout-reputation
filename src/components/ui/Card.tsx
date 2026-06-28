@@ -13,15 +13,15 @@ export default function Card({
   children,
   ...props
 }: CardProps) {
-  const baseStyle = 'rounded-[20px] p-6 transition-all duration-300';
+  const baseStyle = 'rounded-[16px] p-6 transition-all duration-300';
   
   const variants = {
-    standard: 'bg-white border border-[#E5E7EB] shadow-[0px_4px_20px_rgba(15,23,42,0.06)]',
-    glass: 'bg-white/70 backdrop-blur-xl border border-white/50 shadow-[0px_8px_30px_rgba(15,23,42,0.08)]',
+    standard: 'bg-white border border-[#E5E7EB] shadow-[0px_2px_8px_rgba(15,23,42,0.02)]',
+    glass: 'bg-white/70 backdrop-blur-xl border border-white/50 shadow-[0px_4px_12px_rgba(15,23,42,0.02)]',
   };
 
   const hoverStyle = hoverLift 
-    ? 'hover:-translate-y-[3px] hover:shadow-[0px_12px_40px_rgba(15,23,42,0.12)]' 
+    ? 'hover:-translate-y-[2px] hover:shadow-[0px_6px_16px_rgba(15,23,42,0.04)]' 
     : '';
 
   return (

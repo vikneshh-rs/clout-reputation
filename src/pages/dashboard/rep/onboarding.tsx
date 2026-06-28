@@ -411,7 +411,7 @@ export default function RepOnboardingPage(props: any) {
   if (authLoading) {
     return (
       <div className="min-h-screen bg-slate-50 flex items-center justify-center font-sans">
-        <Loader2 className="animate-spin h-8 w-8 text-[#1853AB]" />
+        <Loader2 className="animate-spin h-8 w-8 text-[#073afe]" />
       </div>
     );
   }
@@ -436,7 +436,7 @@ export default function RepOnboardingPage(props: any) {
         <p className="text-xs text-slate-500 mt-0.5">Onboard new businesses, configure profile assets, monitor completion status, and download branded sheet materials.</p>
         <button
           onClick={openOnboardModal}
-          className="bg-gradient-to-r from-blue-600 to-[#1853AB] hover:from-blue-700 hover:to-indigo-750 text-white text-xs font-bold px-4 py-2.5 rounded-2xl flex items-center gap-1.5 self-start sm:self-auto transition-all shadow-md shadow-blue-500/10 active:scale-[0.98]"
+          className="bg-gradient-to-r from-blue-600 to-[#073afe] hover:from-blue-700 hover:to-indigo-750 text-white text-xs font-bold px-4 py-2.5 rounded-2xl flex items-center gap-1.5 self-start sm:self-auto transition-all shadow-md shadow-blue-500/10 active:scale-[0.98]"
         >
           <Plus size={14} />
           Onboard New Business
@@ -462,7 +462,7 @@ export default function RepOnboardingPage(props: any) {
         {/* Filter Toolbar */}
         <div className="p-6 border-b border-slate-100/60 flex flex-col sm:flex-row justify-between items-center gap-4">
           <div className="flex items-center space-x-2.5">
-            <Store size={16} className="text-[#1853AB]" />
+            <Store size={16} className="text-[#073afe]" />
             <h4 className="font-bold text-xs text-slate-900 uppercase tracking-wider font-sans">Onboarded Directory</h4>
           </div>
 
@@ -477,7 +477,7 @@ export default function RepOnboardingPage(props: any) {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search business, code, contact..."
-                className="pl-9 pr-3 py-1.5 w-full sm:w-56 text-xs border border-slate-200 rounded-xl bg-white/60 focus:border-[#1853AB] focus:outline-none focus:ring-4 focus:ring-blue-500/5 transition-all"
+                className="pl-9 pr-3 py-1.5 w-full sm:w-56 text-xs border border-slate-200 rounded-xl bg-white/60 focus:border-[#073afe] focus:outline-none focus:ring-4 focus:ring-blue-500/5 transition-all"
               />
             </div>
 
@@ -485,7 +485,7 @@ export default function RepOnboardingPage(props: any) {
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              className="px-3 py-1.5 text-xs border border-slate-200 rounded-xl bg-white focus:border-[#1853AB] focus:outline-none focus:ring-4 focus:ring-blue-500/5 transition-all text-slate-700 font-semibold"
+              className="px-3 py-1.5 text-xs border border-slate-200 rounded-xl bg-white focus:border-[#073afe] focus:outline-none focus:ring-4 focus:ring-blue-500/5 transition-all text-slate-700 font-semibold"
             >
               <option value="ALL">All Statuses</option>
               <option value="PENDING">Pending</option>
@@ -499,7 +499,7 @@ export default function RepOnboardingPage(props: any) {
         <div className="overflow-x-auto">
           {loading && businesses.length === 0 ? (
             <div className="p-12 text-center">
-              <Loader2 className="animate-spin h-6 w-6 text-[#1853AB] mx-auto mb-2.5" />
+              <Loader2 className="animate-spin h-6 w-6 text-[#073afe] mx-auto mb-2.5" />
               <span className="text-xs text-slate-400 font-medium">Loading onboarded businesses...</span>
             </div>
           ) : filteredBusinesses.length === 0 ? (
@@ -533,7 +533,7 @@ export default function RepOnboardingPage(props: any) {
                               className="w-10 h-10 rounded-xl object-cover border border-slate-100 shadow-sm" 
                             />
                           ) : (
-                            <div className="p-2.5 bg-slate-50 border border-slate-200/50 rounded-xl text-[#1853AB]">
+                            <div className="p-2.5 bg-slate-50 border border-slate-200/50 rounded-xl text-[#073afe]">
                               <Store size={18} />
                             </div>
                           )}
@@ -557,7 +557,7 @@ export default function RepOnboardingPage(props: any) {
                         <div className="space-y-1 max-w-[120px]">
                           <div className="flex justify-between text-[9px] font-bold">
                             <span className="text-slate-500">{setupState.label}</span>
-                            <span className="text-[#1853AB]">{completionPct}%</span>
+                            <span className="text-[#073afe]">{completionPct}%</span>
                           </div>
                           <div className="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden">
                             <div 
@@ -594,7 +594,7 @@ export default function RepOnboardingPage(props: any) {
                         
                         <Link
                           href={`/dashboard/business?businessId=${biz.id}&readOnly=true`}
-                          className="inline-flex items-center gap-1 px-3 py-1.5 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 text-[#1853AB] font-bold text-[10px] shadow-sm transition-all"
+                          className="inline-flex items-center gap-1 px-3 py-1.5 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 text-[#073afe] font-bold text-[10px] shadow-sm transition-all"
                         >
                           <ExternalLink size={10} />
                           <span>View Dashboard</span>
@@ -615,7 +615,7 @@ export default function RepOnboardingPage(props: any) {
           <div className="bg-white/90 backdrop-blur-xl border border-white/60 rounded-3xl shadow-2xl max-w-lg w-full overflow-hidden animate-in fade-in zoom-in-95 duration-200 flex flex-col max-h-[90vh]">
             <div className="px-6 py-4 border-b border-slate-100/60 flex items-center justify-between">
               <h3 className="font-bold text-sm text-slate-900 flex items-center gap-1.5">
-                <Store size={16} className="text-[#1853AB]" />
+                <Store size={16} className="text-[#073afe]" />
                 Onboard Client Business
               </h3>
               <button 
@@ -643,7 +643,7 @@ export default function RepOnboardingPage(props: any) {
                         <img src={logoPreview} alt="Preview" className="h-full w-full object-cover" />
                         {logoUploading && (
                           <div className="absolute inset-0 bg-white/60 flex items-center justify-center">
-                            <Loader2 className="animate-spin h-4 w-4 text-[#1853AB]" />
+                            <Loader2 className="animate-spin h-4 w-4 text-[#073afe]" />
                           </div>
                         )}
                       </div>
@@ -679,7 +679,7 @@ export default function RepOnboardingPage(props: any) {
                       value={formData.name}
                       onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                       placeholder="e.g. Bella Italia"
-                      className="w-full text-xs p-3 border border-slate-200 rounded-2xl focus:border-[#1853AB] focus:outline-none focus:ring-4 focus:ring-blue-500/5 bg-white/60"
+                      className="w-full text-xs p-3 border border-slate-200 rounded-2xl focus:border-[#073afe] focus:outline-none focus:ring-4 focus:ring-blue-500/5 bg-white/60"
                     />
                   </div>
 
@@ -690,7 +690,7 @@ export default function RepOnboardingPage(props: any) {
                       value={formData.category}
                       onChange={(e) => setFormData({ ...formData, category: e.target.value })}
                       placeholder="e.g. Italian Restaurant, Salon"
-                      className="w-full text-xs p-3 border border-slate-200 rounded-2xl focus:border-[#1853AB] focus:outline-none focus:ring-4 focus:ring-blue-500/5 bg-white/60"
+                      className="w-full text-xs p-3 border border-slate-200 rounded-2xl focus:border-[#073afe] focus:outline-none focus:ring-4 focus:ring-blue-500/5 bg-white/60"
                     />
                   </div>
                 </div>
@@ -703,7 +703,7 @@ export default function RepOnboardingPage(props: any) {
                       value={formData.password}
                       onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                       placeholder="Dashboard password"
-                      className="w-full text-xs p-3 border border-slate-200 rounded-2xl focus:border-[#1853AB] focus:outline-none focus:ring-4 focus:ring-blue-500/5 bg-white/60"
+                      className="w-full text-xs p-3 border border-slate-200 rounded-2xl focus:border-[#073afe] focus:outline-none focus:ring-4 focus:ring-blue-500/5 bg-white/60"
                     />
                   </div>
 
@@ -712,7 +712,7 @@ export default function RepOnboardingPage(props: any) {
                     <select
                       value={formData.industry}
                       onChange={(e) => setFormData({ ...formData, industry: e.target.value as any })}
-                      className="w-full text-xs p-3 border border-slate-200 rounded-2xl focus:border-[#1853AB] focus:outline-none focus:ring-4 focus:ring-blue-500/5 bg-white"
+                      className="w-full text-xs p-3 border border-slate-200 rounded-2xl focus:border-[#073afe] focus:outline-none focus:ring-4 focus:ring-blue-500/5 bg-white"
                     >
                       <option value="RESTAURANT">Restaurant</option>
                       <option value="CAFE">Cafe</option>
@@ -735,7 +735,7 @@ export default function RepOnboardingPage(props: any) {
                     onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                     placeholder="Short description of the client business"
                     rows={3}
-                    className="w-full text-xs p-3 border border-slate-200 rounded-2xl focus:border-[#1853AB] focus:outline-none focus:ring-4 focus:ring-blue-500/5 bg-white/60"
+                    className="w-full text-xs p-3 border border-slate-200 rounded-2xl focus:border-[#073afe] focus:outline-none focus:ring-4 focus:ring-blue-500/5 bg-white/60"
                   />
                 </div>
 
@@ -747,7 +747,7 @@ export default function RepOnboardingPage(props: any) {
                       value={formData.contactPerson}
                       onChange={(e) => setFormData({ ...formData, contactPerson: e.target.value })}
                       placeholder="e.g. John Doe"
-                      className="w-full text-xs p-3 border border-slate-200 rounded-2xl focus:border-[#1853AB] focus:outline-none focus:ring-4 focus:ring-blue-500/5 bg-white/60"
+                      className="w-full text-xs p-3 border border-slate-200 rounded-2xl focus:border-[#073afe] focus:outline-none focus:ring-4 focus:ring-blue-500/5 bg-white/60"
                     />
                   </div>
 
@@ -758,7 +758,7 @@ export default function RepOnboardingPage(props: any) {
                       value={formData.phone}
                       onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                       placeholder="e.g. +1 555-1234"
-                      className="w-full text-xs p-3 border border-slate-200 rounded-2xl focus:border-[#1853AB] focus:outline-none focus:ring-4 focus:ring-blue-500/5 bg-white/60"
+                      className="w-full text-xs p-3 border border-slate-200 rounded-2xl focus:border-[#073afe] focus:outline-none focus:ring-4 focus:ring-blue-500/5 bg-white/60"
                     />
                   </div>
                 </div>
@@ -770,7 +770,7 @@ export default function RepOnboardingPage(props: any) {
                     value={formData.address}
                     onChange={(e) => setFormData({ ...formData, address: e.target.value })}
                     placeholder="e.g. 100 Main Street, New York"
-                    className="w-full text-xs p-3 border border-slate-200 rounded-2xl focus:border-[#1853AB] focus:outline-none focus:ring-4 focus:ring-blue-500/5 bg-white/60"
+                    className="w-full text-xs p-3 border border-slate-200 rounded-2xl focus:border-[#073afe] focus:outline-none focus:ring-4 focus:ring-blue-500/5 bg-white/60"
                   />
                 </div>
 
@@ -782,7 +782,7 @@ export default function RepOnboardingPage(props: any) {
                       value={formData.website}
                       onChange={(e) => setFormData({ ...formData, website: e.target.value })}
                       placeholder="https://clientwebsite.com"
-                      className="w-full text-xs p-3 border border-slate-200 rounded-2xl focus:border-[#1853AB] focus:outline-none focus:ring-4 focus:ring-blue-500/5 bg-white/60"
+                      className="w-full text-xs p-3 border border-slate-200 rounded-2xl focus:border-[#073afe] focus:outline-none focus:ring-4 focus:ring-blue-500/5 bg-white/60"
                     />
                   </div>
 
@@ -793,7 +793,7 @@ export default function RepOnboardingPage(props: any) {
                       value={formData.googleMapsUrl}
                       onChange={(e) => setFormData({ ...formData, googleMapsUrl: e.target.value })}
                       placeholder="https://maps.google.com/?cid=..."
-                      className="w-full text-xs p-3 border border-slate-200 rounded-2xl focus:border-[#1853AB] focus:outline-none focus:ring-4 focus:ring-blue-500/5 bg-white/60"
+                      className="w-full text-xs p-3 border border-slate-200 rounded-2xl focus:border-[#073afe] focus:outline-none focus:ring-4 focus:ring-blue-500/5 bg-white/60"
                     />
                   </div>
                 </div>
@@ -805,7 +805,7 @@ export default function RepOnboardingPage(props: any) {
                     value={formData.googleReviewUrl}
                     onChange={(e) => handleGoogleUrlChange(e.target.value)}
                     placeholder="https://search.google.com/local/writereview?placeid=..."
-                    className="w-full text-xs p-3 border border-slate-200 rounded-2xl focus:border-[#1853AB] focus:outline-none focus:ring-4 focus:ring-blue-500/5 bg-white/60"
+                    className="w-full text-xs p-3 border border-slate-200 rounded-2xl focus:border-[#073afe] focus:outline-none focus:ring-4 focus:ring-blue-500/5 bg-white/60"
                   />
                   {googleUrlWarning && (
                     <div className="mt-2 text-[10px] text-amber-600 font-bold flex items-center gap-1">
@@ -828,7 +828,7 @@ export default function RepOnboardingPage(props: any) {
                 <button
                   type="submit"
                   disabled={submitting || logoUploading}
-                  className="px-4 py-2.5 bg-gradient-to-r from-blue-600 to-[#1853AB] text-white font-bold rounded-2xl shadow-md shadow-blue-500/10 active:scale-[0.98] transition-all flex items-center gap-1 border-none cursor-pointer"
+                  className="px-4 py-2.5 bg-gradient-to-r from-blue-600 to-[#073afe] text-white font-bold rounded-2xl shadow-md shadow-blue-500/10 active:scale-[0.98] transition-all flex items-center gap-1 border-none cursor-pointer"
                 >
                   {submitting && <Loader2 className="animate-spin h-3.5 w-3.5" />}
                   <span>Onboard & Setup</span>
@@ -849,7 +849,7 @@ export default function RepOnboardingPage(props: any) {
                 {viewingBusiness.logoUrl ? (
                   <img src={viewingBusiness.logoUrl} alt={viewingBusiness.name} className="w-11 h-11 rounded-xl object-cover border border-slate-200" />
                 ) : (
-                  <div className="p-2.5 bg-white border border-slate-200 rounded-xl text-[#1853AB]">
+                  <div className="p-2.5 bg-white border border-slate-200 rounded-xl text-[#073afe]">
                     <Store size={20} />
                   </div>
                 )}
@@ -869,7 +869,7 @@ export default function RepOnboardingPage(props: any) {
             {/* Scrollable details */}
             <div className="flex-grow overflow-y-auto p-6 space-y-6 text-xs text-slate-600">
               {qrActionMsg && (
-                <div className="p-3.5 rounded-2xl bg-blue-50 border border-blue-200 text-[#1853AB] font-bold">
+                <div className="p-3.5 rounded-2xl bg-blue-50 border border-blue-200 text-[#073afe] font-bold">
                   {qrActionMsg}
                 </div>
               )}
@@ -886,7 +886,7 @@ export default function RepOnboardingPage(props: any) {
                 <div className="space-y-1.5">
                   <div className="flex justify-between font-bold">
                     <span>Profile Completion</span>
-                    <span className="text-[#1853AB]">{computeProfileCompletion(viewingBusiness)}%</span>
+                    <span className="text-[#073afe]">{computeProfileCompletion(viewingBusiness)}%</span>
                   </div>
                   <div className="w-full bg-slate-200 h-2 rounded-full overflow-hidden">
                     <div 
@@ -960,7 +960,7 @@ export default function RepOnboardingPage(props: any) {
                     <div>
                       <span className="text-[10px] text-slate-400 font-medium block">Website</span>
                       {viewingBusiness.website ? (
-                        <a href={viewingBusiness.website} target="_blank" rel="noreferrer" className="text-[#1853AB] font-semibold hover:underline flex items-center gap-0.5 mt-0.5">
+                        <a href={viewingBusiness.website} target="_blank" rel="noreferrer" className="text-[#073afe] font-semibold hover:underline flex items-center gap-0.5 mt-0.5">
                           {viewingBusiness.website.replace(/^https?:\/\//i, '')} <ExternalLink size={10} />
                         </a>
                       ) : (
@@ -1004,7 +1004,7 @@ export default function RepOnboardingPage(props: any) {
                   {viewingBusiness.googleMapsUrl && (
                     <div>
                       <span className="text-[10px] text-slate-400 font-medium block">Google Maps Link</span>
-                      <a href={viewingBusiness.googleMapsUrl} target="_blank" rel="noreferrer" className="text-[#1853AB] font-semibold hover:underline flex items-center gap-0.5 mt-0.5">
+                      <a href={viewingBusiness.googleMapsUrl} target="_blank" rel="noreferrer" className="text-[#073afe] font-semibold hover:underline flex items-center gap-0.5 mt-0.5">
                         Open on Google Maps <Map size={10} />
                       </a>
                     </div>
@@ -1019,7 +1019,7 @@ export default function RepOnboardingPage(props: any) {
                 <div className="space-y-4">
                   <div>
                     <span className="text-[10px] text-slate-400 font-medium block">Google Reviews URL</span>
-                    <a href={viewingBusiness.googleReviewUrl || '#'} target="_blank" rel="noreferrer" className="text-[#1853AB] font-semibold hover:underline flex items-center gap-0.5 mt-0.5 truncate max-w-sm">
+                    <a href={viewingBusiness.googleReviewUrl || '#'} target="_blank" rel="noreferrer" className="text-[#073afe] font-semibold hover:underline flex items-center gap-0.5 mt-0.5 truncate max-w-sm">
                       {viewingBusiness.googleReviewUrl || 'None'} <ExternalLink size={10} />
                     </a>
                   </div>
@@ -1043,7 +1043,7 @@ export default function RepOnboardingPage(props: any) {
                     <button
                       onClick={() => handleGenerateQr(viewingBusiness.id)}
                       disabled={qrGenerating}
-                      className="px-3 py-2 bg-gradient-to-r from-blue-600 to-[#1853AB] text-white font-bold rounded-xl shadow-sm text-[10px] disabled:opacity-50 border-none cursor-pointer"
+                      className="px-3 py-2 bg-gradient-to-r from-blue-600 to-[#073afe] text-white font-bold rounded-xl shadow-sm text-[10px] disabled:opacity-50 border-none cursor-pointer"
                     >
                       {qrGenerating ? 'Generating...' : 'Generate QR'}
                     </button>

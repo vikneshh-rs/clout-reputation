@@ -1,19 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
-import { 
-  AlertTriangle, 
-  Loader2, 
-  Store, 
-  ExternalLink, 
-  Star, 
-  Check, 
-  Phone,
-  User,
-  Heart,
-  MessageSquare,
-  ChevronRight
-} from 'lucide-react';
+import { AlertTriangle, Loader2 } from 'lucide-react';
+import DigitalReviewCard from '@/components/review/DigitalReviewCard';
+import RatingCard from '@/components/review/RatingCard';
+import RecoveryForm from '@/components/review/RecoveryForm';
+import SuccessScreen from '@/components/review/SuccessScreen';
+import PoweredByFooter from '@/components/review/PoweredByFooter';
 
 interface BusinessDetails {
   qrCode: string;
@@ -30,11 +23,11 @@ interface BusinessDetails {
   };
 }
 
-export default function PublicQRResolver() {
+export default function PublicReviewPortal() {
   const router = useRouter();
   const { slug } = router.query;
 
-  // Loading and details state
+  // Portal Details State
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [qrStatus, setQrStatus] = useState<string | null>(null);
@@ -45,24 +38,53 @@ export default function PublicQRResolver() {
   const [funnelLoggedScan, setFunnelLoggedScan] = useState(false);
   const [funnelLoggedStart, setFunnelLoggedStart] = useState(false);
 
-  // Form states
-  const [step, setStep] = useState<'rating' | 'positive-share' | 'positive-completion' | 'negative-form' | 'negative-completion'>('rating');
+  // Flow State
+  const [step, setStep] = useState<'rating' | 'positive-redirect' | 'negative-form' | 'negative-completion'>('rating');
   const [rating, setRating] = useState(0);
-  const [comment, setComment] = useState('');
-  const [customerName, setCustomerName] = useState('');
-  const [customerPhone, setCustomerPhone] = useState('');
-  const [callbackRequested, setCallbackRequested] = useState(false);
-  
+  const [isBottomSheetOpen, setIsBottomSheetOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
-  const [createdReview, setCreatedReview] = useState<any>(null);
 
-  // Generate session ID on mount
+  // Tap Safety Net Timer State
+  const [selectionTimer, setSelectionTimer] = useState<NodeJS.Timeout | null>(null);
+
+  // Redirect Countdown State
+  const [countdown, setCountdown] = useState(2.0);
+  const [redirectInterval, setRedirectInterval] = useState<NodeJS.Timeout | null>(null);
+
+  // Check and initialize session storage on mount / details resolution
   useEffect(() => {
-    setReviewSessionId(`session-${Math.random().toString(36).substring(2, 11)}_${Date.now()}`);
-  }, []);
+    if (!slug) return;
+    
+    const sessionKey = `clout_session_${slug}`;
+    const savedSession = sessionStorage.getItem(sessionKey);
+    
+    if (savedSession) {
+      try {
+        const parsed = JSON.parse(savedSession);
+        setReviewSessionId(parsed.reviewSessionId);
+        if (parsed.hasSubmitted) {
+          const isPos = parsed.submittedRating >= 4;
+          setStep(isPos ? 'positive-redirect' : 'negative-completion');
+          setRating(parsed.submittedRating);
+          if (!isPos) {
+            setIsBottomSheetOpen(true);
+          }
+        }
+      } catch (e) {
+        console.error('Error parsing saved session:', e);
+        const newId = `session-${Math.random().toString(36).substring(2, 11)}_${Date.now()}`;
+        setReviewSessionId(newId);
+        sessionStorage.setItem(sessionKey, JSON.stringify({ reviewSessionId: newId, hasSubmitted: false }));
+      }
+    } else {
+      const newId = `session-${Math.random().toString(36).substring(2, 11)}_${Date.now()}`;
+      setReviewSessionId(newId);
+      sessionStorage.setItem(sessionKey, JSON.stringify({ reviewSessionId: newId, hasSubmitted: false }));
+    }
+  }, [slug]);
 
-  // Fetch details
+  // Fetch Portal details
   useEffect(() => {
     if (!slug) return;
 
@@ -89,7 +111,7 @@ export default function PublicQRResolver() {
     fetchBusinessDetails();
   }, [slug]);
 
-  // Log SCAN stage once details are fetched successfully
+  // Log SCAN stage once details are fetched
   useEffect(() => {
     if (details && reviewSessionId && !funnelLoggedScan) {
       setFunnelLoggedScan(true);
@@ -106,7 +128,7 @@ export default function PublicQRResolver() {
   }, [details, reviewSessionId, funnelLoggedScan]);
 
   // Log START stage when a user clicks a star for the first time
-  const triggerFunnelStart = async (selectedRating: number) => {
+  const triggerFunnelStart = (selectedRating: number) => {
     if (details && reviewSessionId && !funnelLoggedStart) {
       setFunnelLoggedStart(true);
       fetch('/api/business/funnel', {
@@ -119,32 +141,45 @@ export default function PublicQRResolver() {
         })
       }).catch(err => console.error('Failed to log START stage:', err));
     }
-
-    setRating(selectedRating);
     setSaveError(null);
-
-    // Route to appropriate path based on rating selection
-    if (selectedRating >= 4) {
-      setStep('positive-share');
-    } else {
-      setStep('negative-form');
-    }
   };
 
-  // Submit positive review (e.g. if they click Maybe Later or we pre-save before redirect)
-  const submitPositiveReview = async (isRedirecting: boolean) => {
-    if (!details) return;
-    try {
-      setSubmitting(true);
-      setSaveError(null);
+  // Handle star rating selection tap (with 400ms protection window)
+  const handleStarSelect = (selectedRating: number) => {
+    if (selectionTimer) {
+      clearTimeout(selectionTimer);
+    }
 
+    setRating(selectedRating);
+    triggerFunnelStart(selectedRating);
+
+    const timer = setTimeout(() => {
+      if (selectedRating >= 4) {
+        submitPositiveRating(selectedRating);
+      } else {
+        setStep('negative-form');
+        setIsBottomSheetOpen(true);
+      }
+    }, 400);
+
+    setSelectionTimer(timer);
+  };
+
+  // Submit positive rating (4-5 stars) and initiate automatic countdown redirect
+  const submitPositiveRating = async (posRating: number) => {
+    if (!details) return;
+
+    setSubmitting(true);
+    setSaveError(null);
+
+    try {
       const res = await fetch(`/api/r/${slug}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          rating,
-          comment: isRedirecting ? 'Redirected to Google Reviews' : 'Opted to skip Google redirect',
-          customerName: 'Positive Guest',
+          rating: posRating,
+          comment: null,
+          customerName: null,
           customerPhone: null,
           requestCallback: false,
           reviewSessionId
@@ -152,106 +187,117 @@ export default function PublicQRResolver() {
       });
 
       if (!res.ok) {
-        throw new Error('Failed to record positive review.');
+        throw new Error('Failed to record rating.');
       }
 
       const review = await res.json();
-      setCreatedReview(review);
 
-      // Log CTA View
-      await fetch('/api/r/cta', {
+      fetch('/api/r/cta', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ reviewId: review.id, action: 'view' })
-      }).catch(err => console.error('Failed to log CTA view:', err));
+        body: JSON.stringify({
+          reviewId: review.id,
+          action: 'click',
+          businessId: details.business.id,
+          reviewSessionId
+        })
+      }).catch(err => console.error('Failed to log redirect cta click:', err));
 
-      if (isRedirecting) {
-        // Log CTA Click and redirect
-        await fetch('/api/r/cta', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ 
-            reviewId: review.id, 
-            action: 'click', 
-            businessId: details.business.id, 
-            reviewSessionId 
-          })
-        }).catch(err => console.error('Failed to log CTA click:', err));
+      const sessionKey = `clout_session_${slug}`;
+      sessionStorage.setItem(sessionKey, JSON.stringify({
+        reviewSessionId,
+        hasSubmitted: true,
+        submittedRating: posRating,
+        callbackRequested: false
+      }));
+
+      setStep('positive-redirect');
+      setSubmitting(false);
+
+      let timeRemaining = 2.0;
+      const interval = setInterval(() => {
+        timeRemaining -= 0.1;
+        setCountdown(Math.max(0, timeRemaining));
         
-        window.location.href = details.business.googleReviewUrl || '/';
-      } else {
-        setStep('positive-completion');
-      }
+        if (timeRemaining <= 0) {
+          clearInterval(interval);
+          if (details.business.googleReviewUrl) {
+            window.location.href = details.business.googleReviewUrl;
+          }
+        }
+      }, 100);
+
+      setRedirectInterval(interval);
+
     } catch (err: any) {
-      console.error('Positive review submission error:', err);
-      setSaveError(err.message || 'Error saving review. Please try again.');
-    } finally {
+      console.error(err);
+      setSaveError(err.message || 'Unable to submit rating. Please try again.');
       setSubmitting(false);
     }
   };
 
-  // Submit negative review and create recovery ticket
-  const handleNegativeSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleRedirectClick = (e: React.MouseEvent) => {
+    if (redirectInterval) {
+      clearInterval(redirectInterval);
+    }
+    if (details?.business?.googleReviewUrl) {
+      window.location.href = details.business.googleReviewUrl;
+    }
+  };
+
+  const handleRecoverySubmit = async (formData: { customerName: string; customerPhone: string; comment: string; callbackRequested: boolean }) => {
     if (!details) return;
 
+    setSubmitting(true);
     setSaveError(null);
 
-    // Front-end validations
-    if (!customerName.trim()) {
-      alert('Please enter your name.');
-      return;
-    }
-    if (!customerPhone.trim()) {
-      alert('Please enter your WhatsApp number.');
-      return;
-    }
-    if (!comment.trim()) {
-      alert('Please share your feedback so we can improve.');
-      return;
-    }
-
-    // WhatsApp phone format validation (only digits, plus, space, dash, min 7 chars)
-    const phoneClean = customerPhone.trim();
-    const phoneRegex = /^[0-9+\s\-]{7,20}$/;
-    if (!phoneRegex.test(phoneClean)) {
-      alert('Please enter a valid WhatsApp phone number (at least 7 digits, digits and optional + only).');
-      return;
-    }
-
     try {
-      setSubmitting(true);
       const res = await fetch(`/api/r/${slug}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           rating,
-          comment,
-          customerName,
-          customerPhone: phoneClean,
-          requestCallback: callbackRequested,
+          comment: formData.comment,
+          customerName: formData.callbackRequested ? formData.customerName : null,
+          customerPhone: formData.callbackRequested ? formData.customerPhone : null,
+          requestCallback: formData.callbackRequested,
           reviewSessionId
         })
       });
 
       if (!res.ok) {
-        throw new Error('Failed to send feedback.');
+        throw new Error('Failed to submit feedback.');
       }
+
+      const sessionKey = `clout_session_${slug}`;
+      sessionStorage.setItem(sessionKey, JSON.stringify({
+        reviewSessionId,
+        hasSubmitted: true,
+        submittedRating: rating,
+        callbackRequested: formData.callbackRequested
+      }));
 
       setStep('negative-completion');
     } catch (err: any) {
-      console.error('Negative feedback submission error:', err);
+      console.error(err);
       setSaveError(err.message || 'Unable to submit feedback. Please try again.');
     } finally {
       setSubmitting(false);
     }
   };
 
+  useEffect(() => {
+    return () => {
+      if (selectionTimer) clearTimeout(selectionTimer);
+      if (redirectInterval) clearInterval(redirectInterval);
+    };
+  }, [selectionTimer, redirectInterval]);
+
   if (loading) {
     return (
-      <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-6 font-['Inter',_sans-serif]">
-        <Loader2 className="animate-spin h-10 w-10 text-[#1853AB]" />
-        <p className="text-xs text-zinc-500 mt-4 font-medium">Opening review portal...</p>
+      <div className="min-h-screen bg-[#F8FAFC] flex flex-col items-center justify-center p-6 font-sans">
+        <Loader2 className="animate-spin h-10 w-10 text-[#073afe]" />
+        <p className="text-xs text-slate-500 mt-4 font-semibold tracking-wide">Opening review portal...</p>
       </div>
     );
   }
@@ -274,305 +320,136 @@ export default function PublicQRResolver() {
       : 'This review portal is currently inactive.';
 
     return (
-      <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-6 relative font-sans">
-        <div className="w-full max-w-md text-center bg-white/70 backdrop-blur-xl border border-slate-100 rounded-3xl p-8 shadow-sm">
+      <div className="min-h-screen bg-[#F8FAFC] flex flex-col items-center justify-center p-6 relative font-sans">
+        <div className="w-full max-w-[400px] text-center bg-white border border-slate-100 rounded-[24px] p-8 shadow-sm">
           <div className="mx-auto w-12 h-12 bg-red-50 text-red-650 rounded-full flex items-center justify-center mb-4 border border-red-200">
-            <AlertTriangle size={24} />
+            <AlertTriangle size={24} className="text-rose-500" />
           </div>
-          <h3 className="text-lg font-bold text-red-650 mb-2">{errorHeading}</h3>
-          <p className="text-xs text-zinc-500 px-4">{errorText}</p>
+          <h3 className="text-base font-extrabold text-slate-900 mb-2">{errorHeading}</h3>
+          <p className="text-xs text-slate-500 px-4 leading-relaxed">{errorText}</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] text-slate-900 flex flex-col items-center justify-center p-4 relative font-sans overflow-hidden">
+    <div className="min-h-screen bg-slate-50 text-slate-800 flex flex-col items-center justify-center p-5 relative font-sans overflow-y-auto">
       <Head>
         <title>{details.business.name} - Review Portal</title>
-        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" />
-        <style>{`
-          body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif !important;
-            background-color: #F8FAFC !important;
-            color: #0F172A !important;
-          }
-        `}</style>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0, viewport-fit=cover" />
       </Head>
 
-      {/* Ambient glows */}
-      <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-blue-100/40 rounded-full blur-3xl pointer-events-none -translate-x-1/2 -translate-y-1/2" />
-      <div className="absolute bottom-0 right-1/4 w-[500px] h-[500px] bg-indigo-100/30 rounded-full blur-3xl pointer-events-none translate-x-1/2 translate-y-1/2" />
-
-      <div className="w-full max-w-md flex flex-col items-center relative z-10">
+      <div className="w-full max-w-[420px] flex flex-col items-center relative z-10 my-auto">
         
-        {/* Logo and Brand Header */}
-        <div className="flex flex-col items-center mb-6">
-          <div className="h-10 w-10 rounded-2xl bg-[#1853AB] flex items-center justify-center shadow-md shadow-blue-500/10 mb-2.5">
-            <img src="/logo.png" alt="Clout" className="h-5.5 w-5.5 object-contain brightness-0 invert" />
-          </div>
-          <span className="text-xs font-bold tracking-widest text-[#1853AB] uppercase">
-            Clout Reputation
-          </span>
-        </div>
-
-        {/* Portal Card */}
-        <div className="w-full bg-white/75 backdrop-blur-xl border border-white/60 rounded-3xl p-8 shadow-[0_20px_50px_rgba(15,23,42,0.03)] relative overflow-hidden">
+        {/* Permanent Digital Review Card Shell */}
+        <DigitalReviewCard businessName={details.business.name}>
           
-          {/* Header section containing business name and logo */}
+          {saveError && (
+            <div className="w-full mb-4 p-3.5 bg-rose-50 border border-rose-200/50 text-rose-700 text-xs rounded-xl font-sans font-medium text-left animate-fadeIn">
+              {saveError}
+            </div>
+          )}
+          
           {step === 'rating' && (
-            <div className="flex items-center space-x-4 pb-5 border-b border-slate-100/60 mb-6">
-              {details.business.logoUrl ? (
-                <img 
-                  src={details.business.logoUrl} 
-                  alt={details.business.name} 
-                  className="w-14 h-14 rounded-2xl object-cover border border-slate-100 shadow-sm" 
+            <div className="flex flex-col h-full w-full items-center">
+              <div className="mt-[60px] w-full flex justify-center">
+                <RatingCard 
+                  rating={rating} 
+                  onChange={handleStarSelect} 
+                  submitting={submitting} 
                 />
-              ) : (
-                <div className="p-3.5 bg-slate-50 border border-slate-200/60 rounded-2xl text-slate-800 shadow-sm">
-                  <Store size={22} className="text-[#1853AB]" />
-                </div>
-              )}
-              <div>
-                <h2 className="text-base font-bold tracking-tight text-slate-900 leading-tight">{details.business.name}</h2>
-                <p className="text-[9px] text-[#1853AB] font-bold uppercase tracking-wider mt-1 bg-blue-50 px-2.5 py-0.5 rounded-full inline-block">
-                  {details.business.industry.replace('_', ' ')}
-                </p>
-              </div>
-            </div>
-          )}
-
-          {/* STEP 1: Star selection step */}
-          {step === 'rating' && (
-            <div className="space-y-6 py-4">
-              <div className="text-center space-y-1.5">
-                <h3 className="text-lg font-bold text-slate-900 tracking-tight">
-                  How was your experience today?
-                </h3>
-                <p className="text-xs text-slate-500">Tap a star to leave your rating</p>
-              </div>
-
-              {/* Huge stars targets for mobile layout */}
-              <div className="flex items-center justify-center space-x-2.5 py-3">
-                {[1, 2, 3, 4, 5].map((star) => (
-                  <button
-                    key={star}
-                    type="button"
-                    onClick={() => triggerFunnelStart(star)}
-                    className="w-12 h-12 rounded-2xl flex items-center justify-center bg-white border border-slate-200/80 text-slate-300 hover:bg-slate-50/50 hover:border-slate-300 hover:scale-105 active:scale-95 transition-all duration-200 cursor-pointer"
-                  >
-                    <Star className="h-6 w-6 text-slate-350 hover:text-amber-400 hover:fill-amber-400" />
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* PATH A: Positive Rating Selected - Share on Google */}
-          {step === 'positive-share' && (
-            <div className="space-y-6 text-center py-2 animate-fadeIn">
-              <div className="inline-flex items-center justify-center p-4 bg-emerald-50 text-emerald-600 rounded-3xl border border-emerald-100 shadow-[0_8px_20px_rgba(16,185,129,0.06)]">
-                <Heart size={26} className="fill-emerald-500 text-emerald-500" />
               </div>
               
-              <div className="space-y-2">
-                <h3 className="text-lg font-bold text-slate-900 tracking-tight">
-                  We are glad you enjoyed your visit.
-                </h3>
-                <p className="text-xs text-slate-500 max-w-xs mx-auto leading-relaxed">
-                  Would you mind sharing your experience on Google?
-                </p>
-              </div>
-
-              <div className="p-6 bg-slate-50/80 backdrop-blur-md rounded-2xl border border-slate-100/60 space-y-4">
-                <div className="flex flex-col gap-2.5">
-                  <button
-                    onClick={() => submitPositiveReview(true)}
-                    disabled={submitting}
-                    className="w-full inline-flex items-center justify-center px-4 py-3.5 bg-gradient-to-r from-blue-600 to-indigo-650 hover:from-blue-700 hover:to-indigo-750 disabled:opacity-50 text-white rounded-2xl text-xs font-bold transition-all duration-300 shadow-md shadow-blue-500/10 active:scale-[0.98] cursor-pointer border-none"
-                  >
-                    {submitting ? (
-                      <Loader2 className="animate-spin h-4 w-4 mr-2" />
-                    ) : null}
-                    Leave Google Review
-                    <ExternalLink size={12} className="ml-1.5" />
-                  </button>
-                  <button
-                    onClick={() => submitPositiveReview(false)}
-                    disabled={submitting}
-                    className="w-full inline-flex items-center justify-center px-4 py-3 border border-slate-200 bg-white hover:bg-slate-50 text-slate-600 rounded-2xl text-xs font-bold transition-all shadow-sm active:scale-[0.98] cursor-pointer"
-                  >
-                    Maybe Later
-                  </button>
-                </div>
+              <span
+                className="
+                  mt-[42px]
+                  text-[18px]
+                  font-normal
+                  text-[#6B7280]
+                  text-center
+                "
+              >
+                Tap a star to share your experience
+              </span>
+              
+              <div className="mt-auto w-full">
+                <PoweredByFooter />
               </div>
             </div>
           )}
-
-          {/* PATH A COMPLETION: Thank you for positive feedback */}
-          {step === 'positive-completion' && (
-            <div className="space-y-6 text-center py-6 animate-fadeIn">
-              <div className="inline-flex items-center justify-center p-4 bg-emerald-50 text-emerald-600 rounded-3xl border border-emerald-100 shadow-sm">
-                <Check size={26} className="text-emerald-500" />
-              </div>
-              <div className="space-y-2">
-                <h3 className="text-xl font-bold text-slate-900 tracking-tight">Thank you for your support.</h3>
-                <p className="text-xs text-slate-500 max-w-xs mx-auto leading-relaxed">
-                  Your feedback helps local businesses grow. We appreciate your time!
-                </p>
-              </div>
-              <div className="pt-4 text-xs text-slate-400 font-medium">
-                We look forward to serving you again soon!
+          
+          {step === 'positive-redirect' && (
+            <div className="flex flex-col h-full w-full items-center">
+              <SuccessScreen 
+                type="positive" 
+                googleReviewUrl={details.business.googleReviewUrl || ''} 
+                countdownSeconds={countdown}
+                onRedirectClick={handleRedirectClick}
+              />
+              <div className="mt-auto w-full">
+                <PoweredByFooter />
               </div>
             </div>
           )}
-
-          {/* PATH B: Negative Feedback Form */}
+          
           {step === 'negative-form' && (
-            <form onSubmit={handleNegativeSubmit} className="space-y-5 animate-fadeIn">
-              <div className="text-center pb-4 border-b border-slate-100/60 space-y-2">
-                <div className="w-12 h-12 bg-amber-50 text-amber-600 border border-amber-250/50 rounded-2xl flex items-center justify-center mx-auto mb-2 shadow-sm">
-                  <MessageSquare size={20} />
-                </div>
-                <h3 className="text-base font-bold text-slate-900 leading-tight">
-                  We are sorry your experience did not meet expectations.
-                </h3>
-                <p className="text-xs text-slate-500 leading-relaxed max-w-xs mx-auto">
-                  Help us improve by sharing your feedback.
-                </p>
+            <div className="flex flex-col h-full w-full items-center justify-center animate-fadeIn">
+              <div className="flex flex-col items-center justify-center flex-grow">
+                <p className="text-xs text-slate-500 font-semibold mt-8">Recording rating details...</p>
+                <Loader2 className="animate-spin h-6 w-6 text-[#073afe] mt-2" />
               </div>
-
-              {saveError && (
-                <div className="p-3 bg-rose-50 border border-rose-200/50 text-rose-700 text-xs rounded-xl">
-                  {saveError}
-                </div>
-              )}
-
-              {/* Form Inputs */}
-              <div className="space-y-4">
-                
-                {/* Customer Name */}
-                <div className="space-y-1.5">
-                  <label htmlFor="cname" className="text-[10px] font-bold text-slate-500 uppercase tracking-widest block">
-                    Your Name
-                  </label>
-                  <div className="relative">
-                    <User size={13} className="absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400" />
-                    <input
-                      id="cname"
-                      type="text"
-                      required
-                      placeholder="Enter your name"
-                      value={customerName}
-                      onChange={(e) => setCustomerName(e.target.value)}
-                      className="w-full pl-10 pr-4 py-3 bg-white/60 border border-slate-200 rounded-2xl focus:outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-[#1853AB] text-xs transition-all placeholder-slate-400"
-                    />
-                  </div>
-                </div>
-
-                {/* WhatsApp Number */}
-                <div className="space-y-1.5">
-                  <label htmlFor="cphone" className="text-[10px] font-bold text-slate-500 uppercase tracking-widest block">
-                    WhatsApp Number
-                  </label>
-                  <div className="relative">
-                    <Phone size={13} className="absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400" />
-                    <input
-                      id="cphone"
-                      type="tel"
-                      required
-                      placeholder="e.g. +1 555 123 4567"
-                      value={customerPhone}
-                      onChange={(e) => setCustomerPhone(e.target.value)}
-                      className="w-full pl-10 pr-4 py-3 bg-white/60 border border-slate-200 rounded-2xl focus:outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-[#1853AB] text-xs transition-all placeholder-slate-400"
-                    />
-                  </div>
-                </div>
-
-                {/* Feedback comment message */}
-                <div className="space-y-1.5">
-                  <label htmlFor="comments" className="text-[10px] font-bold text-slate-500 uppercase tracking-widest block">
-                    Feedback Message
-                  </label>
-                  <textarea
-                    id="comments"
-                    rows={4}
-                    required
-                    placeholder="Tell us what went wrong so we can fix it."
-                    value={comment}
-                    onChange={(e) => setComment(e.target.value)}
-                    className="w-full p-4 rounded-2xl border border-slate-200 bg-white/60 text-xs focus:ring-4 focus:ring-blue-500/10 focus:border-[#1853AB] focus:outline-none transition-all placeholder-slate-400"
-                  />
-                </div>
-
-                {/* Callback checkbox */}
-                {details.business.enableManagerCallback && (
-                  <div className="flex items-start space-x-3 pt-2 bg-slate-50/60 p-3.5 rounded-2xl border border-slate-100">
-                    <input
-                      id="callback-req"
-                      type="checkbox"
-                      checked={callbackRequested}
-                      onChange={(e) => setCallbackRequested(e.target.checked)}
-                      className="mt-1 h-4 w-4 text-blue-650 border-slate-300 rounded focus:ring-blue-500/10 cursor-pointer"
-                    />
-                    <label htmlFor="callback-req" className="text-xs font-medium text-slate-700 select-none cursor-pointer">
-                      I would like a callback from management
-                      <span className="block text-[9px] text-slate-450 mt-0.5 font-normal">Our recovery team will reach out directly to resolve this.</span>
-                    </label>
-                  </div>
-                )}
-
-              </div>
-
-              <div className="pt-2">
-                <button
-                  type="submit"
-                  disabled={submitting}
-                  className="w-full inline-flex items-center justify-center px-4 py-3.5 bg-gradient-to-r from-blue-600 to-indigo-650 hover:from-blue-700 hover:to-indigo-750 disabled:opacity-50 text-white rounded-2xl text-xs font-bold transition-all duration-300 shadow-md shadow-blue-500/10 active:scale-[0.98] cursor-pointer border-none"
-                >
-                  {submitting ? (
-                    <>
-                      <Loader2 className="animate-spin h-3.5 w-3.5 mr-2" />
-                      Sending Feedback...
-                    </>
-                  ) : (
-                    'Send Feedback'
-                  )}
-                </button>
-              </div>
-            </form>
-          )}
-
-          {/* PATH B COMPLETION: Thank you for negative feedback */}
-          {step === 'negative-completion' && (
-            <div className="space-y-6 text-center py-6 animate-fadeIn">
-              <div className="inline-flex items-center justify-center p-4 bg-emerald-50 text-emerald-600 rounded-3xl border border-emerald-100 shadow-sm">
-                <Check size={26} className="text-emerald-500" />
-              </div>
-              <div className="space-y-2.5">
-                <h3 className="text-xl font-bold text-slate-900 tracking-tight">Thank you for sharing your feedback.</h3>
-                <p className="text-xs text-slate-500 max-w-xs mx-auto leading-relaxed">
-                  Our team will review your concerns and work to improve.
-                </p>
-                {callbackRequested && (
-                  <p className="text-xs font-semibold text-[#1853AB] bg-blue-50/60 p-3 rounded-2xl max-w-xs mx-auto mt-2 border border-blue-100">
-                    A team member may contact you regarding your feedback.
-                  </p>
-                )}
-              </div>
-              <div className="pt-4 text-xs text-slate-400 font-medium">
-                We value your input and hope to welcome you back soon!
+              <div className="mt-auto w-full">
+                <PoweredByFooter />
               </div>
             </div>
           )}
 
-        </div>
-
-        {/* Footer */}
-        <p className="text-center text-[10px] text-slate-400 mt-6 tracking-wide uppercase font-semibold">
-          Powered by Clout Reputation V1
-        </p>
+          {step === 'negative-completion' && (
+            <div className="flex flex-col h-full w-full items-center">
+              <SuccessScreen type="negative" />
+              <div className="mt-auto w-full">
+                <PoweredByFooter />
+              </div>
+            </div>
+          )}
+          
+        </DigitalReviewCard>
       </div>
+
+      {/* Bottom Sheet Drawer for Negative Experience (1-3 stars) */}
+      {isBottomSheetOpen && (
+        <div 
+          className="fixed inset-0 bg-[#0F172A]/40 backdrop-blur-sm z-40 transition-opacity duration-200"
+          onClick={() => {
+            if (step !== 'negative-completion') {
+              setIsBottomSheetOpen(false);
+              setStep('rating');
+              setRating(0);
+            }
+          }}
+        />
+      )}
+
+      {/* Slide-Up Bottom Sheet */}
+      <div 
+        className={`fixed bottom-0 left-0 right-0 max-w-[420px] mx-auto bg-white rounded-t-[24px] shadow-2xl z-50 overflow-hidden flex flex-col h-[75vh] transition-transform duration-250 ease-out ${
+          isBottomSheetOpen ? 'translate-y-0' : 'translate-y-full'
+        }`}
+      >
+        <div className="w-12 h-1 bg-slate-200 rounded-full mx-auto my-3 flex-shrink-0" />
+        
+        <div className="flex-grow overflow-y-auto px-8 pb-8 pt-2">
+          {step === 'negative-completion' ? (
+            <SuccessScreen type="negative" />
+          ) : (
+            <RecoveryForm 
+              onSubmit={handleRecoverySubmit} 
+              submitting={submitting} 
+            />
+          )}
+        </div>
+      </div>
+
     </div>
   );
 }

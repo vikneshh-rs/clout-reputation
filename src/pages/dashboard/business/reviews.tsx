@@ -97,7 +97,7 @@ export default function BusinessReviews(props: any) {
   if (authLoading) {
     return (
       <div className="min-h-screen bg-white flex items-center justify-center font-['Source_Sans_Pro']">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#1853AB]" />
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#073afe]" />
       </div>
     );
   }
@@ -200,7 +200,7 @@ export default function BusinessReviews(props: any) {
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Search keywords, customer names, comments..."
-                className="w-full text-xs border border-slate-200 rounded-xl bg-white pl-9 pr-4 py-2 focus:border-[#1853AB] focus:outline-none focus:ring-2 focus:ring-[#1853AB]/10"
+                className="w-full text-xs border border-slate-200 rounded-xl bg-white pl-9 pr-4 py-2 focus:border-[#073afe] focus:outline-none focus:ring-2 focus:ring-[#073afe]/10"
               />
             </div>
           </div>
@@ -213,7 +213,7 @@ export default function BusinessReviews(props: any) {
               id="rating-filter"
               value={rating}
               onChange={(e) => setRating(e.target.value)}
-              className="w-full text-xs border border-slate-200 rounded-xl bg-white px-2.5 py-1.5 focus:border-[#1853AB] focus:outline-none"
+              className="w-full text-xs border border-slate-200 rounded-xl bg-white px-2.5 py-1.5 focus:border-[#073afe] focus:outline-none"
             >
               <option value="ALL">All Scores</option>
               <option value="5">5 Stars</option>
@@ -232,7 +232,7 @@ export default function BusinessReviews(props: any) {
               id="period-filter"
               value={period}
               onChange={(e) => setPeriod(e.target.value)}
-              className="w-full text-xs border border-slate-200 rounded-xl bg-white px-2.5 py-1.5 focus:border-[#1853AB] focus:outline-none"
+              className="w-full text-xs border border-slate-200 rounded-xl bg-white px-2.5 py-1.5 focus:border-[#073afe] focus:outline-none"
             >
               <option value="7d">Last 7 Days</option>
               <option value="30d">Last 30 Days</option>
@@ -244,7 +244,7 @@ export default function BusinessReviews(props: any) {
 
           <button
             type="submit"
-            className="w-full md:w-auto bg-[#1853AB] hover:bg-[#134289] text-white text-xs font-semibold px-4 py-2 rounded-xl flex items-center gap-1.5 transition-colors cursor-pointer justify-center"
+            className="w-full md:w-auto bg-[#073afe] hover:bg-[#052ecb] text-white text-xs font-semibold px-4 py-2 rounded-xl flex items-center gap-1.5 transition-colors cursor-pointer justify-center"
           >
             Apply Search
           </button>
@@ -254,7 +254,7 @@ export default function BusinessReviews(props: any) {
       {/* Reviews Table/Feed */}
       {loading ? (
         <div className="py-12 flex justify-center">
-          <Loader2 className="animate-spin h-8 w-8 text-[#1853AB]" />
+          <Loader2 className="animate-spin h-8 w-8 text-[#073afe]" />
         </div>
       ) : reviews.length === 0 ? (
         <div className="bg-white/80 backdrop-blur-md border border-slate-100 rounded-2xl overflow-hidden shadow-[0_4px_20px_rgba(0,0,0,0.02)] p-12 text-center text-slate-400 text-sm">

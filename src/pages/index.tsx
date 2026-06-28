@@ -88,7 +88,7 @@ export default function LandingPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] text-[#0F172A] font-sans selection:bg-[#1853AB] selection:text-white relative overflow-hidden flex flex-col justify-between">
+    <div className="min-h-screen bg-[#F8FAFC] text-[#0F172A] font-sans selection:bg-[#073afe] selection:text-white relative overflow-hidden flex flex-col justify-between">
       <Head>
         <title>Clout Reputation | QR-Powered B2B Reputation Management Platform</title>
         <meta name="description" content="Turn customer feedback into business growth using QR-powered reviews, funnel routing, sentiment analytics, and customer recovery." />
@@ -115,7 +115,7 @@ export default function LandingPage() {
             box-shadow: 0 20px 50px -12px rgba(15, 23, 42, 0.25);
           }
           .text-glow {
-            text-shadow: 0 0 50px rgba(24, 83, 171, 0.1);
+            text-shadow: 0 0 50px rgba(7, 58, 254, 0.1);
           }
         `}</style>
       </Head>
@@ -126,40 +126,40 @@ export default function LandingPage() {
         <div className="absolute inset-0 bg-[radial-gradient(#cbd5e1_1px,transparent_1px)] [background-size:2.5rem_2.5rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_80%,transparent_100%)] opacity-35" />
 
         {/* Floating gradient meshes */}
-        <motion.div style={{ y: bgGlowY1 }} className="absolute top-[-10%] left-[10%] w-[800px] h-[800px] rounded-full bg-gradient-to-br from-[#1853AB]/8 to-cyan-400/3 blur-[140px] opacity-70" />
-        <motion.div style={{ y: bgGlowY2 }} className="absolute top-[25%] right-[-15%] w-[700px] h-[700px] rounded-full bg-gradient-to-bl from-indigo-500/6 to-[#1853AB]/3 blur-[120px] opacity-60" />
-        <motion.div style={{ y: bgGlowY3 }} className="absolute top-[50%] left-[-15%] w-[800px] h-[800px] rounded-full bg-gradient-to-tr from-[#1853AB]/5 to-cyan-500/4 blur-[130px] opacity-65" />
-        <motion.div style={{ y: bgGlowY1 }} className="absolute bottom-[10%] right-[10%] w-[900px] h-[900px] rounded-full bg-gradient-to-br from-[#1853AB]/7 to-indigo-600/3 blur-[150px] opacity-75" />
+        <motion.div style={{ y: bgGlowY1 }} className="absolute top-[-10%] left-[10%] w-[800px] h-[800px] rounded-full bg-gradient-to-br from-[#073afe]/8 to-cyan-400/3 blur-[140px] opacity-70" />
+        <motion.div style={{ y: bgGlowY2 }} className="absolute top-[25%] right-[-15%] w-[700px] h-[700px] rounded-full bg-gradient-to-bl from-indigo-500/6 to-[#073afe]/3 blur-[120px] opacity-60" />
+        <motion.div style={{ y: bgGlowY3 }} className="absolute top-[50%] left-[-15%] w-[800px] h-[800px] rounded-full bg-gradient-to-tr from-[#073afe]/5 to-cyan-500/4 blur-[130px] opacity-65" />
+        <motion.div style={{ y: bgGlowY1 }} className="absolute bottom-[10%] right-[10%] w-[900px] h-[900px] rounded-full bg-gradient-to-br from-[#073afe]/7 to-indigo-600/3 blur-[150px] opacity-75" />
       </div>
 
       {/* FLOAT MAC-STYLE HEADER */}
-      <header className="relative z-50 w-full max-w-7xl mx-auto px-6 lg:px-8 pt-6">
-        <div className="glass-mac-frosted rounded-2xl px-8 py-4.5 flex items-center justify-between shadow-lg">
+      <header className="relative z-50 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6">
+        <div className="glass-mac-frosted rounded-2xl px-4 py-3 sm:px-8 sm:py-4.5 flex items-center justify-between shadow-lg">
           <div className="flex items-center">
             <img
               src="/logo.png"
               alt="Clout Reputation"
-              className="h-6 sm:h-7 object-contain"
+              className="h-5 sm:h-7 object-contain"
             />
           </div>
 
           <nav className="hidden md:flex items-center space-x-10 text-[10px] font-bold text-[#64748B] uppercase tracking-widest">
-            <a href="#how-it-works" className="hover:text-[#1853AB] transition-colors">How It Works</a>
-            <a href="#product-showcase" className="hover:text-[#1853AB] transition-colors">Platform</a>
-            <a href="#features" className="hover:text-[#1853AB] transition-colors">Features</a>
-            <a href="#analytics" className="hover:text-[#1853AB] transition-colors">Analytics</a>
+            <a href="#how-it-works" className="hover:text-[#073afe] transition-colors">How It Works</a>
+            <a href="#product-showcase" className="hover:text-[#073afe] transition-colors">Platform</a>
+            <a href="#features" className="hover:text-[#073afe] transition-colors">Features</a>
+            <a href="#analytics" className="hover:text-[#073afe] transition-colors">Analytics</a>
           </nav>
 
-          <div className="flex items-center space-x-5">
+          <div className="flex items-center space-x-3 sm:space-x-5">
             <Link
               href="/login"
-              className="text-[10px] font-bold text-[#64748B] hover:text-[#0F172A] transition-colors uppercase tracking-widest"
+              className="text-[9px] sm:text-[10px] font-bold text-[#64748B] hover:text-[#0F172A] transition-colors uppercase tracking-widest"
             >
               Sign In
             </Link>
             <a
               href="#book-demo"
-              className="inline-flex items-center justify-center px-5 py-3 text-[10px] font-bold text-white bg-[#1853AB] hover:bg-[#134289] rounded-xl transition-all shadow-[0_4px_12px_rgba(24, 83, 171,0.18)] hover:shadow-[0_6px_18px_rgba(24, 83, 171,0.3)] uppercase tracking-widest border-none"
+              className="hidden sm:inline-flex items-center justify-center px-5 py-3 text-[10px] font-bold text-white bg-[#073afe] hover:bg-[#052ecb] rounded-xl transition-all shadow-[0_4px_12px_rgba(7, 58, 254,0.18)] hover:shadow-[0_6px_18px_rgba(7, 58, 254,0.3)] uppercase tracking-widest border-none"
             >
               Book a Demo
             </a>
@@ -171,14 +171,14 @@ export default function LandingPage() {
       <section className="relative z-10 w-full max-w-7xl mx-auto px-6 lg:px-8 py-28 lg:py-36 grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-start">
         {/* Left Column: Typography & CTAs (Sits higher up) */}
         <div className="lg:col-span-5 space-y-8 text-left z-20 mt-4 lg:mt-8">
-          <div className="inline-flex items-center px-4 py-1.5 rounded-full text-[10px] font-bold bg-[#1853AB]/8 border border-[#1853AB]/15 text-[#1853AB] gap-2 shadow-sm uppercase tracking-widest">
+          <div className="inline-flex items-center px-4 py-1.5 rounded-full text-[10px] font-bold bg-[#073afe]/8 border border-[#073afe]/15 text-[#073afe] gap-2 shadow-sm uppercase tracking-widest">
             <Sparkles size={11} className="animate-pulse" />
             Autonomous Sentiment Funnel
           </div>
 
           <h1 className="text-4xl sm:text-5xl lg:text-[68px] xl:text-[76px] font-black tracking-tight text-[#0F172A] leading-[1.05] font-display text-glow">
             Collect More <br />
-            <span className="text-[#1853AB]">5-Star Reviews.</span> <br />
+            <span className="text-[#073afe]">5-Star Reviews.</span> <br />
             Before Problems <br />
             Become Public.
           </h1>
@@ -190,7 +190,7 @@ export default function LandingPage() {
           <div className="flex flex-col sm:flex-row items-center gap-4 pt-2">
             <a
               href="#book-demo"
-              className="w-full sm:w-auto inline-flex items-center justify-center px-8 py-4 font-bold text-white bg-[#1853AB] hover:bg-[#134289] rounded-xl transition-all shadow-[0_8px_20px_rgba(24, 83, 171,0.18)] hover:shadow-[0_12px_28px_rgba(24, 83, 171,0.3)] gap-2 group border-none text-xs uppercase tracking-widest"
+              className="w-full sm:w-auto inline-flex items-center justify-center px-8 py-4 font-bold text-white bg-[#073afe] hover:bg-[#052ecb] rounded-xl transition-all shadow-[0_8px_20px_rgba(7, 58, 254,0.18)] hover:shadow-[0_12px_28px_rgba(7, 58, 254,0.3)] gap-2 group border-none text-xs uppercase tracking-widest"
             >
               Book a Demo
               <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
@@ -213,7 +213,7 @@ export default function LandingPage() {
             {/* Atmospheric Glow Layer behind product */}
             <div className="absolute inset-0 -inset-y-20 z-0 pointer-events-none select-none flex items-center justify-center">
               {/* Primary Glow */}
-              <div className="absolute w-[750px] h-[750px] rounded-full bg-[rgba(24,83,171,0.15)] blur-[130px] -translate-y-12" />
+              <div className="absolute w-[750px] h-[750px] rounded-full bg-[rgba(7, 58, 254,0.15)] blur-[130px] -translate-y-12" />
               {/* Secondary Glow */}
               <div className="absolute w-[450px] h-[450px] rounded-full bg-[rgba(96,165,250,0.1)] blur-[90px] translate-y-16 translate-x-20" />
               {/* Subtle Orbit Lines */}
@@ -247,19 +247,19 @@ export default function LandingPage() {
               <div className="flex-1 flex overflow-hidden">
                 {/* Sidebar */}
                 <div className="w-12 sm:w-14 border-r border-slate-200/50 bg-white/20 flex flex-col items-center py-4 sm:py-6 space-y-4 sm:space-y-6">
-                  <div className="p-1.5 sm:p-2 bg-[#1853AB]/10 text-[#1853AB] rounded-xl">
+                  <div className="p-1.5 sm:p-2 bg-[#073afe]/10 text-[#073afe] rounded-xl">
                     <QrCode size={15} />
                   </div>
-                  <div className="text-[#64748B] hover:text-[#1853AB] transition-colors p-1.5">
+                  <div className="text-[#64748B] hover:text-[#073afe] transition-colors p-1.5">
                     <Layers size={14} />
                   </div>
-                  <div className="text-[#64748B] hover:text-[#1853AB] transition-colors p-1.5">
+                  <div className="text-[#64748B] hover:text-[#073afe] transition-colors p-1.5">
                     <Star size={14} />
                   </div>
-                  <div className="text-[#64748B] hover:text-[#1853AB] transition-colors p-1.5">
+                  <div className="text-[#64748B] hover:text-[#073afe] transition-colors p-1.5">
                     <Users size={14} />
                   </div>
-                  <div className="text-[#64748B] hover:text-[#1853AB] transition-colors p-1.5">
+                  <div className="text-[#64748B] hover:text-[#073afe] transition-colors p-1.5">
                     <TrendingUp size={14} />
                   </div>
                 </div>
@@ -277,14 +277,14 @@ export default function LandingPage() {
                       <span className="text-[7.5px] font-bold text-[#64748B] uppercase tracking-wider block mb-0.5">Average Rating</span>
                       <div className="flex items-center space-x-1">
                         <strong className="text-sm sm:text-base font-bold text-[#0F172A] font-display">4.92</strong>
-                        <div className="flex text-[#1853AB]"><Star size={6.5} className="fill-current" /></div>
+                        <div className="flex text-[#073afe]"><Star size={6.5} className="fill-current" /></div>
                       </div>
                       <span className="text-[6.5px] text-[#64748B] font-medium">98% positive</span>
                     </div>
                     <div className="bg-white/50 border border-slate-100 rounded-xl p-2.5 text-left">
                       <span className="text-[7.5px] font-bold text-[#64748B] uppercase tracking-wider block mb-0.5">Feedback Capture</span>
                       <strong className="text-sm sm:text-base font-bold text-[#0F172A] block font-display">92.7%</strong>
-                      <span className="text-[6.5px] text-[#1853AB] font-bold">Autonomous</span>
+                      <span className="text-[6.5px] text-[#073afe] font-bold">Autonomous</span>
                     </div>
                   </div>
 
@@ -308,7 +308,7 @@ export default function LandingPage() {
                               <span className="text-[6.5px] font-mono text-[#64748B]">{scan.c}</span>
                             </div>
                             <div className="text-right space-y-0.5">
-                              <div className="flex text-[#1853AB] justify-end">
+                              <div className="flex text-[#073afe] justify-end">
                                 {[...Array(scan.r)].map((_, idx) => (
                                   <Star key={idx} size={5.5} className="fill-current" />
                                 ))}
@@ -329,10 +329,10 @@ export default function LandingPage() {
                         <div className="space-y-1.5">
                           <div className="flex justify-between text-[7.5px] text-[#64748B]">
                             <span>Positive Sentiment (4-5 Stars)</span>
-                            <span className="font-bold text-[#1853AB]">88%</span>
+                            <span className="font-bold text-[#073afe]">88%</span>
                           </div>
                           <div className="w-full bg-slate-100 h-1 rounded-full overflow-hidden">
-                            <div className="bg-[#1853AB] h-full rounded-full" style={{ width: '88%' }} />
+                            <div className="bg-[#073afe] h-full rounded-full" style={{ width: '88%' }} />
                           </div>
                         </div>
                         <div className="space-y-1.5">
@@ -359,11 +359,11 @@ export default function LandingPage() {
             <motion.div
               animate={{ y: [0, -5, 0] }}
               transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
-              className="absolute -top-6 left-4 sm:-top-10 sm:left-12 z-30 w-32 sm:w-44 glass-mac-frosted rounded-2xl p-4 shadow-[0_20px_50px_-10px_rgba(24,83,171,0.18)] border border-white/60 text-center space-y-3 flex flex-col items-center"
+              className="absolute -top-6 left-4 sm:-top-10 sm:left-12 z-30 w-32 sm:w-44 glass-mac-frosted rounded-2xl p-4 shadow-[0_20px_50px_-10px_rgba(7, 58, 254,0.18)] border border-white/60 text-center space-y-3 flex flex-col items-center"
             >
               {/* High-Fidelity Vector QR Code */}
               <div className="bg-white p-2 rounded-xl border border-slate-100 shadow-inner">
-                <svg className="w-14 h-14 text-[#1853AB]" viewBox="0 0 25 25" fill="currentColor">
+                <svg className="w-14 h-14 text-[#073afe]" viewBox="0 0 25 25" fill="currentColor">
                   {/* Finder Pattern Top-Left */}
                   <path d="M0,0 h7 v7 h-7 z M1,1 h5 v5 h-5 z M2,2 h3 v3 h-3 z" />
                   {/* Finder Pattern Top-Right */}
@@ -380,7 +380,7 @@ export default function LandingPage() {
                 </svg>
               </div>
               <div className="space-y-0.5">
-                <h4 className="text-[10px] font-black text-[#1853AB] tracking-wider uppercase font-sans">Scan. Review. Grow.</h4>
+                <h4 className="text-[10px] font-black text-[#073afe] tracking-wider uppercase font-sans">Scan. Review. Grow.</h4>
                 <p className="text-[6.5px] text-[#64748B] uppercase font-bold tracking-wider">Secure QR Redirect</p>
               </div>
             </motion.div>
@@ -403,7 +403,7 @@ export default function LandingPage() {
                 {/* 5-Star path */}
                 <div className="flex items-center justify-between bg-white/45 border border-slate-100/50 p-2 rounded-xl text-[8px]">
                   <div className="space-y-0.5">
-                    <div className="flex text-[#1853AB] space-x-0.5">
+                    <div className="flex text-[#073afe] space-x-0.5">
                       {[...Array(5)].map((_, idx) => (
                         <Star key={idx} size={6} className="fill-current" />
                       ))}
@@ -412,7 +412,7 @@ export default function LandingPage() {
                   </div>
                   <div className="flex items-center space-x-1">
                     <ArrowRight size={8} className="text-[#10B981]" />
-                    <div className="font-bold text-[#1853AB] bg-white px-1.5 py-0.5 rounded border border-slate-150 text-[7px] shadow-sm font-sans">
+                    <div className="font-bold text-[#073afe] bg-white px-1.5 py-0.5 rounded border border-slate-150 text-[7px] shadow-sm font-sans">
                       Google Reviews
                     </div>
                   </div>
@@ -421,7 +421,7 @@ export default function LandingPage() {
                 {/* 2-Star path */}
                 <div className="flex items-center justify-between bg-white/45 border border-slate-100/50 p-2 rounded-xl text-[8px]">
                   <div className="space-y-0.5">
-                    <div className="flex text-[#1853AB] space-x-0.5">
+                    <div className="flex text-[#073afe] space-x-0.5">
                       <Star size={6} className="fill-current" />
                       <Star size={6} className="fill-current" />
                       <Star size={6} className="opacity-20" />
@@ -455,7 +455,7 @@ export default function LandingPage() {
                 <span className="text-base font-black text-[#0F172A] font-display">842</span>
                 <span className="text-[7px] text-[#64748B] uppercase font-bold tracking-widest">New 5-Stars</span>
               </div>
-              <svg className="w-full h-8 text-[#1853AB]/80" viewBox="0 0 100 30" fill="none">
+              <svg className="w-full h-8 text-[#073afe]/80" viewBox="0 0 100 30" fill="none">
                 <path d="M0,25 Q15,22 30,10 T60,18 T90,2 T100,5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" fill="none" />
               </svg>
             </motion.div>
@@ -483,7 +483,7 @@ export default function LandingPage() {
       {/* HOW IT WORKS & SENTIMENT SIMULATOR (Merged into one beautiful asymmetric composition,Whitespace: py-40) */}
       <section id="how-it-works" className="relative z-10 w-full max-w-7xl mx-auto px-6 lg:px-8 py-40 border-t border-slate-200/40">
         <div className="text-center max-w-3xl mx-auto mb-28 space-y-4">
-          <span className="text-xs font-bold text-[#1853AB] uppercase tracking-widest">Sentiment Routing</span>
+          <span className="text-xs font-bold text-[#073afe] uppercase tracking-widest">Sentiment Routing</span>
           <h2 className="text-5xl sm:text-6xl font-extrabold text-[#0F172A] tracking-tight font-display">
             A Smart Review Funnel.
           </h2>
@@ -496,11 +496,11 @@ export default function LandingPage() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 items-start">
           {/* Simulator Box (Col Span 7) */}
           <div className="lg:col-span-7 bg-[#F8FAFC]/40 border border-slate-200/60 rounded-3xl p-5 sm:p-8 shadow-sm flex flex-col justify-between min-h-[460px] relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-60 h-60 bg-[#1853AB]/3 blur-3xl pointer-events-none rounded-full" />
+            <div className="absolute top-0 right-0 w-60 h-60 bg-[#073afe]/3 blur-3xl pointer-events-none rounded-full" />
 
             <div className="space-y-6">
               <div>
-                <div className="inline-flex items-center px-2.5 py-1 rounded-full text-[9px] font-bold bg-[#1853AB]/8 text-[#1853AB] mb-3 uppercase tracking-widest">
+                <div className="inline-flex items-center px-2.5 py-1 rounded-full text-[9px] font-bold bg-[#073afe]/8 text-[#073afe] mb-3 uppercase tracking-widest">
                   Interactive Simulator
                 </div>
                 <h3 className="text-3xl font-bold text-[#0F172A] leading-tight font-display">Test the Routing Engine</h3>
@@ -519,8 +519,8 @@ export default function LandingPage() {
                       setFeedbackSubmitted(false);
                     }}
                     className={`w-12 h-12 rounded-xl flex items-center justify-center transition-all ${selectedRating === stars
-                        ? 'bg-[#1853AB] text-white shadow-lg scale-105'
-                        : 'bg-white hover:bg-slate-50 border border-slate-200 text-slate-300 hover:text-[#1853AB] hover:scale-102'
+                        ? 'bg-[#073afe] text-white shadow-lg scale-105'
+                        : 'bg-white hover:bg-slate-50 border border-slate-200 text-slate-300 hover:text-[#073afe] hover:scale-102'
                       }`}
                   >
                     <Star size={18} className={selectedRating === stars || (selectedRating && selectedRating >= stars) ? 'fill-current' : ''} />
@@ -571,7 +571,7 @@ export default function LandingPage() {
                           We are redirecting you to Google Reviews to write a review.
                         </p>
                         <div className="w-28 h-1 bg-slate-100 rounded-full mx-auto overflow-hidden relative">
-                          <div className="absolute top-0 left-0 h-full bg-[#1853AB] w-2/3 rounded-full animate-[pulseGlow_1.5s_infinite]" />
+                          <div className="absolute top-0 left-0 h-full bg-[#073afe] w-2/3 rounded-full animate-[pulseGlow_1.5s_infinite]" />
                         </div>
                       </div>
                     </div>
@@ -604,7 +604,7 @@ export default function LandingPage() {
                               value={feedbackName}
                               onChange={(e) => setFeedbackName(e.target.value)}
                               placeholder="e.g. Sarah"
-                              className="w-full text-xs border border-slate-200 rounded-lg p-2.5 focus:border-[#1853AB] focus:outline-none bg-white"
+                              className="w-full text-xs border border-slate-200 rounded-lg p-2.5 focus:border-[#073afe] focus:outline-none bg-white"
                             />
                           </div>
                           <div className="space-y-1">
@@ -615,7 +615,7 @@ export default function LandingPage() {
                               value={feedbackComment}
                               onChange={(e) => setFeedbackComment(e.target.value)}
                               placeholder="How can we resolve your issue?"
-                              className="w-full text-xs border border-slate-200 rounded-lg p-2.5 focus:border-[#1853AB] focus:outline-none resize-none bg-white"
+                              className="w-full text-xs border border-slate-200 rounded-lg p-2.5 focus:border-[#073afe] focus:outline-none resize-none bg-white"
                             />
                           </div>
                         </div>
@@ -652,7 +652,7 @@ export default function LandingPage() {
               { num: '03', title: 'Booster Routing', desc: 'Positive ratings route directly to Google, while critical feedback goes privately to your internal team.' }
             ].map((step, idx) => (
               <div key={step.num} className="space-y-2 relative pl-12">
-                <span className="absolute left-0 top-0 text-2xl font-extrabold text-[#1853AB]/20 font-display">
+                <span className="absolute left-0 top-0 text-2xl font-extrabold text-[#073afe]/20 font-display">
                   {step.num}
                 </span>
                 <h4 className="text-base font-bold text-[#0F172A]">{step.title}</h4>
@@ -666,7 +666,7 @@ export default function LandingPage() {
         <div className="text-center pt-20">
           <a
             href="#book-demo"
-            className="inline-flex items-center space-x-1.5 text-xs font-bold text-[#1853AB] hover:underline uppercase tracking-widest"
+            className="inline-flex items-center space-x-1.5 text-xs font-bold text-[#073afe] hover:underline uppercase tracking-widest"
           >
             <span>Schedule a Live Workflow Walkthrough</span>
             <ChevronRight size={14} />
@@ -677,7 +677,7 @@ export default function LandingPage() {
       {/* CINEMATIC PRODUCT SHOWCASE (Whitespace: py-40, Tilted mockup with overlapping floating card) */}
       <section id="product-showcase" className="relative z-10 w-full max-w-7xl mx-auto px-6 lg:px-8 py-40 border-t border-slate-200/40 bg-[#FAFAFA]/50">
         <div className="text-center max-w-3xl mx-auto mb-28 space-y-4">
-          <span className="text-xs font-bold text-[#1853AB] uppercase tracking-widest">Brand Experience</span>
+          <span className="text-xs font-bold text-[#073afe] uppercase tracking-widest">Brand Experience</span>
           <h2 className="text-5xl sm:text-6xl font-extrabold text-[#0F172A] tracking-tight font-display">
             A Command Center for Your Location's Reputation
           </h2>
@@ -701,7 +701,7 @@ export default function LandingPage() {
                 <span className="w-2.5 h-2.5 rounded-full bg-slate-200" />
                 <span className="text-[10px] font-bold text-[#64748B] pl-4 font-mono">bella-italia.cloutrep.com/dashboard</span>
               </div>
-              <span className="px-2.5 py-0.5 bg-blue-50 text-[9px] font-bold text-[#1853AB] rounded-full uppercase tracking-widest">Merchant Portal</span>
+              <span className="px-2.5 py-0.5 bg-blue-50 text-[9px] font-bold text-[#073afe] rounded-full uppercase tracking-widest">Merchant Portal</span>
             </div>
 
             {/* Mockup Dashboard Layout */}
@@ -718,7 +718,7 @@ export default function LandingPage() {
                   ].map((item) => (
                     <div
                       key={item.label}
-                      className={`px-3 py-2 rounded-xl text-[10px] font-bold cursor-default ${item.active ? 'bg-[#1853AB] text-white shadow-sm' : 'text-[#64748B]'
+                      className={`px-3 py-2 rounded-xl text-[10px] font-bold cursor-default ${item.active ? 'bg-[#073afe] text-white shadow-sm' : 'text-[#64748B]'
                         }`}
                     >
                       {item.label}
@@ -733,7 +733,7 @@ export default function LandingPage() {
                 <div className="grid grid-cols-3 gap-3">
                   {[
                     { l: 'Average Rating', v: '4.92', c: 'text-[#0F172A]', s: '★ 98% positive' },
-                    { l: 'Review Volume', v: '1,248', c: 'text-[#1853AB]', s: '+24% this month' },
+                    { l: 'Review Volume', v: '1,248', c: 'text-[#073afe]', s: '+24% this month' },
                     { l: 'Private Recoveries', v: '43', c: 'text-[#10B981]', s: '100% resolved' }
                   ].map((kpi) => (
                     <div key={kpi.l} className="bg-slate-50 border border-slate-100 rounded-xl p-3">
@@ -762,12 +762,12 @@ export default function LandingPage() {
                           </div>
                           <p className="text-[#64748B] text-[8px] italic">"{review.text}"</p>
                           <div className="flex items-center justify-between pt-1 border-t border-slate-50">
-                            <div className="flex text-[#1853AB] space-x-0.5">
+                            <div className="flex text-[#073afe] space-x-0.5">
                               {[...Array(review.rating)].map((_, idx) => (
                                 <Star key={idx} size={6} className="fill-current" />
                               ))}
                             </div>
-                            <span className={`text-[6px] font-bold px-1 py-0.2 rounded uppercase tracking-wider ${review.status === 'Recovered' ? 'text-[#10B981] bg-[#10B981]/8' : 'text-[#1853AB] bg-blue-50'
+                            <span className={`text-[6px] font-bold px-1 py-0.2 rounded uppercase tracking-wider ${review.status === 'Recovered' ? 'text-[#10B981] bg-[#10B981]/8' : 'text-[#073afe] bg-blue-50'
                               }`}>{review.status}</span>
                           </div>
                         </div>
@@ -779,11 +779,11 @@ export default function LandingPage() {
                   <div className="border border-slate-150 rounded-xl p-4 bg-white flex flex-col justify-between">
                     <div className="flex items-center justify-between mb-2">
                       <h4 className="text-[9px] font-bold text-[#0F172A] uppercase tracking-widest">Sentiment Velocity</h4>
-                      <span className="text-[8px] font-bold text-[#1853AB]">30 Day View</span>
+                      <span className="text-[8px] font-bold text-[#073afe]">30 Day View</span>
                     </div>
                     {/* SVG Chart area */}
                     <div className="flex-1 min-h-[120px] flex items-end">
-                      <svg className="w-full h-24 text-[#1853AB]" viewBox="0 0 100 40" fill="none">
+                      <svg className="w-full h-24 text-[#073afe]" viewBox="0 0 100 40" fill="none">
                         <path d="M0,35 Q15,32 30,15 T60,25 T90,5 T100,8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" fill="none" />
                         <path d="M0,35 Q15,32 30,15 T60,25 T90,5 T100,8 L100,40 L0,40 Z" fill="url(#showcaseBlueGlow)" opacity="0.1" />
 
@@ -791,15 +791,15 @@ export default function LandingPage() {
                         <path d="M0,38 C20,38 40,28 60,18 C80,8 90,12 100,5" stroke="#10B981" strokeWidth="1.5" strokeDasharray="2 2" fill="none" />
                         <defs>
                           <linearGradient id="showcaseBlueGlow" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="0%" stopColor="#1853AB" />
-                            <stop offset="100%" stopColor="#1853AB" stopOpacity="0" />
+                            <stop offset="0%" stopColor="#073afe" />
+                            <stop offset="100%" stopColor="#073afe" stopOpacity="0" />
                           </linearGradient>
                         </defs>
                       </svg>
                     </div>
                     <div className="flex items-center justify-between pt-2 border-t border-slate-100 text-[7px] text-[#64748B] font-bold uppercase tracking-wider">
                       <div className="flex items-center space-x-1">
-                        <span className="w-1.5 h-1.5 rounded-full bg-[#1853AB]" />
+                        <span className="w-1.5 h-1.5 rounded-full bg-[#073afe]" />
                         <span>Google Reviews</span>
                       </div>
                       <div className="flex items-center space-x-1">
@@ -844,7 +844,7 @@ export default function LandingPage() {
                 </div>
               </div>
               <div className="flex items-center justify-between text-[9px] bg-blue-50/50 p-2.5 rounded-lg border border-blue-100/50">
-                <div className="flex items-center space-x-2 text-[#1853AB]">
+                <div className="flex items-center space-x-2 text-[#073afe]">
                   <Check size={12} className="stroke-[3px]" />
                   <span className="font-bold uppercase tracking-wider">Saved Reputation</span>
                 </div>
@@ -858,7 +858,7 @@ export default function LandingPage() {
         <div className="text-center pt-20">
           <a
             href="#book-demo"
-            className="inline-flex items-center space-x-1.5 text-xs font-bold text-[#1853AB] hover:underline uppercase tracking-widest"
+            className="inline-flex items-center space-x-1.5 text-xs font-bold text-[#073afe] hover:underline uppercase tracking-widest"
           >
             <span>Schedule a Live Location Walkthrough</span>
             <ChevronRight size={14} />
@@ -869,7 +869,7 @@ export default function LandingPage() {
       {/* BESPOKE FEATURE GRID SECTION (Whitespace: py-40, Bento Grid visual architecture) */}
       <section id="features" className="relative z-10 w-full max-w-7xl mx-auto px-6 lg:px-8 py-40 border-t border-slate-200/40">
         <div className="text-center max-w-3xl mx-auto mb-24 space-y-4">
-          <span className="text-xs font-bold text-[#1853AB] uppercase tracking-widest">Capabilities</span>
+          <span className="text-xs font-bold text-[#073afe] uppercase tracking-widest">Capabilities</span>
           <h2 className="text-5xl sm:text-6xl font-extrabold text-[#0F172A] tracking-tight font-display">
             Built for High-Velocity B2B Operations
           </h2>
@@ -883,7 +883,7 @@ export default function LandingPage() {
           {/* Card 1: Smart Funnel Routing (cols 3) */}
           <div className="md:col-span-3 glass-mac-frosted rounded-3xl p-8 flex flex-col justify-between overflow-hidden relative group hover:shadow-xl transition-all duration-300 h-[320px]">
             <div className="space-y-2">
-              <div className="h-9 w-9 rounded-xl bg-blue-50 text-[#1853AB] flex items-center justify-center mb-3">
+              <div className="h-9 w-9 rounded-xl bg-blue-50 text-[#073afe] flex items-center justify-center mb-3">
                 <Star size={16} />
               </div>
               <h3 className="text-sm font-bold text-[#0F172A]">Smart Funnel Routing</h3>
@@ -902,7 +902,7 @@ export default function LandingPage() {
                 <div className="bg-[#10B981]/10 text-[#10B981] px-2 py-1 rounded border border-[#10B981]/20 flex items-center space-x-1">
                   <span>★★★★★</span>
                   <span>➔</span>
-                  <span className="bg-[#1853AB] text-white px-1 rounded font-sans">Google</span>
+                  <span className="bg-[#073afe] text-white px-1 rounded font-sans">Google</span>
                 </div>
                 <div className="bg-amber-500/10 text-amber-600 px-2 py-1 rounded border border-amber-500/20 flex items-center space-x-1">
                   <span>★★☆☆☆</span>
@@ -916,7 +916,7 @@ export default function LandingPage() {
           {/* Card 2: Executive Analytics (cols 3) */}
           <div className="md:col-span-3 glass-mac-frosted rounded-3xl p-8 flex flex-col justify-between overflow-hidden relative group hover:shadow-xl transition-all duration-300 h-[320px]">
             <div className="space-y-2">
-              <div className="h-9 w-9 rounded-xl bg-blue-50 text-[#1853AB] flex items-center justify-center mb-3">
+              <div className="h-9 w-9 rounded-xl bg-blue-50 text-[#073afe] flex items-center justify-center mb-3">
                 <TrendingUp size={16} />
               </div>
               <h3 className="text-sm font-bold text-[#0F172A]">Executive Analytics</h3>
@@ -927,13 +927,13 @@ export default function LandingPage() {
 
             {/* Mini SVG graph visual */}
             <div className="w-full bg-slate-50/50 border border-slate-100 rounded-2xl p-4 h-24 flex items-end">
-              <svg className="w-full h-full text-[#1853AB]" viewBox="0 0 100 30" fill="none">
+              <svg className="w-full h-full text-[#073afe]" viewBox="0 0 100 30" fill="none">
                 <path d="M0,28 Q15,10 30,22 T60,5 T90,15 T100,2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" fill="none" />
                 <path d="M0,28 Q15,10 30,22 T60,5 T90,15 T100,2 L100,30 L0,30 Z" fill="url(#bentoGraphGlow)" opacity="0.08" />
                 <defs>
                   <linearGradient id="bentoGraphGlow" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#1853AB" />
-                    <stop offset="100%" stopColor="#1853AB" stopOpacity="0" />
+                    <stop offset="0%" stopColor="#073afe" />
+                    <stop offset="100%" stopColor="#073afe" stopOpacity="0" />
                   </linearGradient>
                 </defs>
               </svg>
@@ -943,7 +943,7 @@ export default function LandingPage() {
           {/* Card 3: Multi-Location Support (cols 2) */}
           <div className="md:col-span-2 glass-mac-frosted rounded-3xl p-8 flex flex-col justify-between overflow-hidden relative group hover:shadow-xl transition-all duration-300 h-[340px]">
             <div className="space-y-2">
-              <div className="h-9 w-9 rounded-xl bg-blue-50 text-[#1853AB] flex items-center justify-center mb-3">
+              <div className="h-9 w-9 rounded-xl bg-blue-50 text-[#073afe] flex items-center justify-center mb-3">
                 <Building2 size={16} />
               </div>
               <h3 className="text-sm font-bold text-[#0F172A]">Multi-Location Support</h3>
@@ -973,7 +973,7 @@ export default function LandingPage() {
           {/* Card 4: SMS & Email Alerts (cols 4) */}
           <div className="md:col-span-4 glass-mac-frosted rounded-3xl p-8 flex flex-col justify-between overflow-hidden relative group hover:shadow-xl transition-all duration-300 h-[340px]">
             <div className="space-y-2">
-              <div className="h-9 w-9 rounded-xl bg-blue-50 text-[#1853AB] flex items-center justify-center mb-3">
+              <div className="h-9 w-9 rounded-xl bg-blue-50 text-[#073afe] flex items-center justify-center mb-3">
                 <MessageSquare size={16} />
               </div>
               <h3 className="text-sm font-bold text-[#0F172A]">SMS &amp; Email Alerts</h3>
@@ -994,7 +994,7 @@ export default function LandingPage() {
               <p className="text-[#64748B] italic">"Wait time was 25 minutes, and the food was cold."</p>
               <div className="flex justify-between items-center text-[7px] pt-1">
                 <span className="font-bold text-amber-600 uppercase tracking-widest bg-amber-50 px-1.5 py-0.5 rounded">2-Star Scan</span>
-                <span className="text-[#1853AB] font-bold">Manager Notified ➔</span>
+                <span className="text-[#073afe] font-bold">Manager Notified ➔</span>
               </div>
             </div>
           </div>
@@ -1002,7 +1002,7 @@ export default function LandingPage() {
           {/* Card 5: Zero-Install Experience (cols 3) */}
           <div className="md:col-span-3 glass-mac-frosted rounded-3xl p-8 flex flex-col justify-between overflow-hidden relative group hover:shadow-xl transition-all duration-300 h-[300px]">
             <div className="space-y-2">
-              <div className="h-9 w-9 rounded-xl bg-blue-50 text-[#1853AB] flex items-center justify-center mb-3">
+              <div className="h-9 w-9 rounded-xl bg-blue-50 text-[#073afe] flex items-center justify-center mb-3">
                 <Sparkles size={16} />
               </div>
               <h3 className="text-sm font-bold text-[#0F172A]">Zero-Install Experience</h3>
@@ -1014,15 +1014,15 @@ export default function LandingPage() {
             {/* Mobile Scan Step Visuals */}
             <div className="flex space-x-2 mt-4 bg-slate-50/50 border border-slate-100 rounded-2xl p-3 text-[8px] font-bold justify-between items-center">
               <span className="bg-white border border-slate-200 text-[#64748B] px-2 py-1 rounded-md shadow-sm">1. Camera Scan</span>
-              <span className="text-[#1853AB] animate-pulse">➔</span>
-              <span className="bg-[#1853AB] text-white px-2 py-1 rounded-md shadow-sm">2. Instant Portal</span>
+              <span className="text-[#073afe] animate-pulse">➔</span>
+              <span className="bg-[#073afe] text-white px-2 py-1 rounded-md shadow-sm">2. Instant Portal</span>
             </div>
           </div>
 
           {/* Card 6: Private Feedback Resolution (cols 3) */}
           <div className="md:col-span-3 glass-mac-frosted rounded-3xl p-8 flex flex-col justify-between overflow-hidden relative group hover:shadow-xl transition-all duration-300 h-[300px]">
             <div className="space-y-2">
-              <div className="h-9 w-9 rounded-xl bg-blue-50 text-[#1853AB] flex items-center justify-center mb-3">
+              <div className="h-9 w-9 rounded-xl bg-blue-50 text-[#073afe] flex items-center justify-center mb-3">
                 <Layers size={16} />
               </div>
               <h3 className="text-sm font-bold text-[#0F172A]">Private Feedback Resolution</h3>
@@ -1034,7 +1034,7 @@ export default function LandingPage() {
             {/* Resolved timeline stream */}
             <div className="space-y-2 mt-4 text-[8px] font-medium border-l border-slate-200 pl-4 relative">
               <div className="relative">
-                <span className="absolute left-[-20px] top-0.5 w-2 h-2 rounded-full bg-[#1853AB]" />
+                <span className="absolute left-[-20px] top-0.5 w-2 h-2 rounded-full bg-[#073afe]" />
                 <span className="font-bold text-[#0F172A]">10:14 AM</span> — Negative Scan Intercepted
               </div>
               <div className="relative">
@@ -1053,7 +1053,7 @@ export default function LandingPage() {
         <div className="text-center pt-24">
           <a
             href="#book-demo"
-            className="inline-flex items-center space-x-1.5 text-xs font-bold text-[#1853AB] hover:underline uppercase tracking-widest"
+            className="inline-flex items-center space-x-1.5 text-xs font-bold text-[#073afe] hover:underline uppercase tracking-widest"
           >
             <span>Request Developer Docs &amp; Early Access</span>
             <ChevronRight size={14} />
@@ -1063,10 +1063,10 @@ export default function LandingPage() {
 
       {/* EXECUTIVE ANALYTICS SECTION (Whitespace: py-40, responsive SVG-chart mockup) */}
       <section id="analytics" className="relative z-10 w-full max-w-7xl mx-auto px-6 lg:px-8 py-40 border-t border-slate-200/40 bg-[#FAFAFA]/50">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-20 items-center">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-20 items-stretch">
           {/* Left Side: Text and Metrics */}
-          <div className="lg:col-span-5 space-y-6">
-            <span className="text-xs font-bold text-[#1853AB] uppercase tracking-widest">Business Intelligence</span>
+          <div className="lg:col-span-5 space-y-6 flex flex-col justify-center">
+            <span className="text-xs font-bold text-[#073afe] uppercase tracking-widest">Business Intelligence</span>
             <h2 className="text-5xl sm:text-6xl font-extrabold text-[#0F172A] tracking-tight font-display">
               Turn Sentiment Into Executive Data
             </h2>
@@ -1085,7 +1085,7 @@ export default function LandingPage() {
                     <span>{metric.percent}</span>
                   </div>
                   <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
-                    <div className="h-full bg-[#1853AB] rounded-full" style={{ width: metric.percent }} />
+                    <div className="h-full bg-[#073afe] rounded-full" style={{ width: metric.percent }} />
                   </div>
                 </div>
               ))}
@@ -1094,7 +1094,7 @@ export default function LandingPage() {
             <div className="pt-4">
               <a
                 href="#book-demo"
-                className="inline-flex items-center space-x-1.5 text-xs font-bold text-[#1853AB] hover:underline uppercase tracking-widest"
+                className="inline-flex items-center space-x-1.5 text-xs font-bold text-[#073afe] hover:underline uppercase tracking-widest"
               >
                 <span>See Analytics in Action</span>
                 <ChevronRight size={14} />
@@ -1102,18 +1102,17 @@ export default function LandingPage() {
             </div>
           </div>
 
-          {/* Right Side: Parallax Glass Chart Panel */}
-          <div className="lg:col-span-7 relative h-[420px] flex items-center justify-center">
+          {/* Right Side: Glass Chart Panel */}
+          <div className="lg:col-span-7 relative flex items-stretch">
             <motion.div
-              style={{ y: analyticsChartY }}
-              className="w-full glass-mac-frosted rounded-3xl p-6 shadow-2xl border border-white/60 space-y-6"
+              className="w-full h-full glass-mac-frosted rounded-3xl p-6 shadow-2xl border border-white/60 flex flex-col justify-between"
             >
               <div className="flex items-center justify-between pb-4 border-b border-slate-100">
                 <div>
                   <h4 className="text-xs font-bold text-[#0F172A] uppercase tracking-wider">Reputation Velocity Trends</h4>
                   <p className="text-[9px] text-[#64748B]">Satisfaction conversion compared by month</p>
                 </div>
-                <span className="text-[9px] font-bold text-[#1853AB] bg-blue-50 px-2 py-0.5 rounded-lg uppercase tracking-widest">B2B BI Engine</span>
+                <span className="text-[9px] font-bold text-[#073afe] bg-blue-50 px-2 py-0.5 rounded-lg uppercase tracking-widest">B2B BI Engine</span>
               </div>
 
               {/* High-Fidelity SVG Bar Graph */}
@@ -1133,7 +1132,7 @@ export default function LandingPage() {
                         whileInView={{ height: `${col.val}%` }}
                         viewport={{ once: true }}
                         transition={{ duration: 0.8, delay: idx * 0.05 }}
-                        className="w-full bg-[#1853AB] rounded-t-lg"
+                        className="w-full bg-[#073afe] rounded-t-lg"
                       />
                     </div>
                     <span className="text-[10px] font-bold text-[#64748B]">{col.m}</span>
@@ -1148,7 +1147,7 @@ export default function LandingPage() {
       {/* TESTIMONIALS SECTION (Spacious case studies, minimal design) */}
       <section className="relative z-10 w-full max-w-7xl mx-auto px-6 lg:px-8 py-40 border-t border-slate-200/40">
         <div className="text-center max-w-3xl mx-auto mb-28 space-y-4">
-          <span className="text-xs font-bold text-[#1853AB] uppercase tracking-widest">Case Studies</span>
+          <span className="text-xs font-bold text-[#073afe] uppercase tracking-widest">Case Studies</span>
           <h2 className="text-5xl sm:text-6xl font-extrabold text-[#0F172A] tracking-tight font-display">
             Trusted by Enterprise Operators
           </h2>
@@ -1180,7 +1179,7 @@ export default function LandingPage() {
                 {item.quote}
               </p>
               <div className="pt-4 border-t border-slate-100 flex items-center space-x-3">
-                <div className="w-8 h-8 rounded-full bg-[#1853AB]/8 text-[#1853AB] flex items-center justify-center font-bold text-xs uppercase">
+                <div className="w-8 h-8 rounded-full bg-[#073afe]/8 text-[#073afe] flex items-center justify-center font-bold text-xs uppercase">
                   {item.name.charAt(0)}
                 </div>
                 <div>
@@ -1196,7 +1195,7 @@ export default function LandingPage() {
         <div className="text-center pt-12">
           <a
             href="#book-demo"
-            className="inline-flex items-center space-x-1.5 text-xs font-bold text-[#1853AB] hover:underline uppercase tracking-widest"
+            className="inline-flex items-center space-x-1.5 text-xs font-bold text-[#073afe] hover:underline uppercase tracking-widest"
           >
             <span>Read all Client Case Studies</span>
             <ChevronRight size={14} />
@@ -1207,10 +1206,10 @@ export default function LandingPage() {
       {/* CONVERSION DEMO & EARLY ACCESS SECTION (Lead Gen forms inside glass card) */}
       <section id="book-demo" className="relative z-10 w-full max-w-4xl mx-auto px-6 lg:px-8 py-40 border-t border-slate-200/40">
         <div className="glass-mac-frosted rounded-3xl p-8 lg:p-12 shadow-2xl space-y-8 relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-60 h-60 bg-[#1853AB]/4 blur-3xl pointer-events-none rounded-full" />
+          <div className="absolute top-0 right-0 w-60 h-60 bg-[#073afe]/4 blur-3xl pointer-events-none rounded-full" />
 
           <div className="text-center space-y-3">
-            <span className="text-xs font-bold text-[#1853AB] uppercase tracking-widest">Get Started</span>
+            <span className="text-xs font-bold text-[#073afe] uppercase tracking-widest">Get Started</span>
             <h2 className="text-3xl sm:text-4xl font-extrabold text-[#0F172A] tracking-tight font-display">
               Schedule Your Demo &amp; Access Request
             </h2>
@@ -1230,7 +1229,7 @@ export default function LandingPage() {
                     required
                     value={leadName}
                     onChange={(e) => setLeadName(e.target.value)}
-                    className="w-full text-xs border border-slate-200 rounded-xl px-3.5 py-2.5 bg-white/70 focus:border-[#1853AB] focus:outline-none"
+                    className="w-full text-xs border border-slate-200 rounded-xl px-3.5 py-2.5 bg-white/70 focus:border-[#073afe] focus:outline-none"
                     placeholder="e.g. Jean Picard"
                   />
                 </div>
@@ -1242,7 +1241,7 @@ export default function LandingPage() {
                     required
                     value={leadEmail}
                     onChange={(e) => setLeadEmail(e.target.value)}
-                    className="w-full text-xs border border-slate-200 rounded-xl px-3.5 py-2.5 bg-white/70 focus:border-[#1853AB] focus:outline-none"
+                    className="w-full text-xs border border-slate-200 rounded-xl px-3.5 py-2.5 bg-white/70 focus:border-[#073afe] focus:outline-none"
                     placeholder="name@company.com"
                   />
                 </div>
@@ -1254,7 +1253,7 @@ export default function LandingPage() {
                     required
                     value={leadCompany}
                     onChange={(e) => setLeadCompany(e.target.value)}
-                    className="w-full text-xs border border-slate-200 rounded-xl px-3.5 py-2.5 bg-white/70 focus:border-[#1853AB] focus:outline-none"
+                    className="w-full text-xs border border-slate-200 rounded-xl px-3.5 py-2.5 bg-white/70 focus:border-[#073afe] focus:outline-none"
                     placeholder="e.g. Cafe Paris Group"
                   />
                 </div>
@@ -1264,7 +1263,7 @@ export default function LandingPage() {
                     id="leadIndustry"
                     value={leadIndustry}
                     onChange={(e) => setLeadIndustry(e.target.value)}
-                    className="w-full text-xs border border-slate-200 rounded-xl px-3.5 py-2.5 bg-white/70 focus:border-[#1853AB] focus:outline-none"
+                    className="w-full text-xs border border-slate-200 rounded-xl px-3.5 py-2.5 bg-white/70 focus:border-[#073afe] focus:outline-none"
                   >
                     <option value="RESTAURANT">Restaurant</option>
                     <option value="CAFE">Cafe / Bakery</option>
@@ -1280,7 +1279,7 @@ export default function LandingPage() {
                 <button
                   type="submit"
                   disabled={formLoading}
-                  className="w-full bg-[#1853AB] hover:bg-[#134289] text-white text-xs font-bold py-3.5 rounded-xl transition-all shadow-[0_4px_12px_rgba(24, 83, 171,0.2)] hover:shadow-[0_6px_18px_rgba(24, 83, 171,0.3)] disabled:opacity-50 uppercase tracking-widest cursor-pointer border-none"
+                  className="w-full bg-[#073afe] hover:bg-[#052ecb] text-white text-xs font-bold py-3.5 rounded-xl transition-all shadow-[0_4px_12px_rgba(7, 58, 254,0.2)] hover:shadow-[0_6px_18px_rgba(7, 58, 254,0.3)] disabled:opacity-50 uppercase tracking-widest cursor-pointer border-none"
                 >
                   {formLoading ? 'Submitting request...' : 'Submit Request'}
                 </button>
@@ -1300,7 +1299,7 @@ export default function LandingPage() {
               <button
                 type="button"
                 onClick={() => setFormSubmitted(false)}
-                className="text-xs font-semibold text-[#1853AB] hover:underline bg-transparent border-none cursor-pointer"
+                className="text-xs font-semibold text-[#073afe] hover:underline bg-transparent border-none cursor-pointer"
               >
                 Perform another request
               </button>

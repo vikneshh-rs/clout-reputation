@@ -121,7 +121,7 @@ export default function BusinessSettings(props: any) {
   if (authLoading) {
     return (
       <div className="min-h-screen bg-slate-50 flex items-center justify-center font-sans">
-        <Loader2 className="animate-spin h-8 w-8 text-[#1853AB]" />
+        <Loader2 className="animate-spin h-8 w-8 text-[#073afe]" />
       </div>
     );
   }
@@ -169,7 +169,7 @@ export default function BusinessSettings(props: any) {
 
             {loading ? (
               <div className="py-12 flex justify-center">
-                <Loader2 className="animate-spin h-8 w-8 text-[#1853AB]" />
+                <Loader2 className="animate-spin h-8 w-8 text-[#073afe]" />
               </div>
             ) : (
               <form onSubmit={handleSubmit} className="space-y-6">
@@ -186,7 +186,7 @@ export default function BusinessSettings(props: any) {
                       value={name}
                       onChange={(e) => setName(e.target.value)}
                       disabled={isReadOnly}
-                      className="w-full text-xs border border-slate-200 rounded-xl bg-white pl-10 pr-3 py-2 focus:border-[#1853AB] focus:outline-none focus:ring-2 focus:ring-[#1853AB]/10 disabled:bg-slate-50 disabled:text-slate-400"
+                      className="w-full text-xs border border-slate-200 rounded-xl bg-white pl-10 pr-3 py-2 focus:border-[#073afe] focus:outline-none focus:ring-2 focus:ring-[#073afe]/10 disabled:bg-slate-50 disabled:text-slate-400"
                       required
                     />
                   </div>
@@ -222,7 +222,7 @@ export default function BusinessSettings(props: any) {
                       onChange={(e) => setGoogleReviewUrl(e.target.value)}
                       disabled={isReadOnly}
                       placeholder="https://search.google.com/local/writereview?placeid=..."
-                      className="w-full text-xs border border-slate-200 rounded-xl bg-white pl-10 pr-3 py-2 focus:border-[#1853AB] focus:outline-none focus:ring-2 focus:ring-[#1853AB]/10 disabled:bg-slate-50 disabled:text-slate-400"
+                      className="w-full text-xs border border-slate-200 rounded-xl bg-white pl-10 pr-3 py-2 focus:border-[#073afe] focus:outline-none focus:ring-2 focus:ring-[#073afe]/10 disabled:bg-slate-50 disabled:text-slate-400"
                     />
                   </div>
                   <p className="text-[10px] text-slate-400 mt-1">
@@ -246,7 +246,7 @@ export default function BusinessSettings(props: any) {
                         onChange={(e) => setPhone(e.target.value)}
                         disabled={isReadOnly}
                         placeholder="+1 (555) 123-4567"
-                        className="w-full text-xs border border-slate-200 rounded-xl bg-white pl-10 pr-3 py-2 focus:border-[#1853AB] focus:outline-none focus:ring-2 focus:ring-[#1853AB]/10 disabled:bg-slate-50 disabled:text-slate-400"
+                        className="w-full text-xs border border-slate-200 rounded-xl bg-white pl-10 pr-3 py-2 focus:border-[#073afe] focus:outline-none focus:ring-2 focus:ring-[#073afe]/10 disabled:bg-slate-50 disabled:text-slate-400"
                       />
                     </div>
                   </div>
@@ -265,7 +265,7 @@ export default function BusinessSettings(props: any) {
                         onChange={(e) => setAddress(e.target.value)}
                         disabled={isReadOnly}
                         placeholder="123 Corporate St, New York, NY"
-                        className="w-full text-xs border border-slate-200 rounded-xl bg-white pl-10 pr-3 py-2 focus:border-[#1853AB] focus:outline-none focus:ring-2 focus:ring-[#1853AB]/10 disabled:bg-slate-50 disabled:text-slate-400"
+                        className="w-full text-xs border border-slate-200 rounded-xl bg-white pl-10 pr-3 py-2 focus:border-[#073afe] focus:outline-none focus:ring-2 focus:ring-[#073afe]/10 disabled:bg-slate-50 disabled:text-slate-400"
                       />
                     </div>
                   </div>
@@ -293,7 +293,7 @@ export default function BusinessSettings(props: any) {
                       checked={enableGoogleReviewRedirect}
                       onChange={(e) => setEnableGoogleReviewRedirect(e.target.checked)}
                       disabled={isReadOnly}
-                      className="h-4 w-4 text-[#1853AB] focus:ring-[#1853AB] border-slate-300 rounded mt-1 cursor-pointer disabled:opacity-50"
+                      className="h-4 w-4 text-[#073afe] focus:ring-[#073afe] border-slate-300 rounded mt-1 cursor-pointer disabled:opacity-50"
                     />
                   </div>
 
@@ -313,7 +313,7 @@ export default function BusinessSettings(props: any) {
                       checked={enableManagerCallback}
                       onChange={(e) => setEnableManagerCallback(e.target.checked)}
                       disabled={isReadOnly}
-                      className="h-4 w-4 text-[#1853AB] focus:ring-[#1853AB] border-slate-300 rounded mt-1 cursor-pointer disabled:opacity-50"
+                      className="h-4 w-4 text-[#073afe] focus:ring-[#073afe] border-slate-300 rounded mt-1 cursor-pointer disabled:opacity-50"
                     />
                   </div>
                 </div>
@@ -328,7 +328,7 @@ export default function BusinessSettings(props: any) {
                     <button
                       type="submit"
                       disabled={saving}
-                      className="inline-flex items-center justify-center gap-2 bg-[#1853AB] hover:bg-[#134289] text-white text-sm font-semibold rounded-xl px-6 py-2.5 transition-colors disabled:opacity-50 cursor-pointer"
+                      className="inline-flex items-center justify-center gap-2 bg-[#073afe] hover:bg-[#052ecb] text-white text-sm font-semibold rounded-xl px-6 py-2.5 transition-colors disabled:opacity-50 cursor-pointer"
                     >
                       <Save className="h-4 w-4" />
                       {saving ? 'Saving...' : 'Save Settings'}

@@ -1,16 +1,32 @@
 @import "tailwindcss";
 
 @theme {
-  --color-primary-blue: #1853AB;
-  --color-secondary-blue: #3B82F6;
+  --color-primary-blue: #073afe;
+  --color-secondary-blue: #073afe;
   --color-accent-aqua: #06B6D4;
 
-  --shadow-card-premium: 0px 4px 20px rgba(15, 23, 42, 0.05);
-  --shadow-card-hover: 0px 12px 40px rgba(15, 23, 42, 0.10);
-  --shadow-modal-premium: 0px 25px 60px rgba(15, 23, 42, 0.12);
-  --shadow-glass-premium: 0px 8px 30px rgba(15, 23, 42, 0.06);
+  /* Redefine Tailwind's standard blue palette centered around #073afe */
+  --color-blue-50: #eff3ff;
+  --color-blue-100: #dbe3fe;
+  --color-blue-150: #c6d4fe;
+  --color-blue-200: #bfceff;
+  --color-blue-300: #93b0fe;
+  --color-blue-400: #6088fe;
+  --color-blue-500: #073afe;
+  --color-blue-600: #0022d9;
+  --color-blue-650: #001fcc;
+  --color-blue-700: #001cb3;
+  --color-blue-750: #0019a1;
+  --color-blue-800: #001894;
+  --color-blue-900: #00167a;
+  --color-blue-950: #000a47;
 
-  --font-sans: 'Inter', 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --shadow-card-premium: 0px 2px 8px rgba(15, 23, 42, 0.02);
+  --shadow-card-hover: 0px 6px 16px rgba(15, 23, 42, 0.04);
+  --shadow-modal-premium: 0px 10px 32px rgba(15, 23, 42, 0.06);
+  --shadow-glass-premium: 0px 4px 12px rgba(15, 23, 42, 0.02);
+
+  --font-sans: 'Google Sans Flex', 'Inter', 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
 /* =============================================================
@@ -75,7 +91,7 @@ h1, h2, h3, h4, h5, h6 {
    Focus ring — clean
 ===================== */
 *:focus-visible {
-  outline: 2px solid #1853AB;
+  outline: 2px solid #073afe;
   outline-offset: 2px;
   border-radius: 4px;
 }
@@ -87,7 +103,7 @@ h1, h2, h3, h4, h5, h6 {
 @keyframes slideUp {
   from {
     opacity: 0;
-    transform: translateY(16px);
+    transform: translateY(8px);
   }
   to {
     opacity: 1;
@@ -104,40 +120,41 @@ h1, h2, h3, h4, h5, h6 {
   }
 }
 
-@keyframes float {
-  0% {
-    transform: translateY(0px);
-  }
-  50% {
-    transform: translateY(-5px);
-  }
-  100% {
-    transform: translateY(0px);
-  }
-}
-
-@keyframes pulseGlow {
-  0%, 100% {
-    box-shadow: 0 0 15px rgba(37, 99, 235, 0.1);
-  }
-  50% {
-    box-shadow: 0 0 25px rgba(37, 99, 235, 0.25);
-  }
-}
-
 .animate-slideUp {
-  animation: slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: slideUp 200ms ease-out forwards;
 }
 
 .animate-fadeIn {
-  animation: fadeIn 0.4s ease-out forwards;
+  animation: fadeIn 200ms ease-out forwards;
 }
 
-.animate-float {
-  animation: float 4s ease-in-out infinite;
+@keyframes logoScale {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
-.animate-pulseGlow {
-  animation: pulseGlow 3s ease-in-out infinite;
+@keyframes headerSlide {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-logoScale {
+  animation: logoScale 200ms ease-out forwards;
+}
+
+.animate-headerSlide {
+  animation: headerSlide 200ms ease-out forwards;
 }
 

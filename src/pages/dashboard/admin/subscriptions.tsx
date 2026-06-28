@@ -136,7 +136,7 @@ export default function SubscriptionsManagementPage(props: any) {
   if (authLoading) {
     return (
       <div className="min-h-screen bg-white flex items-center justify-center font-['Source_Sans_Pro']">
-        <Loader2 className="animate-spin h-8 w-8 text-[#1853AB]" />
+        <Loader2 className="animate-spin h-8 w-8 text-[#073afe]" />
       </div>
     );
   }
@@ -181,7 +181,7 @@ export default function SubscriptionsManagementPage(props: any) {
         {/* Table Toolbar */}
         <div className="p-4 bg-slate-50/20 border-b border-slate-100 flex flex-col sm:flex-row justify-between items-center gap-4">
           <div className="flex items-center space-x-2">
-            <Clock size={16} className="text-[#1853AB]" />
+            <Clock size={16} className="text-[#073afe]" />
             <h4 className="font-bold text-xs text-black uppercase tracking-wider">Business Subscriptions</h4>
           </div>
 
@@ -196,7 +196,7 @@ export default function SubscriptionsManagementPage(props: any) {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search business name"
-                className="pl-8 pr-3 py-1.5 w-full sm:w-52 text-xs border border-slate-200 rounded-xl bg-white focus:border-[#1853AB] focus:outline-none focus:ring-2 focus:ring-[#1853AB]/10"
+                className="pl-8 pr-3 py-1.5 w-full sm:w-52 text-xs border border-slate-200 rounded-xl bg-white focus:border-[#073afe] focus:outline-none focus:ring-2 focus:ring-[#073afe]/10"
               />
             </div>
 
@@ -204,7 +204,7 @@ export default function SubscriptionsManagementPage(props: any) {
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              className="text-xs border border-slate-200 rounded-xl bg-white px-2.5 py-1.5 focus:border-[#1853AB] focus:outline-none"
+              className="text-xs border border-slate-200 rounded-xl bg-white px-2.5 py-1.5 focus:border-[#073afe] focus:outline-none"
             >
               <option value="ALL">All Statuses</option>
               <option value="ACTIVE">Active</option>
@@ -218,7 +218,7 @@ export default function SubscriptionsManagementPage(props: any) {
         <div className="overflow-x-auto">
           {loading && subscriptions.length === 0 ? (
             <div className="p-12 text-center">
-              <Loader2 className="animate-spin h-6 w-6 text-[#1853AB] mx-auto mb-2" />
+              <Loader2 className="animate-spin h-6 w-6 text-[#073afe] mx-auto mb-2" />
               <span className="text-xs text-zinc-450">Loading subscriptions...</span>
             </div>
           ) : filteredSubscriptions.length === 0 ? (
@@ -275,7 +275,7 @@ export default function SubscriptionsManagementPage(props: any) {
                     <td className="px-6 py-3.5 text-right">
                       <button
                         onClick={() => openManageModal(sub)}
-                        className="inline-flex items-center space-x-1 px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 text-[#1853AB] font-semibold text-[10px] transition-colors"
+                        className="inline-flex items-center space-x-1 px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 text-[#073afe] font-semibold text-[10px] transition-colors"
                         title="Manage plan tier and period limits"
                       >
                         <Sliders size={10} />
@@ -323,7 +323,7 @@ export default function SubscriptionsManagementPage(props: any) {
                   <select
                     value={plan}
                     onChange={(e) => setPlan(e.target.value as any)}
-                    className="w-full text-xs border border-slate-200 rounded-xl bg-white px-2.5 py-1.5 focus:border-[#1853AB] focus:outline-none font-medium text-black"
+                    className="w-full text-xs border border-slate-200 rounded-xl bg-white px-2.5 py-1.5 focus:border-[#073afe] focus:outline-none font-medium text-black"
                   >
                     <option value="TRIAL">TRIAL Tier (30 days default)</option>
                     <option value="BASIC">BASIC Tier (180 days default)</option>
@@ -351,7 +351,7 @@ export default function SubscriptionsManagementPage(props: any) {
                           onClick={() => setAction(actOpt.value as any)}
                           className={`p-2 border rounded font-semibold text-[10px] flex items-center gap-1.5 transition-colors ${
                             active
-                              ? 'bg-blue-50 border-[#1853AB] text-[#1853AB]'
+                              ? 'bg-blue-50 border-[#073afe] text-[#073afe]'
                               : 'bg-white border-zinc-200 text-zinc-650 hover:bg-zinc-50'
                           }`}
                         >
@@ -373,7 +373,7 @@ export default function SubscriptionsManagementPage(props: any) {
                       onChange={(e) => setMonths(Math.max(1, parseInt(e.target.value) || 1))}
                       min="1"
                       max="36"
-                      className="w-full text-xs border border-slate-200 rounded-xl bg-white px-3 py-2 focus:border-[#1853AB] focus:outline-none focus:ring-2 focus:ring-[#1853AB]/10"
+                      className="w-full text-xs border border-slate-200 rounded-xl bg-white px-3 py-2 focus:border-[#073afe] focus:outline-none focus:ring-2 focus:ring-[#073afe]/10"
                       required
                     />
                     <p className="text-[10px] text-zinc-400 mt-1">
@@ -388,14 +388,14 @@ export default function SubscriptionsManagementPage(props: any) {
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}
-                  className="inline-flex items-center space-x-1 px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 text-[#1853AB] font-semibold text-[10px] transition-colors"
+                  className="inline-flex items-center space-x-1 px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 text-[#073afe] font-semibold text-[10px] transition-colors"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="bg-[#1853AB] hover:bg-[#134289] text-white text-xs font-semibold px-4 py-2 rounded-xl flex items-center gap-1.5 transition-colors"
+                  className="bg-[#073afe] hover:bg-[#052ecb] text-white text-xs font-semibold px-4 py-2 rounded-xl flex items-center gap-1.5 transition-colors"
                 >
                   {submitting && <Loader2 className="animate-spin h-3.5 w-3.5" />}
                   <span>Apply Action</span>

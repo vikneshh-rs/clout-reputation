@@ -733,8 +733,29 @@ export async function onboardBusiness(data: {
             website: data.website || null,
             googleMapsUrl: data.googleMapsUrl || null,
             logoUrl: data.logoUrl || null,
-            status: BusinessStatus.PENDING,
+            status: BusinessStatus.ACTIVE,
             createdByRepId: data.createdByRepId
+          }
+        });
+
+        // Auto-generate active QR code on onboarding
+        const qrCode = crypto.randomUUID();
+        const qr = await tx.qRInventory.create({
+          data: {
+            qrCode,
+            status: QRStatus.ACTIVE,
+            assignedBusinessId: business.id,
+            assignedBy: data.createdByRepId,
+            assignedAt: new Date()
+          }
+        });
+
+        await tx.assignmentLog.create({
+          data: {
+            qrInventoryId: qr.id,
+            businessId: business.id,
+            assignedBy: data.createdByRepId,
+            action: 'ASSIGNED'
           }
         });
 
@@ -785,7 +806,7 @@ export async function onboardBusiness(data: {
         website: data.website || null,
         googleMapsUrl: data.googleMapsUrl || null,
         isActive: true,
-        status: BusinessStatus.PENDING,
+        status: BusinessStatus.ACTIVE,
         deletedAt: null,
         enableGoogleReviewRedirect: true,
         enableManagerCallback: true,
@@ -793,6 +814,29 @@ export async function onboardBusiness(data: {
         createdAt: new Date(),
         updatedAt: new Date()
       };
+
+      // Auto-generate mock active QR inventory entry on onboarding
+      const qrCode = crypto.randomUUID();
+      const invId = `inv-${Math.random().toString(36).substring(2, 9)}`;
+      mockQrInventory.push({
+        id: invId,
+        qrCode,
+        status: QRStatus.ACTIVE,
+        assignedBusinessId: businessId,
+        assignedBy: data.createdByRepId,
+        assignedAt: new Date(),
+        replacementQrId: null,
+        createdAt: new Date()
+      });
+
+      mockAssignmentLogs.push({
+        id: `log-${Math.random().toString(36).substring(2, 9)}`,
+        qrInventoryId: invId,
+        businessId,
+        assignedBy: data.createdByRepId,
+        action: 'ASSIGNED',
+        createdAt: new Date()
+      });
 
       const newSub = {
         id: `sub-${businessId}`,
@@ -1269,9 +1313,9 @@ export async function createReview(data: {
           customerPhone: data.customerPhone || null,
           requestCallback: data.requestCallback || false,
           callbackStatus: data.requestCallback ? CallbackStatus.PENDING : CallbackStatus.RESOLVED,
-          redirectedToGoogle: false,
-          googleCtaViewed: false,
-          googleCtaClicked: false,
+          redirectedToGoogle: isPositive,
+          googleCtaViewed: isPositive,
+          googleCtaClicked: isPositive,
           sentiment,
           themes,
           businessId: data.businessId
@@ -1319,9 +1363,9 @@ export async function createReview(data: {
         customerPhone: data.customerPhone || null,
         requestCallback: data.requestCallback || false,
         callbackStatus: data.requestCallback ? CallbackStatus.PENDING : CallbackStatus.RESOLVED,
-        redirectedToGoogle: false,
-        googleCtaViewed: false,
-        googleCtaClicked: false,
+        redirectedToGoogle: isPositive,
+        googleCtaViewed: isPositive,
+        googleCtaClicked: isPositive,
         sentiment,
         themes,
         businessId: data.businessId,
@@ -1364,6 +1408,23 @@ export async function createReview(data: {
       }
 
       return newReview;
+    }
+  );
+}
+
+export async function isSessionSubmitted(reviewSessionId: string): Promise<boolean> {
+  return runQuery(
+    async () => {
+      const event = await db.funnelEvent.findFirst({
+        where: {
+          reviewSessionId,
+          stage: 'SUBMIT'
+        }
+      });
+      return !!event;
+    },
+    async () => {
+      return mockFunnelEvents.some(e => e.reviewSessionId === reviewSessionId && e.stage === 'SUBMIT');
     }
   );
 }
@@ -2971,13 +3032,25 @@ export async function getRecoveryRequests(filters: { businessId?: string, status
           { whatsappNumber: { contains: filters.searchQuery, mode: 'insensitive' } }
         ];
       }
-      return await db.recoveryRequest.findMany({
+      const list = await db.recoveryRequest.findMany({
         where,
-        include: { business: true, review: true, resolvedBy: true },
-        orderBy: [
-          { priority: 'desc' },
-          { createdAt: 'desc' }
-        ]
+        include: { business: true, review: true, resolvedBy: true }
+      });
+
+      const statusOrder: Record<string, number> = {
+        'NEW': 1,
+        'CONTACTED': 2,
+        'RESOLVED': 3,
+        'CLOSED': 4
+      };
+
+      return list.sort((a, b) => {
+        const orderA = statusOrder[a.status] || 5;
+        const orderB = statusOrder[b.status] || 5;
+        if (orderA !== orderB) {
+          return orderA - orderB;
+        }
+        return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
       });
     },
     async () => {
@@ -3011,10 +3084,18 @@ export async function getRecoveryRequests(filters: { businessId?: string, status
         }
       });
 
-      const priorityVal = { 'HIGH': 3, 'MEDIUM': 2, 'LOW': 1 };
+      const statusOrder: Record<string, number> = {
+        'NEW': 1,
+        'CONTACTED': 2,
+        'RESOLVED': 3,
+        'CLOSED': 4
+      };
       return list.sort((a, b) => {
-        const pDiff = (priorityVal[b.priority] || 0) - (priorityVal[a.priority] || 0);
-        if (pDiff !== 0) return pDiff;
+        const orderA = statusOrder[a.status] || 5;
+        const orderB = statusOrder[b.status] || 5;
+        if (orderA !== orderB) {
+          return orderA - orderB;
+        }
         return b.createdAt.getTime() - a.createdAt.getTime();
       });
     }

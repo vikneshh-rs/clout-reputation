@@ -39,7 +39,7 @@ export default function KPIWidget({
           </div>
         )}
       </div>
-      <div className="p-3 bg-[#EFF6FF] text-[#2563EB] rounded-2xl group-hover:scale-105 transition-transform duration-300 flex items-center justify-center">
+      <div className="p-3 bg-[#EFF3FF] text-[#073AFE] rounded-xl group-hover:scale-105 transition-transform duration-300 flex items-center justify-center">
         {icon}
       </div>
     </Card>

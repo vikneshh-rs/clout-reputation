@@ -17,7 +17,7 @@ export default function BusinessRecovery(props: any) {
   if (authLoading) {
     return (
       <div className="min-h-screen bg-slate-50 flex items-center justify-center font-sans">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#1853AB]" />
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#073afe]" />
       </div>
     );
   }

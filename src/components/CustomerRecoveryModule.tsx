@@ -518,8 +518,20 @@ export default function CustomerRecoveryModule({ businessId, readOnly = false }:
             {error}
           </div>
         ) : tickets.length === 0 ? (
-          <div className="py-16 text-center text-slate-400 text-xs font-medium">
-            No recovery requests match the selected filters.
+          <div className="py-16 px-6 flex flex-col items-center justify-center text-center max-w-sm mx-auto animate-fadeIn">
+            <div className="w-16 h-16 rounded-full bg-slate-50 flex items-center justify-center mb-5 border border-slate-100/60 shadow-sm text-slate-450">
+              <svg className="w-8 h-8 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12c0 1.268-.63 2.39-1.593 3.068a3.745 3.745 0 01-1.043 3.296 3.745 3.745 0 01-3.296 1.043A3.745 3.745 0 0112 21c-1.268 0-2.39-.63-3.068-1.593a3.746 3.746 0 01-3.296-1.043 3.745 3.745 0 01-1.043-3.296A3.745 3.745 0 013 12c0-1.268.63-2.39 1.593-3.068a3.745 3.745 0 011.043-3.296 3.746 3.746 0 013.296-1.043A3.746 3.746 0 0112 3c1.268 0 2.39.63 3.068 1.593a3.746 3.746 0 013.296 1.043 3.746 3.746 0 011.043 3.296A3.745 3.745 0 0121 12z" />
+              </svg>
+            </div>
+            <h3 className="text-sm font-bold text-slate-800 mb-1">
+              {user?.role === 'SUPER_ADMIN' ? 'No pending customer recovery requests.' : 'No customer recovery requests yet.'}
+            </h3>
+            <p className="text-xs text-slate-400 font-medium leading-relaxed">
+              {user?.role === 'SUPER_ADMIN' 
+                ? 'All customer complaints across all locations have been successfully resolved.' 
+                : 'Customer feedback submitted through QR codes will appear here.'}
+            </p>
           </div>
         ) : (
           <div className="overflow-x-auto">
@@ -823,7 +835,7 @@ export default function CustomerRecoveryModule({ businessId, readOnly = false }:
                           type="button"
                           onClick={handleUpdateTicket}
                           disabled={updatingTicket}
-                          className="w-full bg-[#1853AB] hover:bg-[#134289] text-white text-xs font-bold py-3 px-4 rounded-2xl shadow-md transition-all cursor-pointer flex items-center justify-center gap-1.5 disabled:opacity-50"
+                          className="w-full bg-[#073afe] hover:bg-[#052ecb] text-white text-xs font-bold py-3 px-4 rounded-2xl shadow-md transition-all cursor-pointer flex items-center justify-center gap-1.5 disabled:opacity-50"
                         >
                           {updatingTicket && <Loader2 className="animate-spin h-3.5 w-3.5" />}
                           Save Changes & Audit

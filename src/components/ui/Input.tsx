@@ -27,7 +27,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
           <input
             id={id}
             ref={ref}
-            className={`block w-full h-12 text-sm bg-white border border-[#D1D5DB] rounded-xl transition-all duration-200 focus:outline-none focus:border-[#2563EB] focus:ring-4 focus:ring-blue-500/10 placeholder-[#9CA3AF] text-[#111827] ${
+            className={`block w-full h-12 text-sm bg-white border border-[#D1D5DB] rounded-xl transition-all duration-200 focus:outline-none focus:border-[#073AFE] focus:ring-4 focus:ring-[#073AFE]/10 placeholder-[#9CA3AF] text-[#111827] ${
               icon ? 'pl-10' : 'pl-4'
             } pr-4 ${className}`}
             {...props}

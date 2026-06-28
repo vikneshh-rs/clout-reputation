@@ -116,14 +116,14 @@ export default function DashboardLayout({ children, title }: DashboardLayoutProp
     ? 'bg-violet-100 text-violet-700 border border-violet-200'
     : user?.role === 'REP'
     ? 'bg-emerald-100 text-emerald-700 border border-emerald-200'
-    : 'bg-blue-100 text-[#1853AB] border border-blue-200';
+    : 'bg-blue-100 text-[#073afe] border border-blue-200';
 
   const SidebarContent = () => (
     <>
       <div className="flex flex-col flex-grow overflow-y-auto">
         {/* Logo */}
         <div className="flex items-center gap-3 px-5 py-5 border-b border-slate-100/50">
-          <div className="h-9 w-9 rounded-xl bg-[#1853AB] flex items-center justify-center shadow-sm shadow-blue-500/20 flex-shrink-0">
+          <div className="h-9 w-9 rounded-xl bg-[#073afe] flex items-center justify-center shadow-sm shadow-blue-500/20 flex-shrink-0">
             <img src="/logo.png" alt="Clout" className="h-5.5 w-5.5 object-contain brightness-0 invert" />
           </div>
           <div>
@@ -146,9 +146,9 @@ export default function DashboardLayout({ children, title }: DashboardLayoutProp
                 key={item.name}
                 href={item.href}
                 onClick={() => setMobileMenuOpen(false)}
-                className={`group flex items-center px-3.5 py-3 text-xs font-semibold rounded-2xl transition-all duration-300 ease-out ${
+                className={`group flex items-center px-3.5 py-3 text-xs font-semibold rounded-[12px] transition-all duration-200 ease-out ${
                   active
-                    ? 'bg-gradient-to-r from-blue-600 to-[#1853AB] text-white shadow-sm shadow-blue-500/20 scale-[1.02]'
+                    ? 'bg-[#073AFE] text-white shadow-sm shadow-[#073AFE]/10'
                     : 'text-slate-500 hover:bg-slate-50 hover:text-slate-900 hover:translate-x-1'
                 }`}
               >
@@ -180,7 +180,7 @@ export default function DashboardLayout({ children, title }: DashboardLayoutProp
       {/* User Footer */}
       <div className="flex-shrink-0 border-t border-slate-100/50 p-3 bg-slate-50/40 backdrop-blur-md">
         <div className="flex items-center px-2.5 py-2.5 rounded-2xl hover:bg-slate-100/60 transition-colors group">
-          <div className="h-8.5 w-8.5 rounded-full bg-gradient-to-br from-[#1853AB] to-blue-400 flex items-center justify-center text-white text-xs font-extrabold flex-shrink-0 shadow-sm">
+          <div className="h-8.5 w-8.5 rounded-full bg-[#073afe] flex items-center justify-center text-white text-xs font-extrabold flex-shrink-0 shadow-sm">
             {user?.name ? user.name[0].toUpperCase() : 'A'}
           </div>
           <div className="ml-2.5 flex-1 min-w-0">
@@ -234,7 +234,7 @@ export default function DashboardLayout({ children, title }: DashboardLayoutProp
         {/* Mobile Top Bar */}
         <header className="sticky top-0 z-20 md:hidden flex items-center justify-between h-14 px-4 bg-white/80 backdrop-blur-md border-b border-slate-200/50 shadow-sm">
           <div className="flex items-center gap-2">
-            <div className="h-7 w-7 rounded-lg bg-[#1853AB] flex items-center justify-center shadow-sm">
+            <div className="h-7 w-7 rounded-lg bg-[#073afe] flex items-center justify-center shadow-sm">
               <img src="/logo.png" alt="Clout" className="h-4 w-4 object-contain brightness-0 invert" />
             </div>
             <span className="text-sm font-bold text-slate-900">Clout Reputation</span>

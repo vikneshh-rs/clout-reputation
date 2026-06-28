@@ -185,7 +185,7 @@ export default function QrAssetsPage(props: any) {
   if (authLoading) {
     return (
       <div className="min-h-screen bg-slate-50 flex items-center justify-center font-sans">
-        <Loader2 className="animate-spin h-8 w-8 text-[#1853AB]" />
+        <Loader2 className="animate-spin h-8 w-8 text-[#073afe]" />
       </div>
     );
   }
@@ -235,7 +235,7 @@ export default function QrAssetsPage(props: any) {
               <span className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest">Total QR Assets</span>
               <span className="block text-2xl font-extrabold text-slate-900 mt-1">{stats.total}</span>
             </div>
-            <div className="p-3 bg-blue-50/70 text-[#1853AB] rounded-2xl">
+            <div className="p-3 bg-blue-50/70 text-[#073afe] rounded-2xl">
               <QrCode size={20} />
             </div>
           </div>
@@ -265,7 +265,7 @@ export default function QrAssetsPage(props: any) {
         {/* Filters */}
         <div className="p-6 border-b border-slate-100/60 flex flex-col sm:flex-row gap-4 items-center justify-between">
           <div className="flex items-center space-x-2.5">
-            <Building2 size={16} className="text-[#1853AB]" />
+            <Building2 size={16} className="text-[#073afe]" />
             <h4 className="font-bold text-xs text-slate-900 uppercase tracking-wider font-sans">Assets List</h4>
           </div>
 
@@ -280,7 +280,7 @@ export default function QrAssetsPage(props: any) {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search business or code..."
-                className="pl-9 pr-3 py-1.5 w-full sm:w-56 text-xs border border-slate-200 rounded-xl bg-white/60 focus:border-[#1853AB] focus:outline-none focus:ring-4 focus:ring-blue-500/5 focus:bg-white transition-all"
+                className="pl-9 pr-3 py-1.5 w-full sm:w-56 text-xs border border-slate-200 rounded-xl bg-white/60 focus:border-[#073afe] focus:outline-none focus:ring-4 focus:ring-blue-500/5 focus:bg-white transition-all"
               />
             </div>
 
@@ -288,7 +288,7 @@ export default function QrAssetsPage(props: any) {
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              className="px-3 py-1.5 text-xs border border-slate-200 rounded-xl bg-white focus:border-[#1853AB] focus:outline-none focus:ring-4 focus:ring-blue-500/5 transition-all text-slate-700 font-semibold"
+              className="px-3 py-1.5 text-xs border border-slate-200 rounded-xl bg-white focus:border-[#073afe] focus:outline-none focus:ring-4 focus:ring-blue-500/5 transition-all text-slate-700 font-semibold"
             >
               <option value="ALL">All Statuses</option>
               <option value="ACTIVE">Active</option>
@@ -301,7 +301,7 @@ export default function QrAssetsPage(props: any) {
         <div className="overflow-x-auto">
           {loading && inventory.length === 0 ? (
             <div className="p-12 text-center">
-              <Loader2 className="animate-spin h-6 w-6 text-[#1853AB] mx-auto mb-2.5" />
+              <Loader2 className="animate-spin h-6 w-6 text-[#073afe] mx-auto mb-2.5" />
               <span className="text-xs text-slate-400 font-medium">Loading QR assets...</span>
             </div>
           ) : inventory.length === 0 ? (
@@ -332,7 +332,7 @@ export default function QrAssetsPage(props: any) {
                             className="w-9 h-9 rounded-xl object-cover border border-slate-100" 
                           />
                         ) : (
-                          <div className="p-2 bg-slate-50 border border-slate-200/50 rounded-xl text-[#1853AB]">
+                          <div className="p-2 bg-slate-50 border border-slate-200/50 rounded-xl text-[#073afe]">
                             <Building2 size={16} />
                           </div>
                         )}
@@ -376,7 +376,7 @@ export default function QrAssetsPage(props: any) {
                         <button
                           onClick={() => downloadBrandedSheet(qr)}
                           disabled={downloadingId === qr.id}
-                          className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 text-[#1853AB] font-bold text-[10px] active:scale-[0.98] transition-all cursor-pointer shadow-sm disabled:opacity-50"
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 text-[#073afe] font-bold text-[10px] active:scale-[0.98] transition-all cursor-pointer shadow-sm disabled:opacity-50"
                           title="Download Printable Review Sheet"
                         >
                           {downloadingId === qr.id ? (

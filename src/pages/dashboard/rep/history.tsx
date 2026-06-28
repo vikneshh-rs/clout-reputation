@@ -68,7 +68,7 @@ export default function RepHistory(props: any) {
   if (authLoading) {
     return (
       <div className="min-h-screen bg-white flex items-center justify-center">
-        <Loader2 className="animate-spin h-8 w-8 text-[#1853AB]" />
+        <Loader2 className="animate-spin h-8 w-8 text-[#073afe]" />
       </div>
     );
   }
@@ -122,7 +122,7 @@ export default function RepHistory(props: any) {
             placeholder="Search logs by QR Code or Business Name..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full text-xs border border-slate-200 rounded-xl bg-white pl-9 pr-3 py-2 focus:border-[#1853AB] focus:outline-none focus:ring-2 focus:ring-[#1853AB]/10"
+            className="w-full text-xs border border-slate-200 rounded-xl bg-white pl-9 pr-3 py-2 focus:border-[#073afe] focus:outline-none focus:ring-2 focus:ring-[#073afe]/10"
           />
         </div>
       </div>
@@ -138,7 +138,7 @@ export default function RepHistory(props: any) {
       <div className="bg-white/80 backdrop-blur-md border border-slate-100 rounded-2xl overflow-hidden shadow-[0_4px_20px_rgba(0,0,0,0.02)]">
         {loading ? (
           <div className="py-20 flex justify-center items-center">
-            <Loader2 className="animate-spin h-8 w-8 text-[#1853AB]" />
+            <Loader2 className="animate-spin h-8 w-8 text-[#073afe]" />
           </div>
         ) : history.length === 0 ? (
           <div className="text-center py-20">
@@ -171,7 +171,7 @@ export default function RepHistory(props: any) {
               <tbody className="divide-y divide-slate-100 bg-transparent">
                 {history.map((log) => (
                   <tr key={log.id} className="hover:bg-slate-50/40 transition-colors">
-                    <td className="px-6 py-4 whitespace-nowrap text-xs font-mono font-bold text-[#1853AB]">
+                    <td className="px-6 py-4 whitespace-nowrap text-xs font-mono font-bold text-[#073afe]">
                       {log.qrInventory.qrCode}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-xs font-semibold">

@@ -2,7 +2,7 @@ import React from 'react';
 
 export function TableContainer({ children, className = '' }: { children: React.ReactNode; className?: string }) {
   return (
-    <div className={`bg-white border border-[#E5E7EB] rounded-[20px] shadow-[0px_4px_20px_rgba(15,23,42,0.06)] overflow-hidden ${className}`}>
+    <div className={`bg-white border border-[#E5E7EB] rounded-[16px] shadow-[0px_2px_8px_rgba(15,23,42,0.02)] overflow-hidden ${className}`}>
       {children}
     </div>
   );

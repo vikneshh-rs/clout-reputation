@@ -295,7 +295,7 @@ export default function QRAssignPortal(props: any) {
   if (authLoading) {
     return (
       <div className="min-h-screen bg-white flex items-center justify-center">
-        <Loader2 className="animate-spin h-8 w-8 text-[#1853AB]" />
+        <Loader2 className="animate-spin h-8 w-8 text-[#073afe]" />
       </div>
     );
   }
@@ -343,7 +343,7 @@ export default function QRAssignPortal(props: any) {
 
         <div className="bg-white/80 backdrop-blur-md border border-slate-100 rounded-2xl overflow-hidden shadow-[0_4px_20px_rgba(0,0,0,0.02)] p-6">
           <div className="flex items-center space-x-3 pb-4 border-b border-slate-100 mb-6">
-            <div className="p-2.5 bg-blue-50/70 text-[#1853AB] rounded-2xl">
+            <div className="p-2.5 bg-blue-50/70 text-[#073afe] rounded-2xl">
               {replacementMode ? <RotateCcw size={22} /> : <QrCode size={22} />}
             </div>
             <div>
@@ -377,7 +377,7 @@ export default function QRAssignPortal(props: any) {
                     setVerifyMethod('scan');
                     setError('');
                   }}
-                  className={`flex-1 pb-3 text-xs font-bold uppercase tracking-wider border-b-2 text-center transition-all cursor-pointer ${verifyMethod === 'scan' ? 'border-[#1853AB] text-[#1853AB]' : 'border-transparent text-zinc-500'}`}
+                  className={`flex-1 pb-3 text-xs font-bold uppercase tracking-wider border-b-2 text-center transition-all cursor-pointer ${verifyMethod === 'scan' ? 'border-[#073afe] text-[#073afe]' : 'border-transparent text-zinc-500'}`}
                 >
                   1. Scan QR Sticker
                 </button>
@@ -387,7 +387,7 @@ export default function QRAssignPortal(props: any) {
                     setVerifyMethod('manual');
                     setError('');
                   }}
-                  className={`flex-1 pb-3 text-xs font-bold uppercase tracking-wider border-b-2 text-center transition-all cursor-pointer ${verifyMethod === 'manual' ? 'border-[#1853AB] text-[#1853AB]' : 'border-transparent text-zinc-500'}`}
+                  className={`flex-1 pb-3 text-xs font-bold uppercase tracking-wider border-b-2 text-center transition-all cursor-pointer ${verifyMethod === 'manual' ? 'border-[#073afe] text-[#073afe]' : 'border-transparent text-zinc-500'}`}
                 >
                   2. Enter Manually
                 </button>
@@ -408,7 +408,7 @@ export default function QRAssignPortal(props: any) {
                       <button
                         type="button"
                         onClick={() => setVerifyMethod('manual')}
-                        className="bg-[#1853AB] hover:bg-[#134289] text-white text-xs font-semibold px-4 py-2 rounded-xl flex items-center gap-1.5 transition-colors cursor-pointer border-none mx-auto"
+                        className="bg-[#073afe] hover:bg-[#052ecb] text-white text-xs font-semibold px-4 py-2 rounded-xl flex items-center gap-1.5 transition-colors cursor-pointer border-none mx-auto"
                       >
                         Enter QR Code Manually
                       </button>
@@ -464,7 +464,7 @@ export default function QRAssignPortal(props: any) {
                         <div className="flex gap-2">
                           <select
                             id="simulateQrSelect"
-                            className="flex-1 text-xs border border-slate-200 rounded-xl bg-white px-2.5 py-1.5 focus:border-[#1853AB] focus:outline-none font-mono uppercase"
+                            className="flex-1 text-xs border border-slate-200 rounded-xl bg-white px-2.5 py-1.5 focus:border-[#073afe] focus:outline-none font-mono uppercase"
                           >
                             <option value="QR-000004">QR-000004 (UNASSIGNED)</option>
                             <option value="QR-000005">QR-000005 (UNASSIGNED)</option>
@@ -480,7 +480,7 @@ export default function QRAssignPortal(props: any) {
                                 handleValidateQr(undefined, selectEl.value);
                               }
                             }}
-                            className="bg-[#1853AB] hover:bg-[#134289] text-white text-xs font-semibold px-4 py-2 rounded-xl flex items-center gap-1.5 transition-colors cursor-pointer border-none whitespace-nowrap"
+                            className="bg-[#073afe] hover:bg-[#052ecb] text-white text-xs font-semibold px-4 py-2 rounded-xl flex items-center gap-1.5 transition-colors cursor-pointer border-none whitespace-nowrap"
                           >
                             Simulate Scan
                           </button>
@@ -511,7 +511,7 @@ export default function QRAssignPortal(props: any) {
                         required
                         value={inputQrCode}
                         onChange={(e) => setInputQrCode(e.target.value.toUpperCase())}
-                        className="w-full text-xs border border-slate-200 rounded-xl bg-white pl-10 pr-3 py-2 focus:border-[#1853AB] focus:outline-none focus:ring-2 focus:ring-[#1853AB]/10 font-mono uppercase"
+                        className="w-full text-xs border border-slate-200 rounded-xl bg-white pl-10 pr-3 py-2 focus:border-[#073afe] focus:outline-none focus:ring-2 focus:ring-[#073afe]/10 font-mono uppercase"
                         placeholder="QR-000004"
                       />
                     </div>
@@ -520,7 +520,7 @@ export default function QRAssignPortal(props: any) {
                   <button
                     type="submit"
                     disabled={loading || !inputQrCode.trim()}
-                    className="w-full flex justify-center items-center bg-[#1853AB] hover:bg-[#134289] text-white text-xs font-semibold px-4 py-2.5 rounded-xl transition-colors cursor-pointer border-none disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="w-full flex justify-center items-center bg-[#073afe] hover:bg-[#052ecb] text-white text-xs font-semibold px-4 py-2.5 rounded-xl transition-colors cursor-pointer border-none disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {loading ? <Loader2 className="animate-spin h-4 w-4 mr-2" /> : null}
                     Validate Sticker
@@ -545,7 +545,7 @@ export default function QRAssignPortal(props: any) {
                     setActiveSubTab('existing');
                     setError('');
                   }}
-                  className={`flex-1 pb-3 text-xs font-bold uppercase tracking-wider border-b-2 text-center transition-all cursor-pointer ${activeSubTab === 'existing' ? 'border-[#1853AB] text-[#1853AB]' : 'border-transparent text-zinc-500'}`}
+                  className={`flex-1 pb-3 text-xs font-bold uppercase tracking-wider border-b-2 text-center transition-all cursor-pointer ${activeSubTab === 'existing' ? 'border-[#073afe] text-[#073afe]' : 'border-transparent text-zinc-500'}`}
                 >
                   Link to Existing Business
                 </button>
@@ -555,7 +555,7 @@ export default function QRAssignPortal(props: any) {
                     setActiveSubTab('new');
                     setError('');
                   }}
-                  className={`flex-1 pb-3 text-xs font-bold uppercase tracking-wider border-b-2 text-center transition-all cursor-pointer ${activeSubTab === 'new' ? 'border-[#1853AB] text-[#1853AB]' : 'border-transparent text-zinc-500'}`}
+                  className={`flex-1 pb-3 text-xs font-bold uppercase tracking-wider border-b-2 text-center transition-all cursor-pointer ${activeSubTab === 'new' ? 'border-[#073afe] text-[#073afe]' : 'border-transparent text-zinc-500'}`}
                 >
                   Onboard New Business
                 </button>
@@ -574,7 +574,7 @@ export default function QRAssignPortal(props: any) {
                       id="existingBizSelect"
                       value={selectedBusinessId}
                       onChange={(e) => setSelectedBusinessId(e.target.value)}
-                      className="mt-2 text-xs border border-slate-200 rounded-xl bg-white w-full px-3 py-2.5 focus:border-[#1853AB] focus:outline-none"
+                      className="mt-2 text-xs border border-slate-200 rounded-xl bg-white w-full px-3 py-2.5 focus:border-[#073afe] focus:outline-none"
                     >
                       {businesses.length === 0 ? (
                         <option value="">No active businesses found</option>
@@ -591,7 +591,7 @@ export default function QRAssignPortal(props: any) {
                   <button
                     type="submit"
                     disabled={loading || !selectedBusinessId}
-                    className="w-full flex justify-center items-center bg-[#1853AB] hover:bg-[#134289] text-white text-xs font-semibold px-4 py-2.5 rounded-xl transition-colors cursor-pointer border-none disabled:opacity-50"
+                    className="w-full flex justify-center items-center bg-[#073afe] hover:bg-[#052ecb] text-white text-xs font-semibold px-4 py-2.5 rounded-xl transition-colors cursor-pointer border-none disabled:opacity-50"
                   >
                     {loading ? <Loader2 className="animate-spin h-4 w-4 mr-2" /> : null}
                     Assign QR to Business
@@ -610,7 +610,7 @@ export default function QRAssignPortal(props: any) {
                         required
                         value={businessName}
                         onChange={(e) => setBusinessName(e.target.value)}
-                        className="mt-1.5 w-full text-xs border border-slate-200 rounded-xl bg-white px-3 py-2 focus:border-[#1853AB] focus:outline-none focus:ring-2 focus:ring-[#1853AB]/10"
+                        className="mt-1.5 w-full text-xs border border-slate-200 rounded-xl bg-white px-3 py-2 focus:border-[#073afe] focus:outline-none focus:ring-2 focus:ring-[#073afe]/10"
                         placeholder="e.g. Luxe Cafe"
                       />
                     </div>
@@ -623,7 +623,7 @@ export default function QRAssignPortal(props: any) {
                         id="bizIndustry"
                         value={industry}
                         onChange={(e) => setIndustry(e.target.value as Industry)}
-                        className="mt-1.5 text-xs border border-slate-200 rounded-xl bg-white w-full px-2.5 py-1.5 focus:border-[#1853AB] focus:outline-none"
+                        className="mt-1.5 text-xs border border-slate-200 rounded-xl bg-white w-full px-2.5 py-1.5 focus:border-[#073afe] focus:outline-none"
                       >
                         {Object.values(Industry).map((ind) => (
                           <option key={ind} value={ind}>{ind.replace('_', ' ')}</option>
@@ -641,7 +641,7 @@ export default function QRAssignPortal(props: any) {
                         required
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
-                        className="mt-1.5 w-full text-xs border border-slate-200 rounded-xl bg-white px-3 py-2 focus:border-[#1853AB] focus:outline-none focus:ring-2 focus:ring-[#1853AB]/10"
+                        className="mt-1.5 w-full text-xs border border-slate-200 rounded-xl bg-white px-3 py-2 focus:border-[#073afe] focus:outline-none focus:ring-2 focus:ring-[#073afe]/10"
                         placeholder="••••••••"
                       />
                     </div>
@@ -655,7 +655,7 @@ export default function QRAssignPortal(props: any) {
                         type="url"
                         value={googleReviewUrl}
                         onChange={(e) => setGoogleReviewUrl(e.target.value)}
-                        className="mt-1.5 w-full text-xs border border-slate-200 rounded-xl bg-white px-3 py-2 focus:border-[#1853AB] focus:outline-none focus:ring-2 focus:ring-[#1853AB]/10"
+                        className="mt-1.5 w-full text-xs border border-slate-200 rounded-xl bg-white px-3 py-2 focus:border-[#073afe] focus:outline-none focus:ring-2 focus:ring-[#073afe]/10"
                         placeholder="https://search.google.com/local/writereview?placeid=..."
                       />
                     </div>
@@ -669,7 +669,7 @@ export default function QRAssignPortal(props: any) {
                         type="text"
                         value={phone}
                         onChange={(e) => setPhone(e.target.value)}
-                        className="mt-1.5 w-full text-xs border border-slate-200 rounded-xl bg-white px-3 py-2 focus:border-[#1853AB] focus:outline-none focus:ring-2 focus:ring-[#1853AB]/10"
+                        className="mt-1.5 w-full text-xs border border-slate-200 rounded-xl bg-white px-3 py-2 focus:border-[#073afe] focus:outline-none focus:ring-2 focus:ring-[#073afe]/10"
                         placeholder="+15551234"
                       />
                     </div>
@@ -683,7 +683,7 @@ export default function QRAssignPortal(props: any) {
                         type="text"
                         value={address}
                         onChange={(e) => setAddress(e.target.value)}
-                        className="mt-1.5 w-full text-xs border border-slate-200 rounded-xl bg-white px-3 py-2 focus:border-[#1853AB] focus:outline-none focus:ring-2 focus:ring-[#1853AB]/10"
+                        className="mt-1.5 w-full text-xs border border-slate-200 rounded-xl bg-white px-3 py-2 focus:border-[#073afe] focus:outline-none focus:ring-2 focus:ring-[#073afe]/10"
                         placeholder="123 Main St, New York"
                       />
                     </div>
@@ -692,7 +692,7 @@ export default function QRAssignPortal(props: any) {
                   <button
                     type="submit"
                     disabled={loading}
-                    className="w-full flex justify-center items-center bg-[#1853AB] hover:bg-[#134289] text-white text-xs font-semibold px-4 py-2.5 rounded-xl transition-colors cursor-pointer border-none disabled:opacity-50"
+                    className="w-full flex justify-center items-center bg-[#073afe] hover:bg-[#052ecb] text-white text-xs font-semibold px-4 py-2.5 rounded-xl transition-colors cursor-pointer border-none disabled:opacity-50"
                   >
                     {loading ? <Loader2 className="animate-spin h-4 w-4 mr-2" /> : null}
                     Onboard &amp; Link QR
@@ -715,7 +715,7 @@ export default function QRAssignPortal(props: any) {
                   required
                   value={oldQrCode}
                   onChange={(e) => setOldQrCode(e.target.value.toUpperCase())}
-                  className="mt-1.5 w-full text-xs border border-slate-200 rounded-xl bg-white px-3 py-2 focus:border-[#1853AB] focus:outline-none focus:ring-2 focus:ring-[#1853AB]/10 font-mono uppercase"
+                  className="mt-1.5 w-full text-xs border border-slate-200 rounded-xl bg-white px-3 py-2 focus:border-[#073afe] focus:outline-none focus:ring-2 focus:ring-[#073afe]/10 font-mono uppercase"
                   placeholder="QR-OLD123"
                 />
               </div>
@@ -730,7 +730,7 @@ export default function QRAssignPortal(props: any) {
                   required
                   value={newQrCode}
                   onChange={(e) => setNewQrCode(e.target.value.toUpperCase())}
-                  className="mt-1.5 w-full text-xs border border-slate-200 rounded-xl bg-white px-3 py-2 focus:border-[#1853AB] focus:outline-none focus:ring-2 focus:ring-[#1853AB]/10 font-mono uppercase"
+                  className="mt-1.5 w-full text-xs border border-slate-200 rounded-xl bg-white px-3 py-2 focus:border-[#073afe] focus:outline-none focus:ring-2 focus:ring-[#073afe]/10 font-mono uppercase"
                   placeholder="QR-NEW456"
                 />
               </div>
@@ -738,7 +738,7 @@ export default function QRAssignPortal(props: any) {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full flex justify-center items-center bg-[#1853AB] hover:bg-[#134289] text-white text-xs font-semibold px-4 py-2.5 rounded-xl transition-colors cursor-pointer border-none disabled:opacity-50"
+                className="w-full flex justify-center items-center bg-[#073afe] hover:bg-[#052ecb] text-white text-xs font-semibold px-4 py-2.5 rounded-xl transition-colors cursor-pointer border-none disabled:opacity-50"
               >
                 {loading ? <Loader2 className="animate-spin h-4 w-4 mr-2" /> : null}
                 Swap QR Sticker
@@ -762,14 +762,14 @@ export default function QRAssignPortal(props: any) {
               <div className="pt-4 flex flex-col sm:flex-row justify-center gap-4">
                 <button
                   onClick={resetForm}
-                  className="inline-flex items-center space-x-1 px-4 py-2 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 text-[#1853AB] font-semibold text-[10px] transition-colors justify-center"
+                  className="inline-flex items-center space-x-1 px-4 py-2 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 text-[#073afe] font-semibold text-[10px] transition-colors justify-center"
                 >
                   Perform another action
                 </button>
                 
                 <button
                   onClick={() => router.push('/dashboard/rep')}
-                  className="bg-[#1853AB] hover:bg-[#134289] text-white text-xs font-semibold px-4 py-2 rounded-xl flex items-center gap-1.5 transition-colors cursor-pointer border-none justify-center"
+                  className="bg-[#073afe] hover:bg-[#052ecb] text-white text-xs font-semibold px-4 py-2 rounded-xl flex items-center gap-1.5 transition-colors cursor-pointer border-none justify-center"
                 >
                   Return to Dashboard
                 </button>

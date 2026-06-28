@@ -14,7 +14,7 @@ export default function Badge({
   const baseStyle = 'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold tracking-wide border';
 
   const variants = {
-    primary: 'bg-[#EFF6FF] text-[#2563EB] border-[#DBEAFE]',
+    primary: 'bg-[#EFF3FF] text-[#073AFE] border-[#DBEAFE]',
     success: 'bg-[#ECFDF5] text-[#10B981] border-[#D1FAE5]',
     warning: 'bg-[#FFFBEB] text-[#D97706] border-[#FEF3C7]',
     error: 'bg-[#FEF2F2] text-[#EF4444] border-[#FEE2E2]',
