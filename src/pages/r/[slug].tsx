@@ -6,7 +6,6 @@ import DigitalReviewCard from '@/components/review/DigitalReviewCard';
 import RatingCard from '@/components/review/RatingCard';
 import RecoveryForm from '@/components/review/RecoveryForm';
 import SuccessScreen from '@/components/review/SuccessScreen';
-import PoweredByFooter from '@/components/review/PoweredByFooter';
 
 interface BusinessDetails {
   qrCode: string;
@@ -333,123 +332,53 @@ export default function PublicReviewPortal() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-800 flex flex-col items-center justify-center p-5 relative font-sans overflow-y-auto">
+    <>
       <Head>
         <title>{details.business.name} - Review Portal</title>
         <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0, viewport-fit=cover" />
       </Head>
 
-      <div className="w-full max-w-[420px] flex flex-col items-center relative z-10 my-auto">
-        
-        {/* Permanent Digital Review Card Shell */}
-        <DigitalReviewCard businessName={details.business.name}>
-          
-          {saveError && (
-            <div className="w-full mb-4 p-3.5 bg-rose-50 border border-rose-200/50 text-rose-700 text-xs rounded-xl font-sans font-medium text-left animate-fadeIn">
-              {saveError}
-            </div>
-          )}
-          
-          {step === 'rating' && (
-            <div className="flex flex-col h-full w-full items-center">
-              <div className="mt-[60px] w-full flex justify-center">
-                <RatingCard 
-                  rating={rating} 
-                  onChange={handleStarSelect} 
-                  submitting={submitting} 
-                />
-              </div>
-              
-              <span
-                className="
-                  mt-[42px]
-                  text-[18px]
-                  font-normal
-                  text-[#6B7280]
-                  text-center
-                "
-              >
-                Tap a star to share your experience
-              </span>
-              
-              <div className="mt-auto w-full">
-                <PoweredByFooter />
-              </div>
-            </div>
-          )}
-          
-          {step === 'positive-redirect' && (
-            <div className="flex flex-col h-full w-full items-center">
-              <SuccessScreen 
-                type="positive" 
-                googleReviewUrl={details.business.googleReviewUrl || ''} 
-                countdownSeconds={countdown}
-                onRedirectClick={handleRedirectClick}
-              />
-              <div className="mt-auto w-full">
-                <PoweredByFooter />
-              </div>
-            </div>
-          )}
-          
-          {step === 'negative-form' && (
-            <div className="flex flex-col h-full w-full items-center justify-center animate-fadeIn">
-              <div className="flex flex-col items-center justify-center flex-grow">
-                <p className="text-xs text-slate-500 font-semibold mt-8">Recording rating details...</p>
-                <Loader2 className="animate-spin h-6 w-6 text-[#073afe] mt-2" />
-              </div>
-              <div className="mt-auto w-full">
-                <PoweredByFooter />
-              </div>
-            </div>
-          )}
+      <DigitalReviewCard businessName={details.business.name}>
+        {saveError && (
+          <div className="w-full mb-4 p-3.5 bg-rose-50 border border-rose-200/50 text-rose-700 text-xs rounded-xl font-sans font-medium text-left animate-fadeIn">
+            {saveError}
+          </div>
+        )}
 
-          {step === 'negative-completion' && (
-            <div className="flex flex-col h-full w-full items-center">
-              <SuccessScreen type="negative" />
-              <div className="mt-auto w-full">
-                <PoweredByFooter />
-              </div>
-            </div>
-          )}
-          
-        </DigitalReviewCard>
-      </div>
+        {step === 'rating' && (
+          <RatingCard 
+            rating={rating} 
+            onChange={handleStarSelect} 
+            submitting={submitting} 
+          />
+        )}
 
-      {/* Bottom Sheet Drawer for Negative Experience (1-3 stars) */}
-      {isBottomSheetOpen && (
-        <div 
-          className="fixed inset-0 bg-[#0F172A]/40 backdrop-blur-sm z-40 transition-opacity duration-200"
-          onClick={() => {
-            if (step !== 'negative-completion') {
-              setIsBottomSheetOpen(false);
-              setStep('rating');
-              setRating(0);
-            }
-          }}
-        />
-      )}
+        {step === 'positive-redirect' && (
+          <SuccessScreen 
+            positive={true} 
+            countdown={countdown}
+            onContinue={() => handleRedirectClick(null as any)}
+          />
+        )}
 
-      {/* Slide-Up Bottom Sheet */}
-      <div 
-        className={`fixed bottom-0 left-0 right-0 max-w-[420px] mx-auto bg-white rounded-t-[24px] shadow-2xl z-50 overflow-hidden flex flex-col h-[75vh] transition-transform duration-250 ease-out ${
-          isBottomSheetOpen ? 'translate-y-0' : 'translate-y-full'
-        }`}
-      >
-        <div className="w-12 h-1 bg-slate-200 rounded-full mx-auto my-3 flex-shrink-0" />
-        
-        <div className="flex-grow overflow-y-auto px-8 pb-8 pt-2">
-          {step === 'negative-completion' ? (
-            <SuccessScreen type="negative" />
-          ) : (
-            <RecoveryForm 
-              onSubmit={handleRecoverySubmit} 
-              submitting={submitting} 
-            />
-          )}
-        </div>
-      </div>
+        {step === 'negative-form' && (
+          <RecoveryForm 
+            loading={submitting}
+            onSubmit={(data) => {
+              handleRecoverySubmit({
+                customerName: data.customerName || '',
+                customerPhone: data.phone || '',
+                comment: data.feedback || '',
+                callbackRequested: data.requestCallback,
+              });
+            }}
+          />
+        )}
 
-    </div>
+        {step === 'negative-completion' && (
+          <SuccessScreen positive={false} />
+        )}
+      </DigitalReviewCard>
+    </>
   );
 }

@@ -54,7 +54,7 @@ export default function DigitalReviewCard({
               flex-col
               items-center
               w-full
-              pt-[52px]
+              pt-[38px]
             "
           >
             <GoogleBadge />

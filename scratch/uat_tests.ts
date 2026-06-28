@@ -12,13 +12,13 @@ import { db } from '../src/lib/db';
 import jwt from 'jsonwebtoken';
 import { CallbackStatus, BusinessStatus } from '@prisma/client';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'super-secret-cloutreputation-jwt-key-change-this-in-production';
-const COOKIE_NAME = 'cloutreputation_session';
+const JWT_SECRET = process.env.JWT_SECRET || 'super-secret-cloutation-jwt-key-change-this-in-production';
+const COOKIE_NAME = 'cloutation_session';
 
 function generateToken(role: 'SUPER_ADMIN' | 'REP' | 'BUSINESS', userId: string, username: string) {
   const payload = {
     userId,
-    email: `${username.toLowerCase()}@cloutreputation.com`,
+    email: `${username.toLowerCase()}@cloutation.com`,
     username,
     role,
     exp: Math.floor(Date.now() / 1000) + 60 * 60

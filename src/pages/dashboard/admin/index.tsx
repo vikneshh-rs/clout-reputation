@@ -107,7 +107,7 @@ export default function AdminDashboard(props: any) {
   return (
     <DashboardLayout title="System Control Dashboard" theme={theme} toggleTheme={toggleTheme}>
       <Head>
-        <title>Super Admin Dashboard - Clout Reputation</title>
+        <title>Super Admin Dashboard - Cloutation</title>
       </Head>
 
       <div className="mb-6 flex justify-between items-center">

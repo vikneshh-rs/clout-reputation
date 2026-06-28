@@ -32,7 +32,7 @@ async function main() {
   const superAdmin = await prisma.user.create({
     data: {
       name: 'Viknesh',
-      email: 'admin@cloutreputation.com',
+      email: 'admin@cloutation.com',
       username: 'deco-admin',
       passwordHash: adminPasswordHash,
       role: UserRole.SUPER_ADMIN,
@@ -44,7 +44,7 @@ async function main() {
   const repAdmin = await prisma.user.create({
     data: {
       name: 'Field Agent Dan',
-      email: 'rep@cloutreputation.com',
+      email: 'rep@cloutation.com',
       username: 'dan',
       passwordHash: repPasswordHash,
       role: UserRole.REP,

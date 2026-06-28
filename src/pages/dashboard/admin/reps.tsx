@@ -227,7 +227,7 @@ export default function RepsManagementPage(props: any) {
   return (
     <DashboardLayout title="Field Representatives" theme={theme} toggleTheme={toggleTheme}>
       <Head>
-        <title>Representatives Management - Clout Reputation</title>
+        <title>Representatives Management - Cloutation</title>
         
       </Head>
 

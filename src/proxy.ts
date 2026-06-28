@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
-const COOKIE_NAME = 'cloutreputation_session';
+const COOKIE_NAME = 'cloutation_session';
 
 // Lightweight, edge-safe JWT payload decoder
 function decodeJwt(token: string) {

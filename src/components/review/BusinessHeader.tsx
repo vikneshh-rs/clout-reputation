@@ -22,7 +22,7 @@ export default function BusinessHeader({
           animate-headerSlide
         "
         style={{
-          fontSize: "clamp(42px, 5vw, 56px)",
+          fontSize: "clamp(40px, 4vw, 46px)",
           maxWidth: "340px",
         }}
       >

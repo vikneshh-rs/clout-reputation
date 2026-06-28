@@ -36,7 +36,7 @@ export default function BusinessRecovery(props: any) {
   return (
     <DashboardLayout title="Customer Recovery Queue" theme={theme} toggleTheme={toggleTheme}>
       <Head>
-        <title>Customer Recovery - Clout Reputation</title>
+        <title>Customer Recovery - Cloutation</title>
       </Head>
 
       <div className="mb-6">

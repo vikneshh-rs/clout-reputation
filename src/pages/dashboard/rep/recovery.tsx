@@ -60,7 +60,7 @@ export default function RepRecovery(props: any) {
   return (
     <DashboardLayout title="My Onboarded Customer Recovery Queue" theme={theme} toggleTheme={toggleTheme}>
       <Head>
-        <title>Customer Recovery Representative - Clout Reputation</title>
+        <title>Customer Recovery Representative - Cloutation</title>
       </Head>
 
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">

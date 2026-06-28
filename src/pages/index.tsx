@@ -90,7 +90,7 @@ export default function LandingPage() {
   return (
     <div className="min-h-screen bg-[#F8FAFC] text-[#0F172A] font-sans selection:bg-[#073afe] selection:text-white relative overflow-hidden flex flex-col justify-between">
       <Head>
-        <title>Clout Reputation | QR-Powered B2B Reputation Management Platform</title>
+        <title>Cloutation | QR-Powered B2B Reputation Management Platform</title>
         <meta name="description" content="Turn customer feedback into business growth using QR-powered reviews, funnel routing, sentiment analytics, and customer recovery." />
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
         <link href="https://api.fontshare.com/v2/css?f[]=cabinet-grotesk@800,900&display=swap" rel="stylesheet" />
@@ -138,7 +138,7 @@ export default function LandingPage() {
           <div className="flex items-center">
             <img
               src="/logo.png"
-              alt="Clout Reputation"
+              alt="Cloutation"
               className="h-5 sm:h-7 object-contain"
             />
           </div>
@@ -238,7 +238,7 @@ export default function LandingPage() {
                   <span className="w-2.5 h-2.5 rounded-full bg-[#10B981]/80" />
                 </div>
                 <div className="text-[9px] font-semibold text-[#64748B] bg-white/45 border border-slate-200/20 rounded-md px-6 py-0.5 font-sans uppercase tracking-widest">
-                  app.cloutreputation.com
+                  app.cloutation.com
                 </div>
                 <div className="w-12" />
               </div>
@@ -699,7 +699,7 @@ export default function LandingPage() {
                 <span className="w-2.5 h-2.5 rounded-full bg-slate-200" />
                 <span className="w-2.5 h-2.5 rounded-full bg-slate-200" />
                 <span className="w-2.5 h-2.5 rounded-full bg-slate-200" />
-                <span className="text-[10px] font-bold text-[#64748B] pl-4 font-mono">bella-italia.cloutrep.com/dashboard</span>
+                <span className="text-[10px] font-bold text-[#64748B] pl-4 font-mono">bella-italia.cloutation.com/dashboard</span>
               </div>
               <span className="px-2.5 py-0.5 bg-blue-50 text-[9px] font-bold text-[#073afe] rounded-full uppercase tracking-widest">Merchant Portal</span>
             </div>
@@ -1315,10 +1315,10 @@ export default function LandingPage() {
         <div className="flex items-center gap-3">
           <img
             src="/logo.png"
-            alt="Clout Reputation Logo"
+            alt="Cloutation Logo"
             className="h-5 object-contain opacity-80"
           />
-          <span>&copy; {new Date().getFullYear()} Clout Reputation. All rights reserved.</span>
+          <span>&copy; {new Date().getFullYear()} Cloutation. All rights reserved.</span>
         </div>
         <div className="flex items-center space-x-6 font-bold uppercase tracking-widest text-[9px]">
           <span>Modern Enterprise Reputation Management</span>

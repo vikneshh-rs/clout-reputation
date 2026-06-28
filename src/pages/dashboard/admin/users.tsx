@@ -108,7 +108,7 @@ export default function UsersManagement() {
   return (
     <DashboardLayout title="User Accounts">
       <Head>
-        <title>Manage Users - Clout Reputation</title>
+        <title>Manage Users - Cloutation</title>
       </Head>
 
       {/* Action Header */}

@@ -154,7 +154,7 @@ export default function SubscriptionsManagementPage(props: any) {
   return (
     <DashboardLayout title="Client Subscriptions" theme={theme} toggleTheme={toggleTheme}>
       <Head>
-        <title>Subscriptions Management - Clout Reputation</title>
+        <title>Subscriptions Management - Cloutation</title>
         
       </Head>
 

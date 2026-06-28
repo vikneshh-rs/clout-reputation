@@ -51,7 +51,7 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col justify-center py-12 sm:px-6 lg:px-8 relative font-sans transition-colors duration-200">
       <Head>
-        <title>Login - Clout Reputation</title>
+        <title>Login - Cloutation</title>
       </Head>
 
 
@@ -66,11 +66,11 @@ export default function LoginPage() {
         <div className="flex flex-col items-center mb-6">
           <img 
             src="/logo.png" 
-            alt="Clout Reputation" 
+            alt="Cloutation" 
             className="h-14 w-14 rounded-xl object-contain mix-blend-multiply transition-all duration-300 hover:scale-105" 
           />
           <span className="mt-2 font-sans text-xl font-bold tracking-tight text-slate-900">
-            Clout Reputation
+            Cloutation
           </span>
         </div>
         
@@ -78,7 +78,7 @@ export default function LoginPage() {
           Welcome back
         </h2>
         <p className="mt-2 text-center text-xs sm:text-sm text-slate-500">
-          Sign in to your Clout Reputation dashboard
+          Sign in to your Cloutation dashboard
         </p>
       </div>
 

@@ -465,7 +465,7 @@ export default function BusinessesManagementPage(props: any) {
   return (
     <DashboardLayout title="Client Businesses & Onboarding" theme={theme} toggleTheme={toggleTheme}>
       <Head>
-        <title>Businesses & Onboarding - Clout Reputation</title>
+        <title>Businesses & Onboarding - Cloutation</title>
       </Head>
 
       <div className="mb-6 flex flex-col sm:flex-row justify-between sm:items-center gap-4">

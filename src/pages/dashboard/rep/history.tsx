@@ -87,7 +87,7 @@ export default function RepHistory(props: any) {
   return (
     <DashboardLayout title="Assignment History" theme={theme} toggleTheme={toggleTheme}>
       <Head>
-        <title>Assignment Logs - Clout Reputation</title>
+        <title>Assignment Logs - Cloutation</title>
         <style>{`
           body, .dashboard-layout {
             font-family: 'Source Sans Pro', sans-serif !important;

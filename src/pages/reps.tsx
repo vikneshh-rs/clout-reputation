@@ -49,7 +49,7 @@ export default function RepsLoginPage() {
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col justify-center py-12 sm:px-6 lg:px-8 relative font-sans transition-colors duration-200">
       <Head>
-        <title>Field Representative Portal Sign In - Clout Reputation</title>
+        <title>Field Representative Portal Sign In - Cloutation</title>
       </Head>
 
 
@@ -64,11 +64,11 @@ export default function RepsLoginPage() {
         <div className="flex flex-col items-center mb-6">
           <img 
             src="/logo.png" 
-            alt="Clout Reputation" 
+            alt="Cloutation" 
             className="h-14 w-14 rounded-xl object-contain mix-blend-multiply transition-all duration-300 hover:scale-105" 
           />
           <span className="mt-2 font-sans text-xl font-bold tracking-tight text-slate-900">
-            Clout Reputation
+            Cloutation
           </span>
         </div>
         <h2 className="text-center text-3xl font-extrabold tracking-tight">

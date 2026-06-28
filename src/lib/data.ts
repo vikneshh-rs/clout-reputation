@@ -50,10 +50,10 @@ let mockBusinesses: Business[] = [
 ];
 
 let mockUsers: User[] = [
-  { id: 'u-admin', name: 'Viknesh', email: 'admin@cloutreputation.com', username: 'deco-admin', passwordHash: '', role: UserRole.SUPER_ADMIN, isActive: true, createdAt: new Date(), updatedAt: new Date() },
-  { id: 'u-rep1', name: 'Field Agent Dan', email: 'rep@cloutreputation.com', username: 'dan', passwordHash: '', role: UserRole.REP, isActive: true, createdAt: new Date(), updatedAt: new Date() },
-  { id: 'u-rep2', name: 'Rahul', email: 'rahul@cloutreputation.com', username: 'rahul', passwordHash: '', role: UserRole.REP, isActive: true, createdAt: new Date(), updatedAt: new Date() },
-  { id: 'u-rep3', name: 'Karthik', email: 'karthik@cloutreputation.com', username: 'karthik', passwordHash: '', role: UserRole.REP, isActive: true, createdAt: new Date(), updatedAt: new Date() },
+  { id: 'u-admin', name: 'Viknesh', email: 'admin@cloutation.com', username: 'deco-admin', passwordHash: '', role: UserRole.SUPER_ADMIN, isActive: true, createdAt: new Date(), updatedAt: new Date() },
+  { id: 'u-rep1', name: 'Field Agent Dan', email: 'rep@cloutation.com', username: 'dan', passwordHash: '', role: UserRole.REP, isActive: true, createdAt: new Date(), updatedAt: new Date() },
+  { id: 'u-rep2', name: 'Rahul', email: 'rahul@cloutation.com', username: 'rahul', passwordHash: '', role: UserRole.REP, isActive: true, createdAt: new Date(), updatedAt: new Date() },
+  { id: 'u-rep3', name: 'Karthik', email: 'karthik@cloutation.com', username: 'karthik', passwordHash: '', role: UserRole.REP, isActive: true, createdAt: new Date(), updatedAt: new Date() },
 ];
 
 let mockSubscriptions: Subscription[] = [

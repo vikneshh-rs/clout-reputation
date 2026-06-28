@@ -11,20 +11,20 @@ async function main() {
 
     // Check if the user already exists
     const existing = await prisma.user.findUnique({
-      where: { email: 'rep@cloutreputation.com' }
+      where: { email: 'rep@cloutation.com' }
     });
 
     if (existing) {
-      console.log('ℹ️ User rep@cloutreputation.com already exists. Updating password...');
+      console.log('ℹ️ User rep@cloutation.com already exists. Updating password...');
       await prisma.user.update({
-        where: { email: 'rep@cloutreputation.com' },
+        where: { email: 'rep@cloutation.com' },
         data: { passwordHash: repPasswordHash, role: 'REP', username: 'dan' }
       });
     } else {
       const rep = await prisma.user.create({
         data: {
           name: 'Field Agent Dan',
-          email: 'rep@cloutreputation.com',
+          email: 'rep@cloutation.com',
           username: 'dan',
           passwordHash: repPasswordHash,
           role: 'REP'

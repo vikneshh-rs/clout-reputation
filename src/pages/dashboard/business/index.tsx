@@ -306,35 +306,35 @@ export default function BusinessDashboard(props: any) {
   return (
     <DashboardLayout title="Business Dashboard" theme={theme} toggleTheme={toggleTheme}>
       <Head>
-        <title>Dashboard - {user.name} - Clout Reputation</title>
+        <title>Dashboard - {user.name} - Cloutation</title>
       </Head>
 
       {/* Modern Greeting Header */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-8 pb-6 border-b border-slate-200/60">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-8 pb-6 border-b border-slate-100">
         <div>
           <h2 className="text-2xl font-extrabold tracking-tight text-slate-900 font-sans">
             {getGreeting()}, {user.name} 👋
           </h2>
           <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 mt-1.5 text-xs text-slate-500 font-medium">
             <span className="font-bold text-slate-800 uppercase tracking-wider">{user.name} Management</span>
-            <span className="text-slate-300">•</span>
-            <div className="flex items-center gap-1">
-              <Calendar size={13} className="text-slate-400" />
+            <span className="text-slate-350">•</span>
+            <div className="flex items-center gap-1.5 text-slate-400">
+              <Calendar size={13} />
               <span>{formattedDate}</span>
             </div>
           </div>
         </div>
 
         {/* Dynamic Period Selector */}
-        <div className="flex items-center gap-2 bg-white px-3.5 py-2 border border-slate-200 rounded-xl shadow-[0_1px_2px_rgba(0,0,0,0.02)]">
-          <label htmlFor="period-select" className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+        <div className="flex items-center gap-2 bg-white px-4 py-2 border border-slate-200/80 rounded-2xl shadow-sm">
+          <label htmlFor="period-select" className="text-[10px] font-bold text-slate-400 uppercase tracking-widest select-none">
             Timeline
           </label>
           <select
             id="period-select"
             value={period}
             onChange={(e) => setPeriod(e.target.value)}
-            className="text-xs font-bold text-slate-800 bg-transparent focus:outline-none focus:ring-0 cursor-pointer"
+            className="text-xs font-bold text-slate-800 bg-transparent border-none focus:outline-none focus:ring-0 cursor-pointer pr-1"
           >
             <option value="7d">Last 7 Days</option>
             <option value="30d">Last 30 Days</option>
@@ -346,28 +346,28 @@ export default function BusinessDashboard(props: any) {
       </div>
 
       {error && (
-        <div className="mb-6 p-4 rounded-xl bg-rose-50 border border-rose-200/50 text-rose-700 text-xs flex items-center gap-2 font-medium">
-          <AlertCircle className="h-5 w-5 text-rose-500 flex-shrink-0" />
+        <div className="mb-6 p-4 rounded-2xl bg-rose-50 border border-rose-100 text-rose-700 text-xs flex items-center gap-2.5 font-medium animate-fadeIn">
+          <AlertCircle className="h-4.5 w-4.5 text-rose-500 flex-shrink-0" />
           <span>{error}</span>
         </div>
       )}
 
       {loading ? (
         <div className="py-32 flex flex-col justify-center items-center gap-3">
-          <Loader2 className="animate-spin h-8 w-8 text-[#073afe]" />
+          <Loader2 className="animate-spin h-8 w-8 text-[#073afe] stroke-[2.25]" />
           <p className="text-xs text-slate-500 font-semibold tracking-wide">Retrieving client intelligence...</p>
         </div>
       ) : data ? (
-        <div className="space-y-8">
+        <div className="space-y-8 animate-fadeIn">
           
           {/* Redesigned 5 Premium KPI Cards Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
             
-            {/* 1. Average Rating */}
-            <Card className="flex flex-col justify-between hover:-translate-y-1 hover:shadow-[0_12px_30px_rgba(15,23,42,0.06)] border-slate-200/80 transition-all duration-300">
+            {/* 1. Average Score */}
+            <div className="bg-white border border-slate-100 rounded-[24px] shadow-[0_8px_30px_rgb(0,0,0,0.015)] p-6 hover:-translate-y-1 hover:shadow-[0_12px_30px_rgba(15,23,42,0.04)] transition-all duration-300 flex flex-col justify-between">
               <div className="flex justify-between items-start">
                 <div className="space-y-1">
-                  <span className="block text-[10px] font-bold text-slate-400 tracking-widest uppercase">
+                  <span className="block text-[10px] font-bold text-slate-400 tracking-wider uppercase">
                     Average Score
                   </span>
                   <div className="flex items-baseline gap-1">
@@ -379,8 +379,8 @@ export default function BusinessDashboard(props: any) {
                   <Star size={16} className="fill-current text-amber-500" />
                 </div>
               </div>
-              <div className="mt-4 flex items-center gap-1 text-[10px] text-slate-500 font-semibold border-t border-slate-100 pt-3">
-                <div className="flex text-amber-500 mr-1">
+              <div className="mt-5 flex items-center gap-1 text-[10px] text-slate-500 font-semibold border-t border-slate-100 pt-3.5">
+                <div className="flex text-amber-500 mr-1.5">
                   {[...Array(5)].map((_, i) => (
                     <Star 
                       key={i} 
@@ -389,15 +389,15 @@ export default function BusinessDashboard(props: any) {
                     />
                   ))}
                 </div>
-                <span>Customer score average</span>
+                <span>Average rating</span>
               </div>
-            </Card>
+            </div>
 
             {/* 2. Total Reviews */}
-            <Card className="flex flex-col justify-between hover:-translate-y-1 hover:shadow-[0_12px_30px_rgba(15,23,42,0.06)] border-slate-200/80 transition-all duration-300">
+            <div className="bg-white border border-slate-100 rounded-[24px] shadow-[0_8px_30px_rgb(0,0,0,0.015)] p-6 hover:-translate-y-1 hover:shadow-[0_12px_30px_rgba(15,23,42,0.04)] transition-all duration-300 flex flex-col justify-between">
               <div className="flex justify-between items-start">
                 <div className="space-y-1">
-                  <span className="block text-[10px] font-bold text-slate-400 tracking-widest uppercase">
+                  <span className="block text-[10px] font-bold text-slate-400 tracking-wider uppercase">
                     Total Reviews
                   </span>
                   <h3 className="text-3xl font-extrabold text-slate-900 tracking-tight">{data.totalReviews}</h3>
@@ -406,17 +406,17 @@ export default function BusinessDashboard(props: any) {
                   <MessageSquare size={16} />
                 </div>
               </div>
-              <div className="mt-4 text-[10px] text-slate-500 font-semibold border-t border-slate-100 pt-3 flex items-center gap-1">
+              <div className="mt-5 text-[10px] text-slate-500 font-semibold border-t border-slate-100 pt-3.5 flex items-center gap-1">
                 <span className="text-[#073afe] font-bold">{data.positiveReviews}</span>
                 <span>positive submissions</span>
               </div>
-            </Card>
+            </div>
 
             {/* 3. Reviews Today */}
-            <Card className="flex flex-col justify-between hover:-translate-y-1 hover:shadow-[0_12px_30px_rgba(15,23,42,0.06)] border-slate-200/80 transition-all duration-300">
+            <div className="bg-white border border-slate-100 rounded-[24px] shadow-[0_8px_30px_rgb(0,0,0,0.015)] p-6 hover:-translate-y-1 hover:shadow-[0_12px_30px_rgba(15,23,42,0.04)] transition-all duration-300 flex flex-col justify-between">
               <div className="flex justify-between items-start">
                 <div className="space-y-1">
-                  <span className="block text-[10px] font-bold text-slate-400 tracking-widest uppercase">
+                  <span className="block text-[10px] font-bold text-slate-400 tracking-wider uppercase">
                     Reviews Today
                   </span>
                   <h3 className="text-3xl font-extrabold text-slate-900 tracking-tight">{reviewsTodayCount}</h3>
@@ -425,16 +425,16 @@ export default function BusinessDashboard(props: any) {
                   <Calendar size={16} />
                 </div>
               </div>
-              <div className="mt-4 text-[10px] text-slate-500 font-semibold border-t border-slate-100 pt-3">
+              <div className="mt-5 text-[10px] text-slate-500 font-semibold border-t border-slate-100 pt-3.5">
                 <span>Submitted within last 24h</span>
               </div>
-            </Card>
+            </div>
 
             {/* 4. Pending Recovery */}
-            <Card className={`flex flex-col justify-between hover:-translate-y-1 hover:shadow-[0_12px_30px_rgba(15,23,42,0.06)] border-slate-200/80 transition-all duration-300 ${pendingRecoveryCount > 0 ? 'ring-1 ring-red-100' : ''}`}>
+            <div className={`bg-white border rounded-[24px] shadow-[0_8px_30px_rgb(0,0,0,0.015)] p-6 hover:-translate-y-1 hover:shadow-[0_12px_30px_rgba(15,23,42,0.04)] transition-all duration-300 flex flex-col justify-between ${pendingRecoveryCount > 0 ? 'border-rose-100 bg-rose-50/5' : 'border-slate-100'}`}>
               <div className="flex justify-between items-start">
                 <div className="space-y-1">
-                  <span className="block text-[10px] font-bold text-slate-400 tracking-widest uppercase">
+                  <span className="block text-[10px] font-bold text-slate-400 tracking-wider uppercase">
                     Pending Recovery
                   </span>
                   <h3 className={`text-3xl font-extrabold tracking-tight ${pendingRecoveryCount > 0 ? 'text-rose-600' : 'text-slate-900'}`}>{pendingRecoveryCount}</h3>
@@ -443,17 +443,17 @@ export default function BusinessDashboard(props: any) {
                   <AlertCircle size={16} />
                 </div>
               </div>
-              <div className="mt-4 text-[10px] text-slate-500 font-semibold border-t border-slate-100 pt-3 flex items-center justify-between">
+              <div className="mt-5 text-[10px] text-slate-500 font-semibold border-t border-slate-100 pt-3.5 flex items-center justify-between">
                 <span>Loyalty cases unresolved</span>
-                {pendingRecoveryCount > 0 && <span className="inline-flex h-2 w-2 rounded-full bg-rose-500" />}
+                {pendingRecoveryCount > 0 && <span className="inline-flex h-1.5 w-1.5 rounded-full bg-rose-500 animate-ping" />}
               </div>
-            </Card>
+            </div>
 
             {/* 5. Active QR Codes */}
-            <Card className="flex flex-col justify-between hover:-translate-y-1 hover:shadow-[0_12px_30px_rgba(15,23,42,0.06)] border-slate-200/80 transition-all duration-300">
+            <div className="bg-white border border-slate-100 rounded-[24px] shadow-[0_8px_30px_rgb(0,0,0,0.015)] p-6 hover:-translate-y-1 hover:shadow-[0_12px_30px_rgba(15,23,42,0.04)] transition-all duration-300 flex flex-col justify-between">
               <div className="flex justify-between items-start">
                 <div className="space-y-1">
-                  <span className="block text-[10px] font-bold text-slate-400 tracking-widest uppercase">
+                  <span className="block text-[10px] font-bold text-slate-400 tracking-wider uppercase">
                     Active QR Codes
                   </span>
                   <h3 className="text-3xl font-extrabold text-slate-900 tracking-tight">{activeQrCount}</h3>
@@ -462,11 +462,11 @@ export default function BusinessDashboard(props: any) {
                   <QrCode size={16} />
                 </div>
               </div>
-              <div className="mt-4 text-[10px] text-slate-500 font-semibold border-t border-slate-100 pt-3 flex items-center gap-1.5">
+              <div className="mt-5 text-[10px] text-slate-500 font-semibold border-t border-slate-100 pt-3.5 flex items-center gap-1.5">
                 <span className="inline-flex h-1.5 w-1.5 rounded-full bg-emerald-500" />
                 <span className="font-mono text-[9px] uppercase">{user.slug || 'active-portal'}</span>
               </div>
-            </Card>
+            </div>
 
           </div>
 
@@ -478,51 +478,51 @@ export default function BusinessDashboard(props: any) {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
               
               <Link href={getLink('/dashboard/business/settings')} className="group block">
-                <Card className="p-5 border-slate-200/60 hover:-translate-y-0.5 hover:border-slate-300 transition-all duration-200 cursor-pointer h-full flex items-start gap-4">
+                <div className="bg-white border border-slate-100 rounded-[20px] shadow-[0_4px_20px_rgba(0,0,0,0.01)] p-5 hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-sm transition-all duration-200 cursor-pointer h-full flex items-start gap-4">
                   <div className="p-2.5 bg-slate-50 text-slate-700 rounded-xl group-hover:bg-[#EFF3FF] group-hover:text-[#073afe] transition-all">
                     <QrCode size={18} />
                   </div>
                   <div>
                     <h5 className="text-xs font-bold text-slate-900 group-hover:text-[#073afe] transition-colors">Download QR Flyers</h5>
-                    <p className="text-[10px] text-slate-400 mt-0.5 leading-relaxed">Save your high-res table flyer PDF for printing.</p>
+                    <p className="text-[10px] text-slate-450 mt-1 leading-relaxed">Save your high-res table flyer PDF for printing.</p>
                   </div>
-                </Card>
+                </div>
               </Link>
 
               <Link href={getLink('/dashboard/business/reviews')} className="group block">
-                <Card className="p-5 border-slate-200/60 hover:-translate-y-0.5 hover:border-slate-300 transition-all duration-200 cursor-pointer h-full flex items-start gap-4">
+                <div className="bg-white border border-slate-100 rounded-[20px] shadow-[0_4px_20px_rgba(0,0,0,0.01)] p-5 hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-sm transition-all duration-200 cursor-pointer h-full flex items-start gap-4">
                   <div className="p-2.5 bg-slate-50 text-slate-700 rounded-xl group-hover:bg-[#EFF3FF] group-hover:text-[#073afe] transition-all">
                     <MessageSquare size={18} />
                   </div>
                   <div>
                     <h5 className="text-xs font-bold text-slate-900 group-hover:text-[#073afe] transition-colors">Browse Feed Comments</h5>
-                    <p className="text-[10px] text-slate-400 mt-0.5 leading-relaxed">View recent ratings and search text responses.</p>
+                    <p className="text-[10px] text-slate-450 mt-1 leading-relaxed">View recent ratings and search text responses.</p>
                   </div>
-                </Card>
+                </div>
               </Link>
 
               <Link href={getLink('/dashboard/business/recovery')} className="group block">
-                <Card className="p-5 border-slate-200/60 hover:-translate-y-0.5 hover:border-slate-300 transition-all duration-200 cursor-pointer h-full flex items-start gap-4">
+                <div className="bg-white border border-slate-100 rounded-[20px] shadow-[0_4px_20px_rgba(0,0,0,0.01)] p-5 hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-sm transition-all duration-200 cursor-pointer h-full flex items-start gap-4">
                   <div className="p-2.5 bg-slate-50 text-slate-700 rounded-xl group-hover:bg-[#EFF3FF] group-hover:text-[#073afe] transition-all">
                     <PhoneCall size={18} />
                   </div>
                   <div>
                     <h5 className="text-xs font-bold text-slate-900 group-hover:text-[#073afe] transition-colors">Manage Recovery Queue</h5>
-                    <p className="text-[10px] text-slate-400 mt-0.5 leading-relaxed">Contact negative reviews to recover customer loyalty.</p>
+                    <p className="text-[10px] text-slate-450 mt-1 leading-relaxed">Contact negative reviews to recover customer loyalty.</p>
                   </div>
-                </Card>
+                </div>
               </Link>
 
               <Link href={getLink('/dashboard/business/settings')} className="group block">
-                <Card className="p-5 border-slate-200/60 hover:-translate-y-0.5 hover:border-slate-300 transition-all duration-200 cursor-pointer h-full flex items-start gap-4">
+                <div className="bg-white border border-slate-100 rounded-[20px] shadow-[0_4px_20px_rgba(0,0,0,0.01)] p-5 hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-sm transition-all duration-200 cursor-pointer h-full flex items-start gap-4">
                   <div className="p-2.5 bg-slate-50 text-slate-700 rounded-xl group-hover:bg-[#EFF3FF] group-hover:text-[#073afe] transition-all">
                     <Settings size={18} />
                   </div>
                   <div>
                     <h5 className="text-xs font-bold text-slate-900 group-hover:text-[#073afe] transition-colors">Configure Settings</h5>
-                    <p className="text-[10px] text-slate-400 mt-0.5 leading-relaxed">Manage Google review redirection details.</p>
+                    <p className="text-[10px] text-slate-450 mt-1 leading-relaxed">Manage Google review redirection details.</p>
                   </div>
-                </Card>
+                </div>
               </Link>
 
             </div>
@@ -530,7 +530,7 @@ export default function BusinessDashboard(props: any) {
 
           {/* Redesigned Charts Section */}
           {data.dailyTrend && data.dailyTrend.length > 0 && (
-            <Card className="border-slate-200/60 p-6">
+            <div className="bg-white border border-slate-100 rounded-[24px] shadow-[0_8px_30px_rgb(0,0,0,0.015)] p-6">
               <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
                 <div>
                   <h4 className="text-xs font-bold text-slate-900 uppercase tracking-widest">
@@ -555,14 +555,14 @@ export default function BusinessDashboard(props: any) {
               </div>
               
               {renderTrendChart(data.dailyTrend, data.reviewTrend)}
-            </Card>
+            </div>
           )}
 
           {/* Feeds Columns layout */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             
             {/* COLUMN 1: Recent Reviews */}
-            <Card className="border-slate-200/60 p-6 flex flex-col justify-between h-full">
+            <div className="bg-white border border-slate-100 rounded-[24px] shadow-[0_8px_30px_rgb(0,0,0,0.015)] p-6 flex flex-col justify-between h-full">
               <div>
                 <div className="flex justify-between items-center mb-6">
                   <h4 className="text-xs font-bold text-slate-900 uppercase tracking-widest flex items-center gap-2">
@@ -589,11 +589,11 @@ export default function BusinessDashboard(props: any) {
                       });
 
                       return (
-                        <div key={rev.id} className="p-4 bg-slate-50/50 hover:bg-slate-50 border border-slate-100 rounded-xl transition-all duration-200">
+                        <div key={rev.id} className="p-4 bg-slate-50/50 hover:bg-slate-50/80 border border-slate-100 rounded-[18px] transition-all duration-200">
                           <div className="flex justify-between items-start gap-3">
                             <div className="flex items-center gap-3">
                               {/* Customer initials avatar */}
-                              <div className={`h-8 w-8 rounded-full ${initialColor.bg} flex items-center justify-center text-xs font-bold flex-shrink-0 border border-slate-200/20`}>
+                              <div className={`h-8.5 w-8.5 rounded-full ${initialColor.bg} flex items-center justify-center text-xs font-bold flex-shrink-0 border border-slate-200/10`}>
                                 {rev.customerName ? rev.customerName[0].toUpperCase() : 'G'}
                               </div>
                               <div>
@@ -604,7 +604,7 @@ export default function BusinessDashboard(props: any) {
                                       <Star 
                                         key={i} 
                                         size={9} 
-                                        className={i < rev.rating ? 'fill-amber-500 text-amber-500' : 'text-slate-250'} 
+                                        className={i < rev.rating ? 'fill-amber-500 text-amber-500' : 'text-slate-200'} 
                                       />
                                     ))}
                                   </div>
@@ -616,12 +616,12 @@ export default function BusinessDashboard(props: any) {
                             {/* Status badges */}
                             <div className="flex flex-wrap gap-1">
                               {rev.googleCtaClicked && (
-                                <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[8px] font-bold uppercase tracking-wider bg-blue-50 text-[#073afe] border border-blue-100/50">
+                                <span className="inline-flex items-center px-1.5 py-0.5 rounded-md text-[8px] font-bold uppercase tracking-wider bg-blue-50 text-[#073afe] border border-blue-100/50">
                                   Google CTA
                                 </span>
                               )}
                               {rev.requestCallback && (
-                                <span className={`inline-flex items-center px-1.5 py-0.5 rounded text-[8px] font-bold uppercase tracking-wider border ${
+                                <span className={`inline-flex items-center px-1.5 py-0.5 rounded-md text-[8px] font-bold uppercase tracking-wider border ${
                                   rev.callbackStatus === 'RESOLVED' 
                                     ? 'bg-emerald-50 text-emerald-700 border-emerald-100'
                                     : 'bg-rose-50 text-rose-700 border-rose-100'
@@ -631,7 +631,7 @@ export default function BusinessDashboard(props: any) {
                               )}
                             </div>
                           </div>
-                          <p className="text-xs text-slate-650 mt-3 pl-1 leading-relaxed italic bg-white/60 p-2.5 rounded-lg border border-slate-100/50">
+                          <p className="text-xs text-slate-650 mt-3 pl-1 leading-relaxed italic bg-white/70 p-3 rounded-xl border border-slate-100/50">
                             {rev.comment ? `"${rev.comment}"` : 'No written feedback comments left.'}
                           </p>
                         </div>
@@ -640,10 +640,10 @@ export default function BusinessDashboard(props: any) {
                   </div>
                 )}
               </div>
-            </Card>
+            </div>
 
             {/* COLUMN 2: Recovery Queue */}
-            <Card className="border-slate-200/60 p-6 flex flex-col justify-between h-full">
+            <div className="bg-white border border-slate-100 rounded-[24px] shadow-[0_8px_30px_rgb(0,0,0,0.015)] p-6 flex flex-col justify-between h-full">
               <div>
                 <div className="flex justify-between items-center mb-6">
                   <h4 className="text-xs font-bold text-slate-900 uppercase tracking-widest flex items-center gap-2">
@@ -670,8 +670,8 @@ export default function BusinessDashboard(props: any) {
                         : 'bg-slate-50 text-slate-600 border-slate-100';
 
                       const statusColor = item.status === 'NEW'
-                        ? 'bg-red-50/50 text-red-650 border-red-200'
-                        : 'bg-amber-50/50 text-amber-650 border-amber-250';
+                        ? 'bg-red-50/50 text-red-600 border-red-200'
+                        : 'bg-amber-50/50 text-amber-600 border-amber-250';
 
                       const formattedRecDate = new Date(item.createdAt).toLocaleDateString('en-US', {
                         month: 'short',
@@ -679,7 +679,7 @@ export default function BusinessDashboard(props: any) {
                       });
 
                       return (
-                        <div key={item.id} className="p-4 bg-slate-50/50 border border-slate-100 rounded-xl flex flex-col justify-between gap-3">
+                        <div key={item.id} className="p-4 bg-slate-50/50 border border-slate-100 rounded-[18px] flex flex-col justify-between gap-3">
                           <div className="flex justify-between items-start gap-2">
                             <div>
                               <div className="flex items-center gap-2">
@@ -695,17 +695,17 @@ export default function BusinessDashboard(props: any) {
 
                             {/* Badges */}
                             <div className="flex items-center gap-1.5 flex-shrink-0">
-                              <span className={`inline-flex items-center px-1.5 py-0.5 rounded text-[8px] font-bold uppercase tracking-wider border ${priorityColor}`}>
+                              <span className={`inline-flex items-center px-1.5 py-0.5 rounded-md text-[8px] font-bold uppercase tracking-wider border ${priorityColor}`}>
                                 {item.priority}
                               </span>
-                              <span className={`inline-flex items-center px-1.5 py-0.5 rounded text-[8px] font-bold uppercase tracking-wider border ${statusColor}`}>
+                              <span className={`inline-flex items-center px-1.5 py-0.5 rounded-md text-[8px] font-bold uppercase tracking-wider border ${statusColor}`}>
                                 {item.status}
                               </span>
                             </div>
                           </div>
 
                           {item.feedback && (
-                            <p className="text-[11px] text-slate-500 bg-white/70 p-2.5 rounded-lg border border-slate-100/50 line-clamp-2">
+                            <p className="text-[11px] text-slate-500 bg-white/70 p-3 rounded-xl border border-slate-100/50 line-clamp-2 leading-relaxed">
                               {item.feedback}
                             </p>
                           )}
@@ -716,14 +716,14 @@ export default function BusinessDashboard(props: any) {
                               href={`https://wa.me/${item.whatsappNumber.replace(/\D/g, '')}`}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="inline-flex items-center justify-center gap-1 bg-[#25D366] hover:bg-[#20ba5a] text-white text-[10px] font-bold px-3 py-1.5 rounded-lg transition-colors shadow-sm"
+                              className="inline-flex items-center justify-center gap-1 bg-[#25D366] hover:bg-[#20ba5a] text-white text-[10px] font-bold px-3 py-1.5 rounded-xl transition-colors shadow-sm"
                             >
                               <PhoneCall size={10} />
                               <span>WhatsApp</span>
                             </a>
                             <Link 
                               href={getLink(`/dashboard/business/recovery`)}
-                              className="inline-flex items-center justify-center bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 text-[10px] font-bold px-3 py-1.5 rounded-lg transition-colors"
+                              className="inline-flex items-center justify-center bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 text-[10px] font-bold px-3 py-1.5 rounded-xl transition-colors"
                             >
                               <span>Update Status</span>
                             </Link>
@@ -734,13 +734,13 @@ export default function BusinessDashboard(props: any) {
                   </div>
                 )}
               </div>
-            </Card>
+            </div>
 
           </div>
 
         </div>
       ) : (
-        <div className="text-center py-12 text-slate-500 text-sm font-medium">
+        <div className="text-center py-20 text-slate-400 text-xs font-semibold">
           No analytics data available for the selected period range.
         </div>
       )}

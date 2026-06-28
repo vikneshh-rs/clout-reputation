@@ -313,7 +313,7 @@ export default function QRAssignPortal(props: any) {
   return (
     <DashboardLayout title={replacementMode ? "Replace Damaged QR" : "Scan & Assign QR"} theme={theme} toggleTheme={toggleTheme}>
       <Head>
-        <title>{replacementMode ? "Replace QR" : "Onboard Business"} - Clout Reputation</title>
+        <title>{replacementMode ? "Replace QR" : "Onboard Business"} - Cloutation</title>
         <style>{`
           body, .dashboard-layout {
             font-family: 'Source Sans Pro', sans-serif !important;

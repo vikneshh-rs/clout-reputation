@@ -139,66 +139,66 @@ export default function CallbackRequests(props: any) {
   return (
     <DashboardLayout title="Callbacks Recovery" theme={theme} toggleTheme={toggleTheme}>
       <Head>
-        <title>Callbacks Dashboard - Clout Reputation</title>
+        <title>Callbacks Dashboard - Cloutation</title>
       </Head>
 
-      <div className="mb-6">
-        <h2 className="text-xl font-bold font-['Source_Sans_Pro'] text-black">Loyalty Recovery</h2>
-        <p className="text-xs text-gray-500 mt-0.5">Contact unsatisfied clients who requested a follow-up to address issues and retain business.</p>
+      <div className="mb-6 animate-fadeIn">
+        <h2 className="text-xl font-bold font-sans text-slate-900">Loyalty Recovery</h2>
+        <p className="text-xs text-slate-450 mt-0.5">Contact unsatisfied clients who requested a follow-up to address issues and retain business.</p>
       </div>
 
       {error && (
-        <div className="mb-6 p-4 rounded-xl bg-rose-50 border border-rose-200/50 text-rose-700 text-xs flex items-start">
-          <AlertCircle className="mr-2 h-4 w-4 flex-shrink-0 mt-0.5" />
+        <div className="mb-6 p-4 rounded-2xl bg-rose-50 border border-rose-100 text-rose-700 text-xs flex items-center gap-2.5 font-medium animate-fadeIn">
+          <AlertCircle className="h-4.5 w-4.5 text-rose-500 flex-shrink-0" />
           <span>{error}</span>
         </div>
       )}
 
       {/* Metrics Grid */}
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3 mb-8">
-        <div className="bg-white/80 backdrop-blur-md p-6 rounded-2xl border border-slate-100 shadow-[0_4px_20px_rgba(0,0,0,0.02)] relative overflow-hidden">
+      <div className="grid grid-cols-1 gap-6 sm:grid-cols-3 mb-8 animate-fadeIn">
+        <div className="bg-white border border-slate-100 p-6 rounded-[24px] shadow-[0_8px_30px_rgb(0,0,0,0.015)] relative overflow-hidden hover:shadow-[0_12px_30px_rgba(15,23,42,0.03)] hover:-translate-y-0.5 transition-all duration-300">
           <span className="block text-[10px] font-bold text-slate-400 tracking-wider uppercase">Pending Cases</span>
-          <h3 className="text-3xl font-bold mt-2 text-rose-600">{pendingRequests}</h3>
+          <h3 className="text-3xl font-extrabold mt-2 text-rose-600 tracking-tight">{pendingRequests}</h3>
         </div>
-        <div className="bg-white/80 backdrop-blur-md p-6 rounded-2xl border border-slate-100 shadow-[0_4px_20px_rgba(0,0,0,0.02)] relative overflow-hidden">
+        <div className="bg-white border border-slate-100 p-6 rounded-[24px] shadow-[0_8px_30px_rgb(0,0,0,0.015)] relative overflow-hidden hover:shadow-[0_12px_30px_rgba(15,23,42,0.03)] hover:-translate-y-0.5 transition-all duration-300">
           <span className="block text-[10px] font-bold text-slate-400 tracking-wider uppercase">Contacted Cases</span>
-          <h3 className="text-3xl font-bold mt-2 text-amber-600">{contactedRequests}</h3>
+          <h3 className="text-3xl font-extrabold mt-2 text-amber-600 tracking-tight">{contactedRequests}</h3>
         </div>
-        <div className="bg-white/80 backdrop-blur-md p-6 rounded-2xl border border-slate-100 shadow-[0_4px_20px_rgba(0,0,0,0.02)] relative overflow-hidden">
+        <div className="bg-white border border-slate-100 p-6 rounded-[24px] shadow-[0_8px_30px_rgb(0,0,0,0.015)] relative overflow-hidden hover:shadow-[0_12px_30px_rgba(15,23,42,0.03)] hover:-translate-y-0.5 transition-all duration-300">
           <span className="block text-[10px] font-bold text-slate-400 tracking-wider uppercase">Resolved Cases</span>
-          <h3 className="text-3xl font-bold mt-2 text-emerald-600">{resolvedRequests}</h3>
+          <h3 className="text-3xl font-extrabold mt-2 text-emerald-600 tracking-tight">{resolvedRequests}</h3>
         </div>
       </div>
 
       {/* Search Filter Panel */}
-      <div className="bg-white/80 backdrop-blur-md border border-slate-100 rounded-2xl p-5 shadow-[0_4px_20px_rgba(0,0,0,0.02)] mb-6">
-        <form onSubmit={handleSearchSubmit} className="flex flex-col md:flex-row gap-4 items-end">
-          <div className="flex-grow w-full">
-            <label htmlFor="search-input" className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">
+      <div className="bg-white border border-slate-100 rounded-[24px] p-6 shadow-[0_8px_30px_rgb(0,0,0,0.015)] mb-8 animate-fadeIn">
+        <form onSubmit={handleSearchSubmit} className="flex flex-col md:flex-row gap-6 items-end">
+          <div className="flex-grow w-full space-y-1.5">
+            <label htmlFor="search-input" className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">
               Search Contact Info
             </label>
             <div className="relative">
-              <Search className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
+              <Search className="absolute left-3.5 top-3.5 h-4 w-4 text-slate-400" />
               <input
                 id="search-input"
                 type="text"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Search name, phone, review comment..."
-                className="w-full text-xs border border-slate-200 rounded-xl bg-white pl-9 pr-4 py-2 focus:border-[#073afe] focus:outline-none focus:ring-2 focus:ring-[#073afe]/10"
+                className="w-full text-xs border border-slate-200 rounded-2xl bg-white pl-10 pr-4 py-3 focus:border-[#073afe] focus:outline-none focus:ring-4 focus:ring-[#073afe]/5 font-medium transition-all h-[46px]"
               />
             </div>
           </div>
 
-          <div className="w-full md:w-56">
-            <label htmlFor="status-filter" className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">
+          <div className="w-full md:w-56 space-y-1.5">
+            <label htmlFor="status-filter" className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">
               Case Status
             </label>
             <select
               id="status-filter"
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              className="w-full text-xs border border-slate-200 rounded-xl bg-white px-2.5 py-1.5 focus:border-[#073afe] focus:outline-none"
+              className="w-full text-xs border border-slate-200 rounded-2xl bg-white px-3.5 py-3 focus:border-[#073afe] focus:outline-none focus:ring-4 focus:ring-[#073afe]/5 font-medium transition-all h-[46px]"
             >
               <option value="ALL">All Statuses</option>
               <option value="PENDING">Pending (Needs Action)</option>
@@ -209,24 +209,26 @@ export default function CallbackRequests(props: any) {
 
           <button
             type="submit"
-            className="w-full md:w-auto bg-[#073afe] hover:bg-[#052ecb] text-white text-xs font-semibold px-4 py-2 rounded-xl flex items-center gap-1.5 transition-colors cursor-pointer justify-center"
+            className="w-full md:w-auto bg-[#073afe] hover:bg-[#052ecb] text-white text-xs font-bold px-6 py-3 rounded-2xl flex items-center gap-1.5 transition-all cursor-pointer justify-center h-[46px] shadow-sm flex-shrink-0"
           >
-            Apply Filters
+            <Search size={14} />
+            <span>Apply Filters</span>
           </button>
         </form>
       </div>
 
       {/* Callback cases list */}
       {loading ? (
-        <div className="py-12 flex justify-center">
-          <Loader2 className="animate-spin h-8 w-8 text-[#073afe]" />
+        <div className="py-20 flex flex-col justify-center items-center gap-3">
+          <Loader2 className="animate-spin h-8 w-8 text-[#073afe] stroke-[2.25]" />
+          <p className="text-xs text-slate-500 font-semibold tracking-wide">Retrieving callback requests...</p>
         </div>
       ) : callbacks.length === 0 ? (
-        <div className="bg-white/80 backdrop-blur-md border border-slate-100 rounded-2xl overflow-hidden shadow-[0_4px_20px_rgba(0,0,0,0.02)] p-12 text-center text-slate-400 text-sm">
+        <div className="bg-white border border-slate-100 rounded-[24px] shadow-[0_8px_30px_rgb(0,0,0,0.015)] p-16 text-center text-slate-400 text-xs font-semibold">
           No callback requests found matching current filters.
         </div>
       ) : (
-        <div className="space-y-4">
+        <div className="space-y-4 animate-fadeIn">
           {callbacks.map((item) => {
             const dateStr = new Date(item.createdAt).toLocaleString(undefined, {
               month: 'short',
@@ -239,58 +241,58 @@ export default function CallbackRequests(props: any) {
             return (
               <div
                 key={item.id}
-                className="bg-white/80 backdrop-blur-md border border-slate-100 rounded-2xl p-5 shadow-[0_4px_20px_rgba(0,0,0,0.02)] flex flex-col md:flex-row justify-between items-start md:items-center gap-4"
+                className="bg-white border border-slate-100 rounded-[20px] p-6 shadow-[0_4px_20px_rgba(0,0,0,0.01)] hover:shadow-[0_8px_30px_rgba(15,23,42,0.03)] hover:border-slate-200 transition-all duration-200 flex flex-col md:flex-row justify-between items-start md:items-center gap-6"
               >
-                <div className="space-y-2 flex-grow">
+                <div className="space-y-3.5 flex-grow">
                   <div className="flex flex-wrap items-center gap-3">
-                    <h4 className="text-sm font-bold text-black">{item.customerName}</h4>
-                    <span className="text-xs font-mono text-slate-500 bg-slate-100 px-2 py-0.5 rounded">
+                    <h4 className="text-sm font-bold text-slate-900">{item.customerName}</h4>
+                    <span className="text-xs font-mono text-slate-500 bg-slate-50 border border-slate-100 px-2 py-0.5 rounded-md">
                       {item.phoneNumber}
                     </span>
-                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded border ${
+                    <span className={`text-[9px] font-bold px-2.5 py-0.5 rounded-md border uppercase tracking-wider ${
                       item.status === 'RESOLVED'
-                        ? 'bg-emerald-50 text-emerald-700 border-emerald-150'
+                        ? 'bg-emerald-50 text-emerald-700 border-emerald-100'
                         : item.status === 'CONTACTED'
-                        ? 'bg-amber-50 text-amber-700 border-amber-200'
-                        : 'bg-rose-50 text-rose-700 border-rose-200'
+                        ? 'bg-amber-50 text-amber-700 border-amber-250'
+                        : 'bg-rose-50 text-rose-700 border-rose-100'
                     }`}>
                       {item.status}
                     </span>
                   </div>
 
-                  <div className="flex items-center gap-1.5 text-xs text-amber-500">
-                    <span className="font-semibold text-slate-500 mr-1">Rating:</span>
+                  <div className="flex items-center gap-1 text-xs text-amber-500 pl-0.5">
+                    <span className="font-bold text-slate-400 mr-2 text-[10px] uppercase">Rating:</span>
                     {[...Array(5)].map((_, i) => (
                       <Star
                         key={i}
                         size={12}
-                        className={i < item.review.rating ? 'fill-amber-500' : 'text-slate-200'}
+                        className={i < item.review.rating ? 'fill-amber-500 text-amber-500' : 'text-slate-200'}
                       />
                     ))}
                   </div>
 
-                  <p className="text-sm text-slate-700 bg-slate-50/50 p-3 rounded-xl border border-slate-100">
-                    <span className="font-bold text-slate-400 block text-[10px] uppercase tracking-wider mb-1">
+                  <p className="text-xs text-slate-700 bg-slate-50/50 p-4 rounded-2xl border border-slate-100 italic leading-relaxed shadow-[0_2px_8px_rgba(15,23,42,0.01)]">
+                    <span className="font-bold text-slate-400 block text-[9px] uppercase tracking-wider mb-1.5 not-italic">
                       Customer Comment
                     </span>
                     "{item.review.comment || 'No comment text provided'}"
                   </p>
 
-                  <span className="block text-[10px] text-slate-400">Requested: {dateStr}</span>
+                  <span className="block text-[10px] text-slate-400 pl-0.5 font-medium">Requested: {dateStr}</span>
                 </div>
 
                 {/* Action buttons */}
                 {isReadOnly ? (
-                  <span className="text-xs font-semibold text-zinc-400 bg-zinc-50 border border-zinc-200 px-2.5 py-1 rounded">
-                    Read-Only
+                  <span className="text-xs font-semibold text-slate-400 bg-slate-50 border border-slate-200 px-4 py-2.5 rounded-xl">
+                    Read-Only Mode
                   </span>
                 ) : (
-                  <div className="flex flex-col sm:flex-row gap-2 w-full md:w-auto">
+                  <div className="flex flex-row md:flex-col gap-2 w-full md:w-auto justify-end flex-shrink-0">
                     {item.status !== 'CONTACTED' && (
                       <button
                         onClick={() => handleUpdateStatus(item.id, 'CONTACTED')}
                         disabled={actionLoadingId === item.id}
-                        className="inline-flex items-center justify-center space-x-1 px-2.5 py-1.5 bg-white border border-amber-200 rounded-lg hover:bg-amber-50 text-amber-700 font-semibold text-[10px] transition-colors disabled:opacity-50 cursor-pointer"
+                        className="inline-flex items-center justify-center px-4 py-2.5 bg-white border border-amber-200 rounded-2xl hover:bg-amber-50 text-amber-705 font-bold text-xs transition-all disabled:opacity-50 cursor-pointer h-[40px] shadow-sm flex-1 md:flex-initial"
                       >
                         Mark Contacted
                       </button>
@@ -299,7 +301,7 @@ export default function CallbackRequests(props: any) {
                       <button
                         onClick={() => handleUpdateStatus(item.id, 'RESOLVED')}
                         disabled={actionLoadingId === item.id}
-                        className="bg-[#073afe] hover:bg-[#052ecb] text-white text-xs font-semibold px-4 py-2 rounded-xl flex items-center gap-1.5 transition-colors disabled:opacity-50 cursor-pointer justify-center"
+                        className="inline-flex items-center justify-center px-4 py-2.5 bg-[#073afe] hover:bg-[#052ecb] text-white font-bold text-xs rounded-2xl transition-all disabled:opacity-50 cursor-pointer h-[40px] shadow-sm flex-1 md:flex-initial"
                       >
                         Mark Resolved
                       </button>
@@ -308,7 +310,7 @@ export default function CallbackRequests(props: any) {
                       <button
                         onClick={() => handleUpdateStatus(item.id, 'PENDING')}
                         disabled={actionLoadingId === item.id}
-                        className="inline-flex items-center justify-center space-x-1 px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 text-slate-600 font-semibold text-[10px] transition-colors disabled:opacity-50 cursor-pointer"
+                        className="inline-flex items-center justify-center px-4 py-2.5 bg-white border border-slate-200 rounded-2xl hover:bg-slate-50 text-slate-600 font-bold text-xs transition-all disabled:opacity-50 cursor-pointer h-[40px] shadow-sm flex-1 md:flex-initial"
                       >
                         Reset to Pending
                       </button>

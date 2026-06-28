@@ -3,8 +3,8 @@ import jwt from 'jsonwebtoken';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { getUserById, getBusinessById } from './data';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'super-secret-cloutreputation-jwt-key-change-this-in-production';
-const COOKIE_NAME = 'cloutreputation_session';
+const JWT_SECRET = process.env.JWT_SECRET || 'super-secret-cloutation-jwt-key-change-this-in-production';
+const COOKIE_NAME = 'cloutation_session';
 
 export interface TokenPayload {
   userId: string;

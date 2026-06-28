@@ -21,7 +21,7 @@ async function main() {
     if (user.role === 'SUPER_ADMIN') {
       username = 'deco-admin';
     } else if (user.role === 'REP') {
-      if (user.email === 'rep@cloutreputation.com' || user.name.toLowerCase().includes('dan')) {
+      if (user.email === 'rep@cloutation.com' || user.name.toLowerCase().includes('dan')) {
         username = 'dan';
       } else {
         username = user.name.toLowerCase().replace(/[^a-z0-9]/g, '');
@@ -54,8 +54,8 @@ async function main() {
   const repPasswordHash = await bcrypt.hash('rep123', salt);
 
   const repsToSeed = [
-    { name: 'Rahul', username: 'rahul', email: 'rahul@cloutreputation.com' },
-    { name: 'Karthik', username: 'karthik', email: 'karthik@cloutreputation.com' }
+    { name: 'Rahul', username: 'rahul', email: 'rahul@cloutation.com' },
+    { name: 'Karthik', username: 'karthik', email: 'karthik@cloutation.com' }
   ];
 
   for (const rep of repsToSeed) {

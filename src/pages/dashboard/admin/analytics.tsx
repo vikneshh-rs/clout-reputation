@@ -108,7 +108,7 @@ export default function PlatformAnalyticsPage(props: any) {
   return (
     <DashboardLayout title="Platform Analytics" theme={theme} toggleTheme={toggleTheme}>
       <Head>
-        <title>Platform Analytics - Clout Reputation</title>
+        <title>Platform Analytics - Cloutation</title>
       </Head>
 
       {/* Period Selection Header */}

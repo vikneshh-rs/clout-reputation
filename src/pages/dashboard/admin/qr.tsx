@@ -203,7 +203,7 @@ export default function QrAssetsPage(props: any) {
   return (
     <DashboardLayout title="QR Assets Management" theme={theme} toggleTheme={toggleTheme}>
       <Head>
-        <title>QR Assets - Clout Reputation</title>
+        <title>QR Assets - Cloutation</title>
       </Head>
 
       <div className="mb-6 flex justify-between items-center">

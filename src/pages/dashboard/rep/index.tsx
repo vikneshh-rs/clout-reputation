@@ -90,7 +90,7 @@ export default function RepDashboard(props: any) {
   return (
     <DashboardLayout title="Rep Dashboard" theme={theme} toggleTheme={toggleTheme}>
       <Head>
-        <title>Rep Dashboard - Clout Reputation</title>
+        <title>Rep Dashboard - Cloutation</title>
       </Head>
 
       {/* Welcome banner */}

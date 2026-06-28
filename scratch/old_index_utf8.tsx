@@ -1,4 +1,4 @@
-﻿import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 import DashboardLayout from '@/components/DashboardLayout';
@@ -209,7 +209,7 @@ export default function BusinessDashboard(props: any) {
   return (
     <DashboardLayout title="Business Dashboard" theme={theme} toggleTheme={toggleTheme}>
       <Head>
-        <title>Dashboard - {user.name} - Clout Reputation</title>
+        <title>Dashboard - {user.name} - Cloutation</title>
       </Head>
 
       {/* Filter Header */}

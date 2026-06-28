@@ -116,7 +116,7 @@ export default function ActivityLogsPage(props: any) {
   return (
     <DashboardLayout title="Security & Activity Logs" theme={theme} toggleTheme={toggleTheme}>
       <Head>
-        <title>Activity Logs - Clout Reputation</title>
+        <title>Activity Logs - Cloutation</title>
       </Head>
 
       <div className="mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
