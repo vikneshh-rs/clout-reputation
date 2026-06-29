@@ -3,7 +3,9 @@ import Head from 'next/head';
 import { useRouter } from 'next/router';
 import DashboardLayout from '@/components/DashboardLayout';
 import { useAuth } from '@/context/AuthContext';
-import { Store, Phone, MapPin, Globe, Save, AlertCircle, CheckCircle, Loader2 } from 'lucide-react';
+import { Store, Phone, MapPin, Globe, Save, AlertCircle, CheckCircle, Loader2, Download } from 'lucide-react';
+import QRCode from 'qrcode';
+import { jsPDF } from 'jspdf';
 
 interface BusinessDetails {
   id: string;
@@ -14,6 +16,10 @@ interface BusinessDetails {
   googleReviewUrl: string | null;
   enableGoogleReviewRedirect: boolean;
   enableManagerCallback: boolean;
+  qrInventory?: {
+    id: string;
+    qrCode: string;
+  }[];
 }
 
 export default function BusinessSettings(props: any) {
@@ -35,8 +41,87 @@ export default function BusinessSettings(props: any) {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [downloadingFlyer, setDownloadingFlyer] = useState(false);
 
   const { theme, toggleTheme } = props;
+
+  const downloadFlyer = async () => {
+    if (!details) return;
+    const qrCodeObj = details.qrInventory && details.qrInventory.length > 0 ? details.qrInventory[0] : null;
+    const code = qrCodeObj ? qrCodeObj.qrCode : details.slug;
+
+    try {
+      setDownloadingFlyer(true);
+      setError('');
+      setSuccess('');
+
+      const doc = new jsPDF({
+        orientation: 'portrait',
+        unit: 'mm',
+        format: [105, 148] // A6 flyer size
+      });
+
+      const width = 105;
+      const height = 148;
+
+      // 1. Subtle, clean border with rounded corners of 5mm
+      doc.setDrawColor(229, 231, 235); // #E5E7EB
+      doc.setLineWidth(0.5);
+      doc.roundedRect(6, 6, width - 12, height - 12, 5, 5, 'S');
+
+      // 2. Business Name (elegant serif font, size 24pt or scaled down)
+      let fontFamily = 'times';
+      doc.setFont(fontFamily, 'bold');
+      
+      let fontSize = 24;
+      let nameLines: string[] = [];
+      const maxTextWidth = 85;
+      
+      while (fontSize >= 14) {
+        doc.setFontSize(fontSize);
+        nameLines = doc.splitTextToSize(details.name, maxTextWidth);
+        const lineHeightInMm = fontSize * 1.15 * 0.3528;
+        const totalHeight = nameLines.length * lineHeightInMm;
+        if (totalHeight <= 18 || fontSize === 14) {
+          break;
+        }
+        fontSize -= 2;
+      }
+
+      const lineHeightInMm = fontSize * 1.15 * 0.3528;
+      const yStart = 22 - ((nameLines.length - 1) * lineHeightInMm / 2);
+      
+      doc.setTextColor(17, 24, 39); // Neutral 900
+      doc.text(nameLines, width / 2, yStart, { align: 'center' });
+
+      // 3. QR Code: occupying approx 70-75% of printable card width (e.g. 76mm is ~72.38%)
+      const targetUrl = `${window.location.origin}/r/${details.slug || code}`;
+      const qrDataUrl = await QRCode.toDataURL(targetUrl, { width: 400, margin: 1 });
+      doc.addImage(qrDataUrl, 'PNG', 14.5, 38, 76, 76);
+
+      // 4. "Scan to Review" centered in Helvetica-Bold (sans-serif, size 16pt, neutral gray `#4B5563`)
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(16);
+      doc.setTextColor(75, 85, 99); // #4B5563
+      doc.text('Scan to Review', width / 2, 132, { align: 'center' });
+
+      // Save PDF
+      doc.save(`${details.name.replace(/\s+/g, '_')}_Review_Sheet.pdf`);
+      setSuccess('Downloaded printable review flyer.');
+
+      // Log download to ActivityLog
+      await fetch('/api/business/track-download', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ businessId: details.id })
+      });
+    } catch (err) {
+      console.error(err);
+      setError('Error generating printable review flyer.');
+    } finally {
+      setDownloadingFlyer(false);
+    }
+  };
 
   const fetchBusinessDetails = async () => {
     try {
@@ -196,15 +281,41 @@ export default function BusinessSettings(props: any) {
                   </p>
                 </div>
 
-                {/* Slug display */}
+                {/* Slug display & QR Flyer Download */}
                 {details && typeof window !== 'undefined' && (
-                  <div className="space-y-1.5">
-                    <span className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-                      Public Review Link Slug
-                    </span>
-                    <div className="flex items-center bg-slate-50/50 border border-slate-100 rounded-2xl px-4 py-3 text-xs text-slate-650 font-mono select-all">
-                      <Globe size={14} className="text-slate-400 mr-2.5 flex-shrink-0" />
-                      <span className="truncate">{window.location.origin}/r/{details.slug}</span>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                    <div className="space-y-1.5">
+                      <span className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                        Public Review Link Slug
+                      </span>
+                      <div className="flex items-center bg-slate-50/50 border border-slate-100 rounded-2xl px-4 py-3 text-xs text-slate-650 font-mono select-all h-[46px]">
+                        <Globe size={14} className="text-slate-400 mr-2.5 flex-shrink-0" />
+                        <span className="truncate">{window.location.origin}/r/{details.slug}</span>
+                      </div>
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <span className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                        Table QR Flyer
+                      </span>
+                      <button
+                        type="button"
+                        onClick={downloadFlyer}
+                        disabled={downloadingFlyer}
+                        className="w-full flex items-center justify-center gap-2 bg-white border border-slate-250 hover:bg-slate-50 text-[#073afe] text-xs font-bold rounded-2xl px-4 py-3 transition-all h-[46px] cursor-pointer shadow-sm disabled:opacity-50"
+                      >
+                        {downloadingFlyer ? (
+                          <>
+                            <Loader2 className="animate-spin h-4 w-4" />
+                            <span>Generating Flyer...</span>
+                          </>
+                        ) : (
+                          <>
+                            <Download className="h-4 w-4" />
+                            <span>Download Table Flyer PDF</span>
+                          </>
+                        )}
+                      </button>
                     </div>
                   </div>
                 )}

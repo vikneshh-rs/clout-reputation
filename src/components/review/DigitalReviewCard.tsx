@@ -7,28 +7,32 @@ import PoweredByFooter from "./PoweredByFooter";
 interface DigitalReviewCardProps {
   businessName: string;
   subtitle?: string;
+  isRating?: boolean;
   children: React.ReactNode;
 }
 
 export default function DigitalReviewCard({
   businessName,
   subtitle = "How was your experience?",
+  isRating = false,
   children,
 }: DigitalReviewCardProps) {
   return (
-    <div className="min-h-screen bg-slate-50 flex items-center justify-center px-6 py-10">
+    <div className="min-h-screen bg-slate-50 flex items-center justify-center px-4 py-10">
       <div
         className="
           relative
-          w-full
+          w-[calc(100vw-32px)]
+          md:w-[420px]
           max-w-[420px]
-          h-[720px]
+          min-h-[720px]
           bg-white
           rounded-[32px]
           overflow-hidden
-          shadow-[0_24px_70px_rgba(15,23,42,0.10)]
+          shadow-[0_24px_80px_rgba(15,23,42,0.10)]
           flex
           flex-col
+          animate-cardFadeIn
         "
       >
         {/* ===========================
@@ -37,8 +41,9 @@ export default function DigitalReviewCard({
         <div
           className="
             relative
-            h-[340px]
+            h-[315px]
             bg-[#073AFE]
+            rounded-t-[32px]
             overflow-hidden
             flex
             flex-col
@@ -55,6 +60,7 @@ export default function DigitalReviewCard({
               items-center
               w-full
               pt-[38px]
+              md:pt-[44px]
             "
           >
             <GoogleBadge />
@@ -77,7 +83,8 @@ export default function DigitalReviewCard({
             flex-1
             flex
             flex-col
-            px-8
+            px-6
+            md:px-8
           "
         >
           {/* Rating / Success / Recovery */}
@@ -93,7 +100,7 @@ export default function DigitalReviewCard({
           </div>
 
           {/* Footer */}
-          <PoweredByFooter />
+          <PoweredByFooter isRating={isRating} />
         </div>
       </div>
     </div>

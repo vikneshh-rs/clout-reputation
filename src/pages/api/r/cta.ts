@@ -8,8 +8,23 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   const { reviewId, action, businessId, reviewSessionId } = req.body;
 
-  if (!reviewId || !action) {
-    return res.status(400).json({ error: 'Missing reviewId or action' });
+  if (!action) {
+    return res.status(400).json({ error: 'Missing action parameter' });
+  }
+
+  // Handle duplicate session redirect tracking (when reviewId is not generated or is undefined)
+  if (!reviewId || reviewId === 'undefined') {
+    if (action === 'click' && businessId && reviewSessionId) {
+      try {
+        const userAgent = req.headers['user-agent'] || null;
+        await logFunnelEvent('REDIRECT', businessId, reviewSessionId, userAgent)
+          .catch(err => console.error('Failed to log REDIRECT funnel event on duplicate session:', err));
+        return res.status(200).json({ success: true, message: 'Redirect logged for duplicate session' });
+      } catch (err) {
+        return res.status(500).json({ error: 'Internal server error logging duplicate redirect' });
+      }
+    }
+    return res.status(400).json({ error: 'Missing reviewId parameter' });
   }
 
   try {

@@ -1,6 +1,6 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { getSessionUser, getAuthorizedBusinessId } from '@/lib/auth';
-import { getRecentActivities } from '@/lib/data';
+import { getRecentActivities, getBusinessById } from '@/lib/data';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'GET') {
@@ -16,6 +16,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const businessId = getAuthorizedBusinessId(req, sessionUser);
     if (!businessId) {
       return res.status(403).json({ error: 'Forbidden. Access denied.' });
+    }
+
+    // Security check: IDOR validation for Representatives
+    if (sessionUser.role === 'REP') {
+      const business = await getBusinessById(businessId);
+      if (!business || business.createdByRepId !== sessionUser.id) {
+        return res.status(403).json({ error: 'Forbidden. Access denied to this business.' });
+      }
     }
 
     const activities = await getRecentActivities(businessId);

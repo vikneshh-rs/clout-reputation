@@ -33,6 +33,15 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
       const mappedInventory = inventory.map(item => {
         const batch = batches.find(b => {
+          const matchItem = item.qrCode.match(/^QR-(\d+)$/);
+          const matchStart = b.startSerial.match(/^QR-(\d+)$/);
+          const matchEnd = b.endSerial.match(/^QR-(\d+)$/);
+          if (matchItem && matchStart && matchEnd) {
+            const itemNum = parseInt(matchItem[1], 10);
+            const startNum = parseInt(matchStart[1], 10);
+            const endNum = parseInt(matchEnd[1], 10);
+            return itemNum >= startNum && itemNum <= endNum;
+          }
           return item.qrCode >= b.startSerial && item.qrCode <= b.endSerial;
         });
         return {

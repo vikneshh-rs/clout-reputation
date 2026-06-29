@@ -106,7 +106,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       const result = await replaceDamagedQr({
         oldQrCode,
         newQrCode,
-        repId: sessionUser.id
+        repId: sessionUser.id,
+        repRole: sessionUser.role
       });
 
       await logActivity(
@@ -130,7 +131,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         return res.status(400).json({ error: 'QR Code and inactive state parameters are required.' });
       }
 
-      const result = await toggleQrInactive(qrCode, !!inactive, sessionUser.id);
+      const result = await toggleQrInactive(qrCode, !!inactive, sessionUser.id, sessionUser.role);
       
       const activityText = inactive ? 'QR Code Deactivated' : 'QR Code Reactivated';
       await logActivity(

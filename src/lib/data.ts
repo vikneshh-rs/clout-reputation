@@ -43,20 +43,20 @@ export function generateUniqueCode(length = 8): string {
 }
 
 // In-Memory Mock Data Store (seeded with the same data as prisma/seed.ts)
-let mockBusinesses: Business[] = [
+export let mockBusinesses: Business[] = [
   { id: 'b1', name: 'Bella Italia', slug: 'bella-italia', businessCode: 'CR-000001', passwordHash: '', industry: Industry.RESTAURANT, logoUrl: 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=100&auto=format&fit=crop', googleReviewUrl: 'https://search.google.com/local/writereview?placeid=ChIJ313_placeholder1', phone: '+15550212', address: '123 Pizza Way, Rome', isActive: true, status: BusinessStatus.ACTIVE, deletedAt: null, enableGoogleReviewRedirect: true, enableManagerCallback: true, createdByRepId: 'u-rep1', createdAt: new Date(), updatedAt: new Date(), description: 'Authentic Italian cuisine in the heart of Rome.', contactPerson: 'Giovanni Rossi', category: 'Restaurant', website: 'https://bellaitalia.com', googleMapsUrl: 'https://maps.google.com/?cid=bella-italia' },
   { id: 'b2', name: 'Luxe Salon', slug: 'luxe-salon', businessCode: 'CR-000002', passwordHash: '', industry: Industry.SALON, logoUrl: 'https://images.unsplash.com/photo-1560066984-138dadb4c035?w=100&auto=format&fit=crop', googleReviewUrl: 'https://search.google.com/local/writereview?placeid=ChIJ313_placeholder2', phone: '+15550213', address: '456 Beauty Blvd, New York', isActive: true, status: BusinessStatus.ACTIVE, deletedAt: null, enableGoogleReviewRedirect: true, enableManagerCallback: true, createdByRepId: 'u-rep1', createdAt: new Date(), updatedAt: new Date(), description: 'Premium hair and beauty treatments.', contactPerson: 'Sarah Jenkins', category: 'Salon', website: 'https://luxesalon.com', googleMapsUrl: 'https://maps.google.com/?cid=luxe-salon' },
   { id: 'b3', name: 'Cafe Paris', slug: 'cafe-paris', businessCode: 'CR-000003', passwordHash: '', industry: Industry.CAFE, logoUrl: 'https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?w=100&auto=format&fit=crop', googleReviewUrl: 'https://search.google.com/local/writereview?placeid=ChIJ313_placeholder3', phone: '+15550214', address: '789 Croissant St, Paris', isActive: true, status: BusinessStatus.ACTIVE, deletedAt: null, enableGoogleReviewRedirect: true, enableManagerCallback: true, createdByRepId: 'u-rep2', createdAt: new Date(), updatedAt: new Date(), description: 'Fresh croissants and specialty coffee.', contactPerson: 'Jean-Luc Picard', category: 'Cafe', website: 'https://cafeparis.com', googleMapsUrl: 'https://maps.google.com/?cid=cafe-paris' },
 ];
 
-let mockUsers: User[] = [
+export let mockUsers: User[] = [
   { id: 'u-admin', name: 'Viknesh', email: 'admin@cloutation.com', username: 'deco-admin', passwordHash: '', role: UserRole.SUPER_ADMIN, isActive: true, createdAt: new Date(), updatedAt: new Date() },
   { id: 'u-rep1', name: 'Field Agent Dan', email: 'rep@cloutation.com', username: 'dan', passwordHash: '', role: UserRole.REP, isActive: true, createdAt: new Date(), updatedAt: new Date() },
   { id: 'u-rep2', name: 'Rahul', email: 'rahul@cloutation.com', username: 'rahul', passwordHash: '', role: UserRole.REP, isActive: true, createdAt: new Date(), updatedAt: new Date() },
   { id: 'u-rep3', name: 'Karthik', email: 'karthik@cloutation.com', username: 'karthik', passwordHash: '', role: UserRole.REP, isActive: true, createdAt: new Date(), updatedAt: new Date() },
 ];
 
-let mockSubscriptions: Subscription[] = [
+export let mockSubscriptions: Subscription[] = [
   { id: 'sub-b1', businessId: 'b1', plan: SubscriptionPlan.PRO, status: SubscriptionStatus.ACTIVE, startDate: new Date(), endDate: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000), createdAt: new Date(), updatedAt: new Date() },
   { id: 'sub-b2', businessId: 'b2', plan: SubscriptionPlan.TRIAL, status: SubscriptionStatus.ACTIVE, startDate: new Date(), endDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), createdAt: new Date(), updatedAt: new Date() },
   { id: 'sub-b3', businessId: 'b3', plan: SubscriptionPlan.BASIC, status: SubscriptionStatus.ACTIVE, startDate: new Date(), endDate: new Date(Date.now() + 180 * 24 * 60 * 60 * 1000), createdAt: new Date(), updatedAt: new Date() },
@@ -262,7 +262,7 @@ function seedMockScans() {
 seedMockScans();
 
 let mockQrInventory: any[] = [];
-let mockAssignmentLogs: any[] = [];
+export let mockAssignmentLogs: any[] = [];
 let mockQrBatches: any[] = [
   {
     id: 'batch-1',
@@ -309,7 +309,7 @@ function seedMockInventory() {
 }
 seedMockInventory();
 
-let mockLogs: ActivityLog[] = [
+export let mockLogs: ActivityLog[] = [
   { id: 'log-1', userId: 'u-admin', action: 'Business Onboarded', entityType: 'BUSINESS', entityId: 'b1', metadata: JSON.stringify({ name: 'Bella Italia' }), createdAt: new Date(Date.now() - 3600000) },
   { id: 'log-2', userId: 'u-rep1', action: 'QR Code Assigned', entityType: 'BUSINESS', entityId: 'b1', metadata: JSON.stringify({ qrCode: 'QR-BELLA' }), createdAt: new Date(Date.now() - 7200050) },
   { id: 'log-3', userId: 'u-rep1', action: 'QR Code Assigned', entityType: 'BUSINESS', entityId: 'b2', metadata: JSON.stringify({ qrCode: 'QR-LUXE' }), createdAt: new Date(Date.now() - 10800000) }
@@ -343,7 +343,7 @@ function isDbConfigured(): boolean {
 }
 
 // Run a query with fallback
-async function runQuery<T>(dbQuery: () => Promise<T>, mockQuery: () => Promise<T>): Promise<T> {
+export async function runQuery<T>(dbQuery: () => Promise<T>, mockQuery: () => Promise<T>): Promise<T> {
   if (!isDbConfigured()) {
     await initializeMockPasswords();
     return mockQuery();
@@ -438,6 +438,10 @@ export async function getBusinessById(id: string) {
           subscriptions: {
             orderBy: { createdAt: 'desc' },
             take: 1
+          },
+          qrInventory: {
+            where: { status: 'ACTIVE' },
+            take: 1
           }
         }
       });
@@ -446,7 +450,8 @@ export async function getBusinessById(id: string) {
       const biz = mockBusinesses.find(b => b.id === id);
       if (!biz) return null;
       const subscriptions = mockSubscriptions.filter(s => s.businessId === id);
-      return { ...biz, subscriptions };
+      const qrInventory = mockQrInventory.filter(q => q.assignedBusinessId === id && q.status === 'ACTIVE');
+      return { ...biz, subscriptions, qrInventory };
     }
   );
   if (result) {
@@ -1635,6 +1640,25 @@ export async function getCallbackRequestsByBusiness(
   );
 }
 
+export async function getCallbackRequestById(id: string) {
+  return runQuery(
+    async () => {
+      return await db.callbackRequest.findUnique({
+        where: { id },
+        include: {
+          review: true
+        }
+      });
+    },
+    async () => {
+      const cb = mockCallbackRequests.find(c => c.id === id);
+      if (!cb) return null;
+      const review = mockReviews.find(r => r.id === cb.reviewId);
+      return { ...cb, review };
+    }
+  );
+}
+
 export async function updateCallbackRequestStatus(id: string, status: CallbackStatus) {
   return runQuery(
     async () => {
@@ -1832,6 +1856,7 @@ export async function replaceDamagedQr(data: {
   oldQrCode: string;
   newQrCode: string;
   repId: string;
+  repRole?: string;
 }) {
   return runQuery(
     async () => {
@@ -1843,7 +1868,20 @@ export async function replaceDamagedQr(data: {
           throw new Error('Old QR code is not in ACTIVE status.');
         }
 
-        const businessId = oldQr.assignedBusinessId!;
+        const businessId = oldQr.assignedBusinessId;
+        if (!businessId) {
+          throw new Error('Old QR code is not assigned to any business.');
+        }
+
+        // Security check: IDOR check for REP role
+        if (data.repRole === 'REP') {
+          const business = await tx.business.findUnique({
+            where: { id: businessId }
+          });
+          if (business && business.createdByRepId !== data.repId) {
+            throw new Error('Access denied. This business was onboarded by another representative.');
+          }
+        }
 
         // Set old QR to ARCHIVED
         const updatedOldQr = await tx.qRInventory.update({
@@ -1881,6 +1919,18 @@ export async function replaceDamagedQr(data: {
       }
 
       const businessId = oldQr.assignedBusinessId;
+      if (!businessId) {
+        throw new Error('Old QR code is not assigned to any business.');
+      }
+
+      // Security check: IDOR check for REP role
+      if (data.repRole === 'REP') {
+        const business = mockBusinesses.find(b => b.id === businessId);
+        if (business && business.createdByRepId !== data.repId) {
+          throw new Error('Access denied. This business was onboarded by another representative.');
+        }
+      }
+
       oldQr.status = QRStatus.ARCHIVED;
 
       const newQr = {
@@ -1895,8 +1945,9 @@ export async function replaceDamagedQr(data: {
       };
       mockQrInventory.push(newQr);
 
+      const logId = `log-${Math.random().toString(36).substring(2, 9)}`;
       mockAssignmentLogs.push({
-        id: `log-${Math.random().toString(36).substring(2, 9)}`,
+        id: logId,
         qrInventoryId: newQr.id,
         businessId,
         assignedBy: data.repId,
@@ -1907,12 +1958,30 @@ export async function replaceDamagedQr(data: {
       return { success: true, oldQr, newQr };
     }
   );
-}
+};
 
-export async function toggleQrInactive(qrCode: string, inactive: boolean, repId: string) {
+export async function toggleQrInactive(qrCode: string, inactive: boolean, repId: string, repRole?: string) {
   const targetStatus = inactive ? QRStatus.ARCHIVED : QRStatus.ACTIVE;
   return runQuery(
     async () => {
+      const qrRecord = await db.qRInventory.findUnique({
+        where: { qrCode }
+      });
+      if (!qrRecord) {
+        throw new Error('QR Code does not exist in inventory.');
+      }
+      if (repRole === 'REP') {
+        const businessId = qrRecord.assignedBusinessId;
+        if (businessId) {
+          const business = await db.business.findUnique({
+            where: { id: businessId }
+          });
+          if (business && business.createdByRepId !== repId) {
+            throw new Error('Access denied. This business was onboarded by another representative.');
+          }
+        }
+      }
+
       const updated = await db.qRInventory.update({
         where: { qrCode },
         data: { status: targetStatus }
@@ -1921,10 +1990,20 @@ export async function toggleQrInactive(qrCode: string, inactive: boolean, repId:
     },
     async () => {
       const qrRecord = mockQrInventory.find(q => q.qrCode === qrCode);
-      if (qrRecord) {
-        qrRecord.status = targetStatus;
+      if (!qrRecord) {
+        throw new Error('QR Code does not exist in inventory.');
       }
-      return qrRecord || null;
+      if (repRole === 'REP') {
+        const businessId = qrRecord.assignedBusinessId;
+        if (businessId) {
+          const business = mockBusinesses.find(b => b.id === businessId);
+          if (business && business.createdByRepId !== repId) {
+            throw new Error('Access denied. This business was onboarded by another representative.');
+          }
+        }
+      }
+      qrRecord.status = targetStatus;
+      return qrRecord;
     }
   );
 }

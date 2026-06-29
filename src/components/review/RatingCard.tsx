@@ -23,7 +23,7 @@ export default function RatingCard({
       "
     >
       {/* Stars */}
-      <div className="mt-14 max-w-[340px] mx-auto w-full">
+      <div className="mt-[48px] md:mt-[90px] max-w-[340px] mx-auto w-full">
         <StarRating
           rating={rating}
           onChange={onChange}
@@ -34,20 +34,18 @@ export default function RatingCard({
       {/* Helper Text */}
       <p
         className="
-          mt-10
+          mt-[24px]
+          md:mt-[32px]
           text-center
-          text-[17px]
+          text-[18px]
           leading-6
           font-normal
-          text-slate-500
+          text-[#6B7280]
           select-none
         "
       >
         Tap a star to share your experience
       </p>
-
-      {/* Spacer */}
-      <div className="flex-1 min-h-[80px]" />
     </div>
   );
 }

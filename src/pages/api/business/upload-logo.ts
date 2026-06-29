@@ -40,7 +40,20 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       base64Data = matches[2];
     }
 
+    // Security check: Validate mime-type to prevent Arbitrary File Upload (Stored XSS)
+    const allowedMimes = ['image/png', 'image/jpeg', 'image/jpg', 'image/gif', 'image/webp'];
+    if (!allowedMimes.includes(detectedMime.toLowerCase())) {
+      return res.status(400).json({ error: 'Invalid file type. Only PNG, JPEG, JPG, GIF, and WEBP images are allowed.' });
+    }
+
     const buffer = Buffer.from(base64Data, 'base64');
+
+    // Security check: Restrict logo size to 5MB to prevent disk flooding
+    const maxSizeBytes = 5 * 1024 * 1024; // 5MB
+    if (buffer.length > maxSizeBytes) {
+      return res.status(400).json({ error: 'File is too large. Maximum size allowed is 5MB.' });
+    }
+
     const ext = detectedMime.split('/')[1] || 'png';
     const uniqueFilename = `${crypto.randomUUID()}.${ext}`;
 
@@ -85,6 +98,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(200).json({ url: localUrl });
   } catch (error: any) {
     console.error('Logo upload API error:', error);
-    return res.status(550).json({ error: error.message || 'Internal server error uploading logo' });
+    return res.status(500).json({ error: error.message || 'Internal server error uploading logo' });
   }
 }

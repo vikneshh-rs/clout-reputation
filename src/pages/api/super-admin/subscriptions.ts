@@ -1,7 +1,7 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { getSessionUser } from '@/lib/auth';
 import { db } from '@/lib/db';
-import { updateSubscription } from '@/lib/data';
+import { updateSubscription, runQuery, mockSubscriptions, mockBusinesses } from '@/lib/data';
 import { SubscriptionPlan } from '@prisma/client';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
@@ -11,34 +11,31 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(403).json({ error: 'Access denied. Super Admin role required.' });
     }
 
-    const isDbConfigured = () => {
-      const dbUrl = process.env.DATABASE_URL || '';
-      return dbUrl !== '' && !dbUrl.includes('placeholder');
-    };
-
     if (req.method === 'GET') {
-      if (!isDbConfigured()) {
-        const data = require('@/lib/data');
-        const subs = [...data.mockSubscriptions];
-        const resolved = subs.map((s: any) => {
-          const biz = data.mockBusinesses.find((b: any) => b.id === s.businessId);
-          return {
-            ...s,
-            business: biz ? { name: biz.name } : null
-          };
-        });
-        resolved.sort((a: any, b: any) => b.createdAt.getTime() - a.createdAt.getTime());
-        return res.status(200).json({ subscriptions: resolved });
-      }
-
-      const subscriptions = await db.subscription.findMany({
-        orderBy: { createdAt: 'desc' },
-        include: {
-          business: { select: { name: true } }
+      const resolved = await runQuery(
+        async () => {
+          return await db.subscription.findMany({
+            orderBy: { createdAt: 'desc' },
+            include: {
+              business: { select: { name: true } }
+            }
+          });
+        },
+        async () => {
+          const subs = [...mockSubscriptions];
+          const resolved = subs.map((s: any) => {
+            const biz = mockBusinesses.find((b: any) => b.id === s.businessId);
+            return {
+              ...s,
+              business: biz ? { name: biz.name } : null
+            };
+          });
+          resolved.sort((a: any, b: any) => b.createdAt.getTime() - a.createdAt.getTime());
+          return resolved;
         }
-      });
+      );
 
-      return res.status(200).json({ subscriptions });
+      return res.status(200).json({ subscriptions: resolved });
     }
 
     if (req.method === 'POST') {

@@ -131,11 +131,15 @@ export default function CustomerRecoveryModule({ businessId, readOnly = false }:
   };
 
   useEffect(() => {
-    fetchTickets();
+    Promise.resolve().then(() => {
+      fetchTickets();
+    });
   }, [statusFilter, priorityFilter, businessId]);
 
   useEffect(() => {
-    fetchAnalytics();
+    Promise.resolve().then(() => {
+      fetchAnalytics();
+    });
   }, [businessId]);
 
   const handleSearchSubmit = (e: React.FormEvent) => {
@@ -726,7 +730,7 @@ export default function CustomerRecoveryModule({ businessId, readOnly = false }:
                       <span className="text-xs font-bold text-slate-700 ml-1.5">({selectedTicket.rating} Stars)</span>
                     </div>
                     <div className="p-4 bg-slate-50 border border-slate-100 rounded-2xl text-xs text-slate-700 italic leading-relaxed">
-                      "{selectedTicket.feedback || 'No comment provided by customer'}"
+                      &quot;{selectedTicket.feedback || 'No comment provided by customer'}&quot;
                     </div>
                   </div>
 

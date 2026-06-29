@@ -679,7 +679,7 @@ export default function LandingPage() {
         <div className="text-center max-w-3xl mx-auto mb-28 space-y-4">
           <span className="text-xs font-bold text-[#073afe] uppercase tracking-widest">Brand Experience</span>
           <h2 className="text-5xl sm:text-6xl font-extrabold text-[#0F172A] tracking-tight font-display">
-            A Command Center for Your Location's Reputation
+            A Command Center for Your Location&apos;s Reputation
           </h2>
           <p className="text-[#64748B] text-base max-w-lg mx-auto">
             Monitor guest reviews in real-time, track sentiment velocity, and recover unhappy diners privately before they post online.
@@ -760,7 +760,7 @@ export default function LandingPage() {
                             <span className="font-bold text-[#0F172A]">{review.customer}</span>
                             <span className="text-[7px] text-[#64748B]">{review.source}</span>
                           </div>
-                          <p className="text-[#64748B] text-[8px] italic">"{review.text}"</p>
+                          <p className="text-[#64748B] text-[8px] italic">&quot;{review.text}&quot;</p>
                           <div className="flex items-center justify-between pt-1 border-t border-slate-50">
                             <div className="flex text-[#073afe] space-x-0.5">
                               {[...Array(review.rating)].map((_, idx) => (
@@ -991,7 +991,7 @@ export default function LandingPage() {
                 </span>
                 <span className="text-[#64748B] font-normal">Table 4</span>
               </div>
-              <p className="text-[#64748B] italic">"Wait time was 25 minutes, and the food was cold."</p>
+              <p className="text-[#64748B] italic">&quot;Wait time was 25 minutes, and the food was cold.&quot;</p>
               <div className="flex justify-between items-center text-[7px] pt-1">
                 <span className="font-bold text-amber-600 uppercase tracking-widest bg-amber-50 px-1.5 py-0.5 rounded">2-Star Scan</span>
                 <span className="text-[#073afe] font-bold">Manager Notified ➔</span>

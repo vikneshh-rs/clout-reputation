@@ -118,7 +118,7 @@ export default function DashboardLayout({ children, title }: DashboardLayoutProp
     ? 'bg-emerald-100 text-emerald-700 border border-emerald-200'
     : 'bg-blue-100 text-[#073afe] border border-blue-200';
 
-  const SidebarContent = () => (
+  const renderSidebarContent = () => (
     <>
       <div className="flex flex-col flex-grow overflow-y-auto">
         {/* Logo */}
@@ -185,7 +185,7 @@ export default function DashboardLayout({ children, title }: DashboardLayoutProp
           </div>
           <div className="ml-2.5 flex-1 min-w-0">
             <p className="text-xs font-bold text-slate-950 truncate">{user?.name || 'Admin'}</p>
-            <p className="text-[10px] text-slate-400 truncate mt-0.5">{user?.email || roleLabel}</p>
+            <p className="text-[10px] text-slate-450 truncate mt-0.5">{user?.email || roleLabel}</p>
           </div>
           <button
             onClick={logout}
@@ -204,7 +204,7 @@ export default function DashboardLayout({ children, title }: DashboardLayoutProp
 
       {/* Desktop Sidebar */}
       <aside className="hidden md:flex md:w-60 md:flex-col md:fixed md:inset-y-0 border-r border-slate-200/50 bg-white/80 backdrop-blur-xl z-30 shadow-[4px_0_24px_rgba(15,23,42,0.015)]">
-        <SidebarContent />
+        {renderSidebarContent()}
       </aside>
 
       {/* Mobile Slide-over Drawer */}
@@ -223,7 +223,7 @@ export default function DashboardLayout({ children, title }: DashboardLayoutProp
                 <X size={14} />
               </button>
             </div>
-            <SidebarContent />
+            {renderSidebarContent()}
           </div>
         </div>
       )}

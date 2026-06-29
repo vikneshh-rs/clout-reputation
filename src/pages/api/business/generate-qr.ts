@@ -1,6 +1,6 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { getSessionUser } from '@/lib/auth';
-import { generateQrForBusiness, logActivity } from '@/lib/data';
+import { generateQrForBusiness, logActivity, getBusinessById } from '@/lib/data';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') {
@@ -16,6 +16,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const { businessId } = req.body;
     if (!businessId) {
       return res.status(400).json({ error: 'Business ID is required.' });
+    }
+
+    // Security check: IDOR validation for Representatives
+    if (sessionUser.role === 'REP') {
+      const business = await getBusinessById(businessId);
+      if (!business || business.createdByRepId !== sessionUser.id) {
+        return res.status(403).json({ error: 'Forbidden. Access denied to this business.' });
+      }
     }
 
     const qr = await generateQrForBusiness(businessId, sessionUser.id);

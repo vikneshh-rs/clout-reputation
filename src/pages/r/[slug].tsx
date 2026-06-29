@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
 import { AlertTriangle, Loader2 } from 'lucide-react';
@@ -34,13 +34,12 @@ export default function PublicReviewPortal() {
 
   // Session & Stage Tracking
   const [reviewSessionId, setReviewSessionId] = useState('');
-  const [funnelLoggedScan, setFunnelLoggedScan] = useState(false);
+  const funnelLoggedScanRef = useRef(false);
   const [funnelLoggedStart, setFunnelLoggedStart] = useState(false);
 
   // Flow State
   const [step, setStep] = useState<'rating' | 'positive-redirect' | 'negative-form' | 'negative-completion'>('rating');
   const [rating, setRating] = useState(0);
-  const [isBottomSheetOpen, setIsBottomSheetOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
 
@@ -61,24 +60,27 @@ export default function PublicReviewPortal() {
     if (savedSession) {
       try {
         const parsed = JSON.parse(savedSession);
-        setReviewSessionId(parsed.reviewSessionId);
-        if (parsed.hasSubmitted) {
-          const isPos = parsed.submittedRating >= 4;
-          setStep(isPos ? 'positive-redirect' : 'negative-completion');
-          setRating(parsed.submittedRating);
-          if (!isPos) {
-            setIsBottomSheetOpen(true);
+        Promise.resolve().then(() => {
+          setReviewSessionId(parsed.reviewSessionId);
+          if (parsed.hasSubmitted) {
+            const isPos = parsed.submittedRating >= 4;
+            setStep(isPos ? 'positive-redirect' : 'negative-completion');
+            setRating(parsed.submittedRating);
           }
-        }
+        });
       } catch (e) {
         console.error('Error parsing saved session:', e);
         const newId = `session-${Math.random().toString(36).substring(2, 11)}_${Date.now()}`;
-        setReviewSessionId(newId);
+        Promise.resolve().then(() => {
+          setReviewSessionId(newId);
+        });
         sessionStorage.setItem(sessionKey, JSON.stringify({ reviewSessionId: newId, hasSubmitted: false }));
       }
     } else {
       const newId = `session-${Math.random().toString(36).substring(2, 11)}_${Date.now()}`;
-      setReviewSessionId(newId);
+      Promise.resolve().then(() => {
+        setReviewSessionId(newId);
+      });
       sessionStorage.setItem(sessionKey, JSON.stringify({ reviewSessionId: newId, hasSubmitted: false }));
     }
   }, [slug]);
@@ -100,8 +102,9 @@ export default function PublicReviewPortal() {
         }
         const data = await res.json();
         setDetails(data);
-      } catch (err: any) {
-        setError(err.message || 'Unable to load details for this review portal.');
+      } catch (err) {
+        const errObj = err as Error;
+        setError(errObj.message || 'Unable to load details for this review portal.');
       } finally {
         setLoading(false);
       }
@@ -112,8 +115,8 @@ export default function PublicReviewPortal() {
 
   // Log SCAN stage once details are fetched
   useEffect(() => {
-    if (details && reviewSessionId && !funnelLoggedScan) {
-      setFunnelLoggedScan(true);
+    if (details && reviewSessionId && !funnelLoggedScanRef.current) {
+      funnelLoggedScanRef.current = true;
       fetch('/api/business/funnel', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -124,10 +127,33 @@ export default function PublicReviewPortal() {
         })
       }).catch(err => console.error('Failed to log SCAN stage:', err));
     }
-  }, [details, reviewSessionId, funnelLoggedScan]);
+  }, [details, reviewSessionId]);
+
+  // Trigger redirect when step becomes positive-redirect (handles both submission and session restore)
+  useEffect(() => {
+    if (step === 'positive-redirect' && details && details.business.googleReviewUrl && !redirectInterval) {
+      let timeRemaining = 2.0;
+      const interval = setInterval(() => {
+        timeRemaining -= 0.1;
+        setCountdown(Math.max(0, timeRemaining));
+        
+        if (timeRemaining <= 0) {
+          clearInterval(interval);
+          window.location.href = details.business.googleReviewUrl!;
+        }
+      }, 100);
+
+      Promise.resolve().then(() => {
+        setRedirectInterval(interval);
+      });
+      return () => {
+        clearInterval(interval);
+      };
+    }
+  }, [step, details, redirectInterval]);
 
   // Log START stage when a user clicks a star for the first time
-  const triggerFunnelStart = (selectedRating: number) => {
+  const triggerFunnelStart = () => {
     if (details && reviewSessionId && !funnelLoggedStart) {
       setFunnelLoggedStart(true);
       fetch('/api/business/funnel', {
@@ -150,14 +176,13 @@ export default function PublicReviewPortal() {
     }
 
     setRating(selectedRating);
-    triggerFunnelStart(selectedRating);
+    triggerFunnelStart();
 
     const timer = setTimeout(() => {
       if (selectedRating >= 4) {
         submitPositiveRating(selectedRating);
       } else {
         setStep('negative-form');
-        setIsBottomSheetOpen(true);
       }
     }, 400);
 
@@ -213,29 +238,18 @@ export default function PublicReviewPortal() {
       setStep('positive-redirect');
       setSubmitting(false);
 
-      let timeRemaining = 2.0;
-      const interval = setInterval(() => {
-        timeRemaining -= 0.1;
-        setCountdown(Math.max(0, timeRemaining));
-        
-        if (timeRemaining <= 0) {
-          clearInterval(interval);
-          if (details.business.googleReviewUrl) {
-            window.location.href = details.business.googleReviewUrl;
-          }
-        }
-      }, 100);
-
-      setRedirectInterval(interval);
-
-    } catch (err: any) {
-      console.error(err);
-      setSaveError(err.message || 'Unable to submit rating. Please try again.');
+    } catch (err) {
+      const errObj = err as Error;
+      console.error(errObj);
+      setSaveError(errObj.message || 'Unable to submit rating. Please try again.');
       setSubmitting(false);
     }
   };
 
-  const handleRedirectClick = (e: React.MouseEvent) => {
+  const handleRedirectClick = (e?: React.MouseEvent) => {
+    if (e) {
+      e.preventDefault();
+    }
     if (redirectInterval) {
       clearInterval(redirectInterval);
     }
@@ -277,9 +291,10 @@ export default function PublicReviewPortal() {
       }));
 
       setStep('negative-completion');
-    } catch (err: any) {
-      console.error(err);
-      setSaveError(err.message || 'Unable to submit feedback. Please try again.');
+    } catch (err) {
+      const errObj = err as Error;
+      console.error(errObj);
+      setSaveError(errObj.message || 'Unable to submit feedback. Please try again.');
     } finally {
       setSubmitting(false);
     }
@@ -338,7 +353,7 @@ export default function PublicReviewPortal() {
         <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0, viewport-fit=cover" />
       </Head>
 
-      <DigitalReviewCard businessName={details.business.name}>
+      <DigitalReviewCard businessName={details.business.name} isRating={step === 'rating'}>
         {saveError && (
           <div className="w-full mb-4 p-3.5 bg-rose-50 border border-rose-200/50 text-rose-700 text-xs rounded-xl font-sans font-medium text-left animate-fadeIn">
             {saveError}
@@ -357,7 +372,7 @@ export default function PublicReviewPortal() {
           <SuccessScreen 
             positive={true} 
             countdown={countdown}
-            onContinue={() => handleRedirectClick(null as any)}
+            onContinue={() => handleRedirectClick()}
           />
         )}
 

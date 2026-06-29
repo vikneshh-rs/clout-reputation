@@ -10,10 +10,12 @@ export default function BusinessHeader({
   subtitle = "How was your experience?",
 }: BusinessHeaderProps) {
   return (
-    <div className="flex flex-col items-center text-center w-full mt-8 px-8 z-20">
+    <div className="flex flex-col items-center text-center w-full z-20">
       {/* Business Name */}
       <h1
         className="
+          mt-[20px]
+          md:mt-[24px]
           text-white
           font-extrabold
           tracking-[-0.03em]
@@ -22,8 +24,10 @@ export default function BusinessHeader({
           animate-headerSlide
         "
         style={{
-          fontSize: "clamp(40px, 4vw, 46px)",
+          fontFamily: "Inter, system-ui, sans-serif",
+          fontSize: "56px",
           maxWidth: "340px",
+          color: "#FFFFFF",
         }}
       >
         {name}
@@ -32,14 +36,17 @@ export default function BusinessHeader({
       {/* Subtitle */}
       <p
         className="
-          mt-5
-          text-white/95
-          font-medium
-          tracking-tight
+          mt-[12px]
+          md:mt-[16px]
+          text-white
+          font-normal
+          tracking-normal
+          leading-[1.4]
           animate-headerSlide
         "
         style={{
-          fontSize: "20px",
+          fontFamily: "Inter, system-ui, sans-serif",
+          fontSize: "24px",
         }}
       >
         {subtitle}

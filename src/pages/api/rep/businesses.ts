@@ -12,12 +12,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     // GET handler: list businesses with full details
     if (req.method === 'GET') {
-      const businesses = await getAllBusinesses(false); // active/pending/inactive (getAllBusinesses(false) returns active ones)
+      let businesses = await getAllBusinesses(false); // active/pending/inactive (getAllBusinesses(false) returns active ones)
       
-      // Filter businesses: if REP, we can show businesses created by them or all.
-      // Let's show all active/pending/inactive businesses, but allow filtering.
-      // Wait, let's return all active businesses (including pending ones since their isActive is true).
-      // We will include details: id, name, slug, industry, logoUrl, phone, address, googleReviewUrl, description, contactPerson, category, website, googleMapsUrl, status, createdByRep, createdAt, qrInventory.
+      // Security/UX check: Filter businesses if user is a REP
+      if (sessionUser.role === 'REP') {
+        businesses = businesses.filter(b => b.createdByRepId === sessionUser.id);
+      }
       
       return res.status(200).json({ businesses });
     }

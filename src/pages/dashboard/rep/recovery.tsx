@@ -10,7 +10,7 @@ interface BusinessItem {
   name: string;
 }
 
-export default function RepRecovery(props: any) {
+export default function RepRecovery(props: { theme: 'light' | 'dark'; toggleTheme: () => void }) {
   const { user, loading: authLoading } = useAuth();
   const { theme, toggleTheme } = props;
 

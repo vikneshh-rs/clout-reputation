@@ -1,6 +1,6 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { getSessionUser, getAuthorizedBusinessId } from '@/lib/auth';
-import { getCallbackRequestsByBusiness, updateCallbackRequestStatus } from '@/lib/data';
+import { getCallbackRequestsByBusiness, updateCallbackRequestStatus, getCallbackRequestById } from '@/lib/data';
 import { CallbackStatus } from '@prisma/client';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
@@ -30,6 +30,17 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       const { id, status } = req.body;
       if (!id || !status) {
         return res.status(400).json({ error: 'Callback ID and new status are required.' });
+      }
+
+      // Security check: IDOR validation
+      const callbackReq = await getCallbackRequestById(id);
+      if (!callbackReq) {
+        return res.status(404).json({ error: 'Callback request not found.' });
+      }
+      
+      const targetBusinessId = callbackReq.review?.businessId;
+      if (targetBusinessId !== businessId) {
+        return res.status(403).json({ error: 'Forbidden. Access denied to this callback request.' });
       }
 
       // Verify status is valid enum
