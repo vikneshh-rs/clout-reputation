@@ -153,7 +153,7 @@ export default function QrAssetsPage(props: any) {
       doc.text(nameLines, width / 2, yStart, { align: 'center' });
 
       // 3. QR Code: occupying approx 70-75% of printable card width (e.g. 76mm is ~72.38%)
-      const targetUrl = `${window.location.origin}/r/${slug || code}`;
+      const targetUrl = `${window.location.origin}/r/${slug}`;
       const qrDataUrl = await QRCode.toDataURL(targetUrl, { width: 400, margin: 1 });
       doc.addImage(qrDataUrl, 'PNG', 14.5, 38, 76, 76);
 

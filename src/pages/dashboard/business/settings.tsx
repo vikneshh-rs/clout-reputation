@@ -3,7 +3,7 @@ import Head from 'next/head';
 import { useRouter } from 'next/router';
 import DashboardLayout from '@/components/DashboardLayout';
 import { useAuth } from '@/context/AuthContext';
-import { Store, Phone, MapPin, Globe, Save, AlertCircle, CheckCircle, Loader2, Download } from 'lucide-react';
+import { Store, Phone, MapPin, Globe, Save, AlertCircle, CheckCircle, Loader2, Download, Lock } from 'lucide-react';
 import QRCode from 'qrcode';
 import { jsPDF } from 'jspdf';
 
@@ -47,8 +47,7 @@ export default function BusinessSettings(props: any) {
 
   const downloadFlyer = async () => {
     if (!details) return;
-    const qrCodeObj = details.qrInventory && details.qrInventory.length > 0 ? details.qrInventory[0] : null;
-    const code = qrCodeObj ? qrCodeObj.qrCode : details.slug;
+    const code = details.slug;
 
     try {
       setDownloadingFlyer(true);
@@ -284,14 +283,18 @@ export default function BusinessSettings(props: any) {
                 {/* Slug display & QR Flyer Download */}
                 {details && typeof window !== 'undefined' && (
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                    <div className="space-y-1.5">
-                      <span className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                    <div className="space-y-2">
+                      <span className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
                         Public Review Link Slug
                       </span>
-                      <div className="flex items-center bg-slate-50/50 border border-slate-100 rounded-2xl px-4 py-3 text-xs text-slate-650 font-mono select-all h-[46px]">
-                        <Globe size={14} className="text-slate-400 mr-2.5 flex-shrink-0" />
+                      <div className="flex items-center bg-slate-100 border border-slate-200 rounded-2xl px-4 py-3 text-xs text-slate-500 font-mono h-[46px] select-all cursor-not-allowed">
+                        <Lock size={14} className="text-slate-400 mr-2.5 flex-shrink-0" />
                         <span className="truncate">{window.location.origin}/r/{details.slug}</span>
                       </div>
+                      <p className="text-[11px] text-slate-400 leading-normal flex items-start gap-1">
+                        <span className="flex-shrink-0 mt-0.5">🔒</span>
+                        <span>This URL is permanent to ensure your QR codes and printed marketing materials continue working indefinitely.</span>
+                      </p>
                     </div>
 
                     <div className="space-y-1.5">

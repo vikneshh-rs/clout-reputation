@@ -122,18 +122,11 @@ export default function DashboardLayout({ children, title }: DashboardLayoutProp
     <>
       <div className="flex flex-col flex-grow overflow-y-auto">
         {/* Logo */}
-        <div className="flex items-center gap-3 px-5 py-5 border-b border-slate-100/50">
-          <div className="h-9 w-9 rounded-xl bg-[#073afe] flex items-center justify-center shadow-sm shadow-blue-500/20 flex-shrink-0">
-            <img src="/logo.png" alt="Cloutation" className="h-5.5 w-5.5 object-contain brightness-0 invert" />
-          </div>
-          <div>
-            <span className="block text-sm font-bold tracking-tight text-slate-900">
-              Cloutation
-            </span>
-            <span className={`inline-flex items-center px-2 py-0.5 rounded-md text-[9px] font-bold uppercase tracking-wider mt-1 ${roleColor}`}>
-              {roleLabel}
-            </span>
-          </div>
+        <div className="flex flex-col gap-2 px-5 py-[18px] border-b border-slate-100/50 items-start">
+          <img src="/logo.png" alt="Cloutation" className="h-11 w-auto object-contain" />
+          <span className={`inline-flex items-center px-2 py-0.5 rounded-md text-[9px] font-bold uppercase tracking-wider ${roleColor}`}>
+            {roleLabel}
+          </span>
         </div>
 
         {/* Navigation */}
@@ -233,12 +226,7 @@ export default function DashboardLayout({ children, title }: DashboardLayoutProp
 
         {/* Mobile Top Bar */}
         <header className="sticky top-0 z-20 md:hidden flex items-center justify-between h-14 px-4 bg-white/80 backdrop-blur-md border-b border-slate-200/50 shadow-sm">
-          <div className="flex items-center gap-2">
-            <div className="h-7 w-7 rounded-lg bg-[#073afe] flex items-center justify-center shadow-sm">
-              <img src="/logo.png" alt="Cloutation" className="h-4 w-4 object-contain brightness-0 invert" />
-            </div>
-            <span className="text-sm font-bold text-slate-900">Cloutation</span>
-          </div>
+          <img src="/logo.png" alt="Cloutation" className="h-8 w-auto object-contain" />
           <button
             onClick={() => setMobileMenuOpen(true)}
             className="p-2 rounded-xl border border-slate-200 bg-white text-slate-500 hover:bg-slate-50"

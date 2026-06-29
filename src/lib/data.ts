@@ -2996,18 +2996,40 @@ export async function getQrDownloadStats(businessId: string) {
 export async function resolveBusinessByIdentifier(identifier: string) {
   return runQuery(
     async () => {
-      // 1. Try to find by slug first
-      let business = await db.business.findUnique({
+      // 1. Try to find by ID (UUID)
+      const bizById = await db.business.findUnique({
+        where: { id: identifier },
+        include: { qrInventory: { where: { status: QRStatus.ACTIVE }, take: 1 } }
+      });
+
+      if (bizById) {
+        const activeQr = bizById.qrInventory.length > 0 ? bizById.qrInventory[0] : null;
+        return { business: bizById, qrCode: activeQr?.qrCode || 'NO_QR', qrStatus: activeQr?.status || 'Not Generated' };
+      }
+
+      // 2. Try to find by Business Code
+      const bizByCode = await db.business.findUnique({
+        where: { businessCode: identifier },
+        include: { qrInventory: { where: { status: QRStatus.ACTIVE }, take: 1 } }
+      });
+
+      if (bizByCode) {
+        const activeQr = bizByCode.qrInventory.length > 0 ? bizByCode.qrInventory[0] : null;
+        return { business: bizByCode, qrCode: activeQr?.qrCode || 'NO_QR', qrStatus: activeQr?.status || 'Not Generated' };
+      }
+
+      // 3. Try to find by slug
+      const bizBySlug = await db.business.findUnique({
         where: { slug: identifier },
         include: { qrInventory: { where: { status: QRStatus.ACTIVE }, take: 1 } }
       });
 
-      if (business) {
-        const activeQr = business.qrInventory.length > 0 ? business.qrInventory[0] : null;
-        return { business, qrCode: activeQr?.qrCode || 'NO_QR', qrStatus: activeQr?.status || 'Not Generated' };
+      if (bizBySlug) {
+        const activeQr = bizBySlug.qrInventory.length > 0 ? bizBySlug.qrInventory[0] : null;
+        return { business: bizBySlug, qrCode: activeQr?.qrCode || 'NO_QR', qrStatus: activeQr?.status || 'Not Generated' };
       }
 
-      // 2. Try to find by QR code UUID
+      // 4. Try to find by QR code UUID
       const qrRecord = await db.qRInventory.findUnique({
         where: { qrCode: identifier },
         include: { business: true }
@@ -3021,18 +3043,40 @@ export async function resolveBusinessByIdentifier(identifier: string) {
     },
     async () => {
       // Mock resolution
-      // 1. Try slug
-      let business = mockBusinesses.find(b => b.slug === identifier);
-      if (business) {
-        const activeQr = mockQrInventory.find(q => q.assignedBusinessId === business.id && q.status === QRStatus.ACTIVE);
+      // 1. Try ID
+      const bizById = mockBusinesses.find(b => b.id === identifier);
+      if (bizById) {
+        const activeQr = mockQrInventory.find(q => q.assignedBusinessId === bizById.id && q.status === QRStatus.ACTIVE);
         return {
-          business,
+          business: bizById,
           qrCode: activeQr?.qrCode || 'NO_QR',
           qrStatus: activeQr?.status || 'Not Generated'
         };
       }
 
-      // 2. Try QR Code UUID
+      // 2. Try Business Code
+      const bizByCode = mockBusinesses.find(b => b.businessCode === identifier);
+      if (bizByCode) {
+        const activeQr = mockQrInventory.find(q => q.assignedBusinessId === bizByCode.id && q.status === QRStatus.ACTIVE);
+        return {
+          business: bizByCode,
+          qrCode: activeQr?.qrCode || 'NO_QR',
+          qrStatus: activeQr?.status || 'Not Generated'
+        };
+      }
+
+      // 3. Try Slug
+      const bizBySlug = mockBusinesses.find(b => b.slug === identifier);
+      if (bizBySlug) {
+        const activeQr = mockQrInventory.find(q => q.assignedBusinessId === bizBySlug.id && q.status === QRStatus.ACTIVE);
+        return {
+          business: bizBySlug,
+          qrCode: activeQr?.qrCode || 'NO_QR',
+          qrStatus: activeQr?.status || 'Not Generated'
+        };
+      }
+
+      // 4. Try QR Code UUID
       const qrRecord = mockQrInventory.find(q => q.qrCode === identifier);
       if (qrRecord) {
         const biz = mockBusinesses.find(b => b.id === qrRecord.assignedBusinessId);

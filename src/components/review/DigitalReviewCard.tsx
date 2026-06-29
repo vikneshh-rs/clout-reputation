@@ -25,7 +25,8 @@ export default function DigitalReviewCard({
           w-[calc(100vw-32px)]
           md:w-[420px]
           max-w-[420px]
-          min-h-[720px]
+          min-h-[580px]
+          md:min-h-[720px]
           bg-white
           rounded-[32px]
           overflow-hidden
@@ -59,7 +60,7 @@ export default function DigitalReviewCard({
               flex-col
               items-center
               w-full
-              pt-[38px]
+              pt-[28px]
               md:pt-[44px]
             "
           >

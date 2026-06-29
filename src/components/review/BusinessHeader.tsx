@@ -14,7 +14,7 @@ export default function BusinessHeader({
       {/* Business Name */}
       <h1
         className="
-          mt-[20px]
+          mt-[16px]
           md:mt-[24px]
           text-white
           font-extrabold
@@ -36,7 +36,7 @@ export default function BusinessHeader({
       {/* Subtitle */}
       <p
         className="
-          mt-[12px]
+          mt-[8px]
           md:mt-[16px]
           text-white
           font-normal
