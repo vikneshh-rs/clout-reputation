@@ -67,11 +67,8 @@ export default function LoginPage() {
           <img 
             src="/logo.png" 
             alt="Cloutation" 
-            className="h-14 w-14 rounded-xl object-contain mix-blend-multiply transition-all duration-300 hover:scale-105" 
+            className="h-16 w-auto object-contain transition-all duration-300 hover:scale-105" 
           />
-          <span className="mt-2 font-sans text-xl font-bold tracking-tight text-slate-900">
-            Cloutation
-          </span>
         </div>
         
         <h2 className="text-center text-3xl font-extrabold tracking-tight">
