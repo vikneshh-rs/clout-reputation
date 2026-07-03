@@ -2023,6 +2023,56 @@ export async function revokeQrAsset(qrCode: string, adminId: string) {
   );
 }
 
+export async function deleteQrAsset(qrCode: string, adminId: string) {
+  return runQuery(
+    async () => {
+      const qrRecord = await db.qRAsset.findUnique({
+        where: { qrCode }
+      });
+      if (!qrRecord) {
+        throw new Error('QR Asset does not exist.');
+      }
+
+      const businessId = qrRecord.assignedBusinessId;
+
+      if (businessId) {
+        await db.business.update({
+          where: { id: businessId },
+          data: {
+            assignedQrAssetId: null
+          }
+        });
+      }
+
+      const deletedQr = await db.qRAsset.delete({
+        where: { qrCode }
+      });
+
+      return deletedQr;
+    },
+    async () => {
+      const idx = mockQrAssets.findIndex(q => q.qrCode === qrCode);
+      if (idx === -1) {
+        throw new Error('QR Asset does not exist.');
+      }
+      const qrRecord = mockQrAssets[idx];
+      const businessId = qrRecord.assignedBusinessId;
+
+      if (businessId) {
+        const biz = mockBusinesses.find(b => b.id === businessId);
+        if (biz) {
+          biz.assignedQrAssetId = null;
+        }
+      }
+
+      mockQrHistory = mockQrHistory.filter(h => h.qrAssetId !== qrRecord.id);
+      mockQrAssets.splice(idx, 1);
+
+      return qrRecord;
+    }
+  );
+}
+
 export async function assignQrToBusiness(data: {
   qrCode: string;
   businessId: string;

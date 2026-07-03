@@ -28,8 +28,6 @@ import {
   Sliders,
   Play
 } from 'lucide-react';
-import QRCode from 'qrcode';
-import { jsPDF } from 'jspdf';
 
 interface Subscription {
   id: string;
@@ -358,6 +356,8 @@ export default function BusinessesManagementPage(props: any) {
 
     try {
       setQrActionMsg('Preparing branded sheet PDF...');
+      const { jsPDF } = await import('jspdf');
+      const QRCode = (await import('qrcode')).default;
       const doc = new jsPDF({
         orientation: 'portrait',
         unit: 'mm',

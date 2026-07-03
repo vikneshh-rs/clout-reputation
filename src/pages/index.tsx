@@ -92,7 +92,6 @@ export default function LandingPage() {
       <Head>
         <title>Cloutation | QR-Powered B2B Reputation Management Platform</title>
         <meta name="description" content="Turn customer feedback into business growth using QR-powered reviews, funnel routing, sentiment analytics, and customer recovery." />
-        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
         <link href="https://api.fontshare.com/v2/css?f[]=cabinet-grotesk@800,900&display=swap" rel="stylesheet" />
         <style>{`
           h1, .font-display {

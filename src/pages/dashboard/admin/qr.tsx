@@ -16,10 +16,9 @@ import {
   Plus,
   RefreshCw,
   X,
-  Link
+  Link,
+  Trash2
 } from 'lucide-react';
-import QRCode from 'qrcode';
-import { jsPDF } from 'jspdf';
 
 interface QRRecord {
   id: string;
@@ -80,6 +79,11 @@ export default function QrAssetsPage(props: any) {
   const [isGenerateModalOpen, setIsGenerateModalOpen] = useState(false);
   const [isAssignModalOpen, setIsAssignModalOpen] = useState(false);
   const [isRevokeModalOpen, setIsRevokeModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [deletingQrCode, setDeletingQrCode] = useState<string | null>(null);
+  const [deletingQrStatus, setDeletingQrStatus] = useState<'ASSIGNED' | 'FREE' | null>(null);
+  const [deletingBusinessName, setDeletingBusinessName] = useState('');
+  const [deletingQr, setDeletingQr] = useState(false);
 
   // Form states
   const [prefixInput, setPrefixInput] = useState('A');
@@ -192,6 +196,42 @@ export default function QrAssetsPage(props: any) {
     }
   };
 
+  // Deletion Modal Trigger
+  const openDeleteModal = (qrCode: string, status: 'ASSIGNED' | 'FREE', bizName = '') => {
+    setDeletingQrCode(qrCode);
+    setDeletingQrStatus(status);
+    setDeletingBusinessName(bizName);
+    setIsDeleteModalOpen(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!deletingQrCode) return;
+    try {
+      setDeletingQr(true);
+      setError('');
+      setSuccess('');
+
+      const res = await fetch('/api/super-admin/delete-qr', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ qrCode: deletingQrCode })
+      });
+
+      const data = await res.json();
+      if (res.ok) {
+        setSuccess(`Successfully deleted QR Code ${deletingQrCode}.`);
+        setIsDeleteModalOpen(false);
+        fetchInventory();
+      } else {
+        setError(data.error || 'Failed to delete QR code.');
+      }
+    } catch (err) {
+      setError('Network error deleting QR code.');
+    } finally {
+      setDeletingQr(false);
+    }
+  };
+
   // Revocation Modal Trigger
   const openRevokeModal = (qrCode: string, bizName: string) => {
     setSelectedQrCode(qrCode);
@@ -292,6 +332,9 @@ export default function QrAssetsPage(props: any) {
       setDownloadingId(qr.id);
       setError('');
       
+      const { jsPDF } = await import('jspdf');
+      const QRCode = (await import('qrcode')).default;
+
       const doc = new jsPDF({
         orientation: 'portrait',
         unit: 'mm',
@@ -582,7 +625,7 @@ export default function QrAssetsPage(props: any) {
 
                         {/* Actions for ASSIGNED */}
                         <td className="px-6 py-4 text-right">
-                          <div className="inline-flex gap-2">
+                          <div className="inline-flex gap-2 items-center">
                             <button
                               onClick={() => downloadBrandedSheet(qr)}
                               disabled={downloadingId === qr.id}
@@ -600,6 +643,13 @@ export default function QrAssetsPage(props: any) {
                               className="px-2.5 py-1.5 bg-rose-50 border border-rose-250 text-rose-600 rounded-xl hover:bg-rose-100 font-bold text-[10px] active:scale-[0.98] transition-all cursor-pointer shadow-sm"
                             >
                               Revoke
+                            </button>
+                            <button
+                              onClick={() => openDeleteModal(qr.qrCode, 'ASSIGNED', qr.business?.name || '')}
+                              className="p-1.5 text-slate-400 hover:text-red-500 rounded-lg hover:bg-slate-50 active:scale-[0.98] transition-colors cursor-pointer"
+                              title="Delete QR"
+                            >
+                              <Trash2 size={14} />
                             </button>
                           </div>
                         </td>
@@ -623,13 +673,22 @@ export default function QrAssetsPage(props: any) {
 
                         {/* Actions for FREE */}
                         <td className="px-6 py-4 text-right">
-                          <button
-                            onClick={() => openAssignModal(qr.qrCode)}
-                            className="inline-flex items-center gap-1 px-3 py-1.5 bg-[#073afe] text-white border border-[#073afe] rounded-xl hover:bg-blue-700 font-bold text-[10px] active:scale-[0.98] transition-all cursor-pointer shadow-sm"
-                          >
-                            <Link size={10} />
-                            <span>Assign to Business</span>
-                          </button>
+                          <div className="inline-flex gap-2 items-center justify-end">
+                            <button
+                              onClick={() => openAssignModal(qr.qrCode)}
+                              className="inline-flex items-center gap-1 px-3 py-1.5 bg-[#073afe] text-white border border-[#073afe] rounded-xl hover:bg-blue-700 font-bold text-[10px] active:scale-[0.98] transition-all cursor-pointer shadow-sm"
+                            >
+                              <Link size={10} />
+                              <span>Assign to Business</span>
+                            </button>
+                            <button
+                              onClick={() => openDeleteModal(qr.qrCode, 'FREE')}
+                              className="p-1.5 text-slate-400 hover:text-red-500 rounded-lg hover:bg-slate-50 active:scale-[0.98] transition-colors cursor-pointer"
+                              title="Delete QR"
+                            >
+                              <Trash2 size={14} />
+                            </button>
+                          </div>
                         </td>
                       </>
                     )}
@@ -870,6 +929,67 @@ export default function QrAssetsPage(props: any) {
                     <Loader2 className="animate-spin h-3.5 w-3.5" />
                   ) : (
                     <span>Assign Link</span>
+                  )}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* modal - CONFIRM DELETION */}
+      {isDeleteModalOpen && (
+        <div className="fixed inset-0 z-50 overflow-y-auto font-sans animate-fadeIn">
+          <div className="flex min-h-screen items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
+            <div className="relative w-full max-w-md bg-white rounded-3xl shadow-2xl border border-slate-100 overflow-hidden p-6">
+              <div className="flex items-center space-x-3 mb-4 text-rose-600">
+                <AlertTriangle className="h-6 w-6" />
+                <h3 className="text-base font-bold">Delete QR Asset?</h3>
+              </div>
+
+              <div className="text-xs text-slate-500 space-y-2 mb-6 leading-relaxed">
+                <p>Are you sure you want to permanently delete this QR asset?</p>
+                <div className="bg-slate-50 border border-slate-100 rounded-2xl p-4 font-semibold text-slate-800">
+                  <div className="flex justify-between">
+                    <span>QR Code:</span>
+                    <span className="font-mono text-rose-600">{deletingQrCode}</span>
+                  </div>
+                  {deletingQrStatus === 'ASSIGNED' && (
+                    <div className="flex justify-between mt-1">
+                      <span>Assigned Business:</span>
+                      <span>{deletingBusinessName}</span>
+                    </div>
+                  )}
+                </div>
+                {deletingQrStatus === 'ASSIGNED' ? (
+                  <p className="text-rose-500 text-[10px] font-bold">
+                    Warning: This QR asset is currently active. Deleting it will immediately revoke the business assignment. Scan redirection for this code will stop working!
+                  </p>
+                ) : (
+                  <p className="text-slate-400 text-[10px]">
+                    Note: This action is permanent and cannot be undone. The QR code identifier will be deleted from the system.
+                  </p>
+                )}
+              </div>
+
+              <div className="flex gap-3 justify-end">
+                <button
+                  type="button"
+                  onClick={() => setIsDeleteModalOpen(false)}
+                  className="px-4 py-2 border border-slate-200 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-50 active:scale-[0.98] transition-all"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={handleDeleteConfirm}
+                  disabled={deletingQr}
+                  className="inline-flex items-center gap-1.5 px-4 py-2 bg-rose-600 text-white rounded-xl text-xs font-bold hover:bg-rose-700 disabled:opacity-50 active:scale-[0.98] transition-all shadow-sm"
+                >
+                  {deletingQr ? (
+                    <Loader2 className="animate-spin h-3.5 w-3.5" />
+                  ) : (
+                    <span>Yes, Delete</span>
                   )}
                 </button>
               </div>
