@@ -41,6 +41,11 @@ enum QRStatus {
   ARCHIVED
 }
 
+enum QRAssetStatus {
+  FREE
+  ASSIGNED
+}
+
 
 enum CallbackStatus {
   PENDING
@@ -76,8 +81,8 @@ model User {
   updatedAt          DateTime        @updatedAt
   
   // Relations
-  qrAssignments      QRInventory[]   @relation("RepAssignments")
-  assignmentLogs     AssignmentLog[]
+  qrAssets           QRAsset[]       @relation("RepAssignments")
+  qrHistory          QRHistory[]
   qrBatches          QRBatch[]
   createdBusinesses  Business[]      @relation("RepCreatedBusinesses")
   resolvedRecoveryRequests RecoveryRequest[] @relation("RecoveryResolver")
@@ -116,8 +121,12 @@ model Business {
   reviews         Review[]
   subscriptions   Subscription[]
   qrScans         QRScan[]
-  qrInventory     QRInventory[]
-  assignmentLogs  AssignmentLog[]
+  
+  assignedQrAssetId String?  @unique @map("assigned_qr_asset_id")
+  assignedQrAsset   QRAsset? @relation("ActiveQrAsset", fields: [assignedQrAssetId], references: [id], onDelete: SetNull)
+
+  qrAssets        QRAsset[] @relation("QrAssetBusiness")
+  qrHistory       QRHistory[]
   recoveryRequests RecoveryRequest[]
   funnelEvents    FunnelEvent[]
 
@@ -209,45 +218,46 @@ model QRScan {
   @@index([qrCode])
 }
 
-model QRInventory {
-  id                 String      @id @default(uuid())
-  qrCode             String      @unique
-  status             QRStatus    @default(ACTIVE)
-  assignedBusinessId String?
-  assignedBy         String?
-  assignedAt         DateTime?
-  replacementQrId    String?     @unique
-  createdAt          DateTime    @default(now())
+model QRAsset {
+  id                 String          @id @default(uuid())
+  qrCode             String          @unique @map("qr_code")
+  status             QRAssetStatus   @default(FREE)
+  assignedBusinessId String?         @map("assigned_business_id")
+  assignedDate       DateTime?       @map("assigned_date")
+  revokedDate        DateTime?       @map("revoked_date")
+  assignedBy         String?         @map("assigned_by")
+  createdAt          DateTime        @default(now()) @map("created_at")
+  updatedAt          DateTime        @updatedAt @map("updated_at")
 
   // Relations
-  business           Business?   @relation(fields: [assignedBusinessId], references: [id], onDelete: SetNull)
-  rep                User?       @relation("RepAssignments", fields: [assignedBy], references: [id], onDelete: SetNull)
-  replacementQr      QRInventory? @relation("ReplacementHistory", fields: [replacementQrId], references: [id])
-  replacedQr         QRInventory? @relation("ReplacementHistory")
-  logs               AssignmentLog[]
+  business           Business?       @relation("QrAssetBusiness", fields: [assignedBusinessId], references: [id], onDelete: SetNull)
+  rep                User?           @relation("RepAssignments", fields: [assignedBy], references: [id], onDelete: SetNull)
+  activeBusiness     Business?       @relation("ActiveQrAsset")
+  history            QRHistory[]
 
   @@index([assignedBusinessId])
   @@index([assignedBy])
   @@index([status])
+  @@map("qr_assets")
 }
 
-model AssignmentLog {
-  id            String      @id @default(uuid())
-  qrInventoryId String
-  businessId    String
-  assignedBy    String
-  action        String      // "ASSIGNED", "REPLACED", "UNASSIGNED"
-  createdAt     DateTime    @default(now())
+model QRHistory {
+  id         String    @id @default(uuid())
+  qrAssetId  String    @map("qr_asset_id")
+  businessId String?   @map("business_id")
+  assignedBy String?   @map("assigned_by")
+  assignedAt DateTime  @default(now()) @map("assigned_at")
+  revokedAt  DateTime? @map("revoked_at")
 
   // Relations
-  qrInventory   QRInventory @relation(fields: [qrInventoryId], references: [id], onDelete: Cascade)
-  business      Business    @relation(fields: [businessId], references: [id], onDelete: Cascade)
-  rep           User        @relation(fields: [assignedBy], references: [id], onDelete: Cascade)
+  qrAsset    QRAsset   @relation(fields: [qrAssetId], references: [id], onDelete: Cascade)
+  business   Business? @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  rep        User?     @relation(fields: [assignedBy], references: [id], onDelete: SetNull)
 
-  @@index([qrInventoryId])
+  @@index([qrAssetId])
   @@index([businessId])
   @@index([assignedBy])
-  @@index([createdAt])
+  @@map("qr_history")
 }
 
 model QRBatch {

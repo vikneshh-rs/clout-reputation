@@ -1,6 +1,6 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { resolveBusinessByIdentifier, recordQrScan, createReview, isSessionSubmitted } from '@/lib/data';
-import { BusinessStatus, QRStatus } from '@prisma/client';
+import { BusinessStatus, QRAssetStatus } from '@prisma/client';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   const { qrCode } = req.query; // qrCode param is the identifier (either slug or QR UUID)
@@ -22,11 +22,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(400).json({ error: 'This business does not have an active QR code generated.', status: 'NOT_GENERATED' });
     }
 
-    if (qrStatus === QRStatus.ARCHIVED) {
-      return res.status(400).json({ error: 'This QR code asset has been archived.', status: 'ARCHIVED' });
+    if (qrStatus === QRAssetStatus.FREE) {
+      return res.status(400).json({ error: 'This QR Code is currently inactive.', status: 'INACTIVE' });
     }
 
-    if (!business.isActive || business.status === BusinessStatus.INACTIVE) {
+    if (!business || !business.isActive || business.status === BusinessStatus.INACTIVE) {
       return res.status(403).json({ error: 'This review portal is temporarily inactive.', status: 'INACTIVE' });
     }
 

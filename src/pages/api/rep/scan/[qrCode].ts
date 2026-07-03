@@ -24,8 +24,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     return res.status(200).json({ 
-      status: qrRecord.status,
-      qrInventory: qrRecord
+      status: qrRecord.status === 'FREE' ? 'UNASSIGNED' : qrRecord.status,
+      qrInventory: {
+        ...qrRecord,
+        status: qrRecord.status === 'FREE' ? 'UNASSIGNED' : qrRecord.status
+      }
     });
   } catch (error: any) {
     console.error('Scan QR API error:', error);

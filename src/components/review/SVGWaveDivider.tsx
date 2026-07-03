@@ -2,7 +2,7 @@ import React from "react";
 
 export default function SVGWaveDivider() {
   return (
-    <div className="absolute -bottom-[2px] left-0 w-full h-[97px] overflow-hidden pointer-events-none select-none z-10">
+    <div className="absolute -bottom-[2px] left-0 w-full h-[48px] md:h-[55px] overflow-hidden pointer-events-none select-none z-10">
       {/* Gloss Highlight */}
       <svg
         viewBox="0 0 1440 95"

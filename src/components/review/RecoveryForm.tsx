@@ -38,46 +38,46 @@ export default function RecoveryForm({
         flex
         flex-col
         h-full
-        px-7
-        pt-8
-        pb-8
+        px-0
+        pt-3
+        pb-3
         animate-slideUp
       "
     >
       {/* Handle */}
-      <div className="mx-auto mb-7 h-1.5 w-12 rounded-full bg-slate-300" />
+      <div className="mx-auto mb-3 h-1.5 w-12 rounded-full bg-slate-300" />
 
       {/* Title */}
-      <h2 className="text-center text-[28px] font-bold tracking-tight text-slate-900">
-        We're sorry.
+      <h2 className="text-center text-[20px] md:text-[24px] font-bold tracking-tight text-slate-900">
+        We're sorry we didn't meet your expectations.
       </h2>
 
-      <p className="mt-3 text-center text-[16px] leading-7 text-slate-500">
-        We'd love to know how we can improve your experience.
+      <p className="mt-1 text-center text-[13px] md:text-[14px] leading-normal text-slate-500">
+        Your feedback helps us improve. Please tell us about your experience.
       </p>
 
       {/* Feedback */}
-      <div className="mt-8">
-        <label className="mb-3 flex items-center gap-2 text-sm font-semibold text-slate-700">
-          <MessageSquareText size={16} />
+      <div className="mt-3">
+        <label className="mb-1.5 flex items-center gap-2 text-xs font-semibold text-slate-700">
+          <MessageSquareText size={14} />
           Your Feedback
         </label>
 
         <textarea
-          rows={5}
+          rows={3}
           value={feedback}
           onChange={(e) => setFeedback(e.target.value)}
-          placeholder="Tell us about your experience..."
+          placeholder="Tell us what happened..."
           className="
             w-full
             resize-none
-            rounded-2xl
+            rounded-xl
             border
             border-slate-200
             bg-white
-            px-4
-            py-4
-            text-[16px]
+            px-3
+            py-2.5
+            text-[14px]
             outline-none
             transition-all
             duration-200
@@ -90,33 +90,34 @@ export default function RecoveryForm({
       </div>
 
       {/* Callback */}
-      <label className="mt-7 flex cursor-pointer items-start gap-3">
+      <label className="mt-3.5 flex cursor-pointer items-start gap-3">
         <input
           type="checkbox"
           checked={callback}
           onChange={(e) => setCallback(e.target.checked)}
-          className="mt-1 h-5 w-5 rounded border-slate-300 accent-[#073AFE]"
+          className="mt-0.5 h-4.5 w-4.5 rounded border-slate-300 accent-[#073AFE]"
         />
 
-        <span className="text-[15px] leading-6 text-slate-600">
-          I'd like the management to contact me regarding my experience.
+        <span className="text-[13px] md:text-[14.5px] leading-tight text-slate-600">
+          I'd like to request a callback from the management.
         </span>
       </label>
 
       {/* Expand Fields */}
       {callback && (
-        <div className="mt-7 space-y-5 animate-fadeIn">
+        <div className="mt-3.5 space-y-3 animate-fadeIn">
           <input
             value={customerName}
             onChange={(e) => setCustomerName(e.target.value)}
             placeholder="Your Name"
             className="
-              h-14
+              h-11
               w-full
               rounded-xl
               border
               border-slate-200
               px-4
+              text-sm
               outline-none
               transition-all
               focus:border-[#073AFE]
@@ -128,7 +129,7 @@ export default function RecoveryForm({
 
           <div className="relative">
             <Phone
-              size={18}
+              size={16}
               className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
             />
 
@@ -137,13 +138,14 @@ export default function RecoveryForm({
               onChange={(e) => setPhone(e.target.value)}
               placeholder="WhatsApp Number"
               className="
-                h-14
+                h-11
                 w-full
                 rounded-xl
                 border
                 border-slate-200
                 pl-11
                 pr-4
+                text-sm
                 outline-none
                 transition-all
                 focus:border-[#073AFE]
@@ -156,20 +158,20 @@ export default function RecoveryForm({
         </div>
       )}
 
-      <div className="flex-1" />
+      <div className="flex-1 min-h-[12px]" />
 
       {/* Submit */}
       <button
         disabled={loading}
         type="submit"
         className="
-          mt-8
-          h-[54px]
+          mt-4
+          h-11
           w-full
-          rounded-2xl
+          rounded-xl
           bg-[#073AFE]
           text-white
-          text-[16px]
+          text-[15px]
           font-semibold
           transition-all
           duration-200
@@ -179,7 +181,7 @@ export default function RecoveryForm({
           disabled:bg-slate-300
         "
       >
-        {loading ? "Submitting..." : "Send Feedback"}
+        {loading ? "Submitting..." : "Submit Feedback"}
       </button>
     </form>
   );

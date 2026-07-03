@@ -1,4 +1,4 @@
-import { PrismaClient, UserRole, Industry, BusinessStatus, QRStatus, CallbackStatus, SubscriptionStatus, SubscriptionPlan } from '@prisma/client';
+import { PrismaClient, UserRole, Industry, BusinessStatus, QRAssetStatus, CallbackStatus, SubscriptionStatus, SubscriptionPlan } from '@prisma/client';
 import bcrypt from 'bcryptjs';
 
 const prisma = new PrismaClient();
@@ -12,8 +12,8 @@ async function main() {
   await prisma.recoveryRequest.deleteMany({});
   await prisma.funnelEvent.deleteMany({});
   await prisma.review.deleteMany({});
-  await prisma.assignmentLog.deleteMany({});
-  await prisma.qRInventory.deleteMany({});
+  await prisma.qRHistory.deleteMany({});
+  await prisma.qRAsset.deleteMany({});
   await prisma.qRScan.deleteMany({});
   await prisma.qRBatch.deleteMany({});
   await prisma.subscription.deleteMany({});
@@ -137,31 +137,40 @@ async function main() {
   });
   console.log('✅ Created Business Subscriptions');
 
-  // 4. Create QRInventory records
-  // Create ACTIVE QRs for businesses
-  const qrCodes = ['QR-BELLA', 'QR-LUXE', 'QR-PARIS'];
+  // 4. Create QRAsset records
+  // Create ASSIGNED QRs for seeded businesses
+  const qrCodes = ['cqr-A001', 'cqr-A002', 'cqr-A003'];
   const businesses = [b1, b2, b3];
 
   for (let i = 0; i < businesses.length; i++) {
     const biz = businesses[i];
     const qrCode = qrCodes[i];
 
-    const qrInventory = await prisma.qRInventory.create({
+    const qrAsset = await prisma.qRAsset.create({
       data: {
         qrCode,
-        status: QRStatus.ACTIVE,
-        business: { connect: { id: biz.id } },
-        rep: { connect: { id: repAdmin.id } },
+        status: QRAssetStatus.ASSIGNED,
+        assignedBusinessId: biz.id,
+        assignedBy: repAdmin.id,
+        assignedDate: new Date(),
       },
     });
 
-    // Create Assignment Log
-    await prisma.assignmentLog.create({
+    // Update active QR pointer in Business record
+    await prisma.business.update({
+      where: { id: biz.id },
       data: {
-        qrInventoryId: qrInventory.id,
+        assignedQrAssetId: qrAsset.id,
+      },
+    });
+
+    // Create Assignment Log History
+    await prisma.qRHistory.create({
+      data: {
+        qrAssetId: qrAsset.id,
         businessId: biz.id,
         assignedBy: repAdmin.id,
-        action: 'ASSIGNED',
+        assignedAt: new Date(),
       },
     });
   }

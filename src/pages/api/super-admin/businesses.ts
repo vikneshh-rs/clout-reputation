@@ -39,7 +39,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         contactPerson,
         category,
         website,
-        googleMapsUrl
+        googleMapsUrl,
+        qrCode
       } = req.body;
 
       const finalName = name?.trim() || `New Business - ${Math.floor(100000 + Math.random() * 900000)}`;
@@ -72,14 +73,15 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         phone: phone || null,
         address: address || null,
         googleReviewUrl: googleReviewUrl || null,
-        plan: plan ? (plan as SubscriptionPlan) : SubscriptionPlan.TRIAL,
+        plan: plan ? String(plan) : 'TRIAL_14',
         createdByRepId: sessionUser.id,
         logoUrl: logoUrl || null,
         description: description || null,
         contactPerson: contactPerson || null,
         category: category || null,
         website: website || null,
-        googleMapsUrl: googleMapsUrl || null
+        googleMapsUrl: googleMapsUrl || null,
+        qrCode: qrCode || null
       });
       
       // Log platform activity

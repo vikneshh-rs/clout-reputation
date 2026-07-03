@@ -28,7 +28,7 @@ import { jsPDF } from 'jspdf';
 
 interface Subscription {
   id: string;
-  plan: 'TRIAL' | 'BASIC' | 'PRO';
+  plan: string;
   status: 'ACTIVE' | 'EXPIRED' | 'CANCELLED';
   endDate: string;
 }
@@ -36,7 +36,7 @@ interface Subscription {
 interface QRRecord {
   id: string;
   qrCode: string;
-  status: 'ACTIVE' | 'ARCHIVED';
+  status: 'ASSIGNED' | 'FREE';
   createdAt: string;
 }
 
@@ -62,7 +62,7 @@ interface Business {
     name: string;
   } | null;
   subscriptions?: Subscription[];
-  qrInventory?: QRRecord[];
+  qrAssets?: QRRecord[];
   totalDownloads?: number;
   lastDownloadDate?: string | null;
 }
@@ -307,9 +307,9 @@ export default function RepOnboardingPage(props: any) {
   };
 
   const handleDownloadBrandedSheet = async (biz: Business) => {
-    const activeQr = biz.qrInventory?.find(q => q.status === 'ACTIVE');
+    const activeQr = biz.qrAssets?.find(q => q.status === 'ASSIGNED');
     if (!activeQr) {
-      alert('Please generate an active QR code first before downloading.');
+      alert('Please generate an active QR asset first before downloading.');
       return;
     }
 
@@ -369,7 +369,7 @@ export default function RepOnboardingPage(props: any) {
       doc.text(nameLines, width / 2, yStart, { align: 'center' });
 
       // 3. QR Code: occupying approx 70-75% of printable card width (e.g. 76mm is ~72.38%)
-      const targetUrl = `${window.location.origin}/r/${biz.slug}`;
+      const targetUrl = `${window.location.origin}/r/${activeQr.qrCode}`;
       const qrDataUrl = await QRCode.toDataURL(targetUrl, { width: 400, margin: 1 });
       doc.addImage(qrDataUrl, 'PNG', 14.5, 38, 76, 76);
 
@@ -676,6 +676,8 @@ export default function RepOnboardingPage(props: any) {
                     <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">Business Name</label>
                     <input
                       type="text"
+                      name="username"
+                      autoComplete="username"
                       value={formData.name}
                       onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                       placeholder="e.g. Bella Italia"
@@ -687,6 +689,8 @@ export default function RepOnboardingPage(props: any) {
                     <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">Category</label>
                     <input
                       type="text"
+                      name="category"
+                      autoComplete="off"
                       value={formData.category}
                       onChange={(e) => setFormData({ ...formData, category: e.target.value })}
                       placeholder="e.g. Italian Restaurant, Salon"
@@ -700,6 +704,8 @@ export default function RepOnboardingPage(props: any) {
                     <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">Direct Access Password</label>
                     <input
                       type="password"
+                      name="password"
+                      autoComplete="new-password"
                       value={formData.password}
                       onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                       placeholder="Dashboard password"
@@ -1026,16 +1032,16 @@ export default function RepOnboardingPage(props: any) {
 
                   <div className="p-4 bg-slate-50 border border-slate-100 rounded-2xl flex justify-between items-center">
                     <div>
-                      <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider block">Active QR Code UUID</span>
+                      <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider block">Active QR ID</span>
                       <strong className="font-mono text-slate-800 mt-1 block">
-                        {viewingBusiness.qrInventory?.find(q => q.status === 'ACTIVE')?.qrCode || 'NO_QR_GENERATED'}
+                        {viewingBusiness.qrAssets?.find(q => q.status === 'ASSIGNED')?.qrCode || 'NO_QR_GENERATED'}
                       </strong>
                       <span className="inline-block mt-2 text-[9px] font-bold text-slate-400">
                         Status: 
                         <span className={`ml-1 uppercase ${
-                          viewingBusiness.qrInventory?.find(q => q.status === 'ACTIVE') ? 'text-emerald-600 font-extrabold' : 'text-rose-500 font-bold'
+                          viewingBusiness.qrAssets?.find(q => q.status === 'ASSIGNED') ? 'text-emerald-600 font-extrabold' : 'text-rose-500 font-bold'
                         }`}>
-                          {viewingBusiness.qrInventory?.find(q => q.status === 'ACTIVE') ? 'Active' : 'Not Generated'}
+                          {viewingBusiness.qrAssets?.find(q => q.status === 'ASSIGNED') ? 'Active' : 'Not Generated'}
                         </span>
                       </span>
                     </div>
@@ -1049,7 +1055,7 @@ export default function RepOnboardingPage(props: any) {
                     </button>
                   </div>
 
-                  {viewingBusiness.qrInventory?.find(q => q.status === 'ACTIVE') && (
+                  {viewingBusiness.qrAssets?.find(q => q.status === 'ASSIGNED') && (
                     <div className="p-4 bg-indigo-50/30 border border-indigo-100/50 rounded-2xl space-y-3">
                       <div className="flex justify-between items-center text-[10px] font-bold text-indigo-750">
                         <span>QR Download Analytics</span>

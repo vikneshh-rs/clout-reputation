@@ -44,15 +44,16 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         return res.status(400).json({ error: 'Business ID, plan, and action are required.' });
       }
 
-      if (!Object.values(SubscriptionPlan).includes(plan)) {
-        return res.status(400).json({ error: `Invalid plan. Must be: ${Object.values(SubscriptionPlan).join(', ')}` });
+      const validPlans = ['TRIAL_14', 'TRIAL_28', 'UNLIMITED', 'TRIAL', 'BASIC', 'PRO'];
+      if (!validPlans.includes(plan)) {
+        return res.status(400).json({ error: `Invalid plan. Must be one of: ${validPlans.join(', ')}` });
       }
 
       const qtyMonths = months ? parseInt(months, 10) : 1;
 
       const sub = await updateSubscription(
         businessId,
-        plan as SubscriptionPlan,
+        plan,
         action as any,
         qtyMonths,
         sessionUser.id

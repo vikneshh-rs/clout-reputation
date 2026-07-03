@@ -9,13 +9,13 @@ import {
   Subscription,
   ActivityLog,
   QRScan,
-  QRInventory,
-  AssignmentLog,
+  QRAsset,
+  QRHistory,
   QRBatch,
   UserRole,
   Industry,
   BusinessStatus,
-  QRStatus,
+  QRAssetStatus,
   CallbackStatus,
   SubscriptionStatus,
   SubscriptionPlan,
@@ -44,9 +44,9 @@ export function generateUniqueCode(length = 8): string {
 
 // In-Memory Mock Data Store (seeded with the same data as prisma/seed.ts)
 export let mockBusinesses: Business[] = [
-  { id: 'b1', name: 'Bella Italia', slug: 'bella-italia', businessCode: 'CR-000001', passwordHash: '', industry: Industry.RESTAURANT, logoUrl: 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=100&auto=format&fit=crop', googleReviewUrl: 'https://search.google.com/local/writereview?placeid=ChIJ313_placeholder1', phone: '+15550212', address: '123 Pizza Way, Rome', isActive: true, status: BusinessStatus.ACTIVE, deletedAt: null, enableGoogleReviewRedirect: true, enableManagerCallback: true, createdByRepId: 'u-rep1', createdAt: new Date(), updatedAt: new Date(), description: 'Authentic Italian cuisine in the heart of Rome.', contactPerson: 'Giovanni Rossi', category: 'Restaurant', website: 'https://bellaitalia.com', googleMapsUrl: 'https://maps.google.com/?cid=bella-italia' },
-  { id: 'b2', name: 'Luxe Salon', slug: 'luxe-salon', businessCode: 'CR-000002', passwordHash: '', industry: Industry.SALON, logoUrl: 'https://images.unsplash.com/photo-1560066984-138dadb4c035?w=100&auto=format&fit=crop', googleReviewUrl: 'https://search.google.com/local/writereview?placeid=ChIJ313_placeholder2', phone: '+15550213', address: '456 Beauty Blvd, New York', isActive: true, status: BusinessStatus.ACTIVE, deletedAt: null, enableGoogleReviewRedirect: true, enableManagerCallback: true, createdByRepId: 'u-rep1', createdAt: new Date(), updatedAt: new Date(), description: 'Premium hair and beauty treatments.', contactPerson: 'Sarah Jenkins', category: 'Salon', website: 'https://luxesalon.com', googleMapsUrl: 'https://maps.google.com/?cid=luxe-salon' },
-  { id: 'b3', name: 'Cafe Paris', slug: 'cafe-paris', businessCode: 'CR-000003', passwordHash: '', industry: Industry.CAFE, logoUrl: 'https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?w=100&auto=format&fit=crop', googleReviewUrl: 'https://search.google.com/local/writereview?placeid=ChIJ313_placeholder3', phone: '+15550214', address: '789 Croissant St, Paris', isActive: true, status: BusinessStatus.ACTIVE, deletedAt: null, enableGoogleReviewRedirect: true, enableManagerCallback: true, createdByRepId: 'u-rep2', createdAt: new Date(), updatedAt: new Date(), description: 'Fresh croissants and specialty coffee.', contactPerson: 'Jean-Luc Picard', category: 'Cafe', website: 'https://cafeparis.com', googleMapsUrl: 'https://maps.google.com/?cid=cafe-paris' },
+  { id: 'b1', name: 'Bella Italia', slug: 'bella-italia', businessCode: 'CR-000001', passwordHash: '', industry: Industry.RESTAURANT, logoUrl: 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=100&auto=format&fit=crop', googleReviewUrl: 'https://search.google.com/local/writereview?placeid=ChIJ313_placeholder1', phone: '+15550212', address: '123 Pizza Way, Rome', isActive: true, status: BusinessStatus.ACTIVE, deletedAt: null, enableGoogleReviewRedirect: true, enableManagerCallback: true, createdByRepId: 'u-rep1', createdAt: new Date(), updatedAt: new Date(), description: 'Authentic Italian cuisine in the heart of Rome.', contactPerson: 'Giovanni Rossi', category: 'Restaurant', website: 'https://bellaitalia.com', googleMapsUrl: 'https://maps.google.com/?cid=bella-italia', assignedQrAssetId: 'inv-b1' },
+  { id: 'b2', name: 'Luxe Salon', slug: 'luxe-salon', businessCode: 'CR-000002', passwordHash: '', industry: Industry.SALON, logoUrl: 'https://images.unsplash.com/photo-1560066984-138dadb4c035?w=100&auto=format&fit=crop', googleReviewUrl: 'https://search.google.com/local/writereview?placeid=ChIJ313_placeholder2', phone: '+15550213', address: '456 Beauty Blvd, New York', isActive: true, status: BusinessStatus.ACTIVE, deletedAt: null, enableGoogleReviewRedirect: true, enableManagerCallback: true, createdByRepId: 'u-rep1', createdAt: new Date(), updatedAt: new Date(), description: 'Premium hair and beauty treatments.', contactPerson: 'Sarah Jenkins', category: 'Salon', website: 'https://luxesalon.com', googleMapsUrl: 'https://maps.google.com/?cid=luxe-salon', assignedQrAssetId: 'inv-b2' },
+  { id: 'b3', name: 'Cafe Paris', slug: 'cafe-paris', businessCode: 'CR-000003', passwordHash: '', industry: Industry.CAFE, logoUrl: 'https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?w=100&auto=format&fit=crop', googleReviewUrl: 'https://search.google.com/local/writereview?placeid=ChIJ313_placeholder3', phone: '+15550214', address: '789 Croissant St, Paris', isActive: true, status: BusinessStatus.ACTIVE, deletedAt: null, enableGoogleReviewRedirect: true, enableManagerCallback: true, createdByRepId: 'u-rep2', createdAt: new Date(), updatedAt: new Date(), description: 'Fresh croissants and specialty coffee.', contactPerson: 'Jean-Luc Picard', category: 'Cafe', website: 'https://cafeparis.com', googleMapsUrl: 'https://maps.google.com/?cid=cafe-paris', assignedQrAssetId: 'inv-b3' },
 ];
 
 export let mockUsers: User[] = [
@@ -261,14 +261,14 @@ function seedMockScans() {
 }
 seedMockScans();
 
-let mockQrInventory: any[] = [];
-export let mockAssignmentLogs: any[] = [];
+let mockQrAssets: any[] = [];
+export let mockQrHistory: any[] = [];
 let mockQrBatches: any[] = [
   {
     id: 'batch-1',
     batchName: 'Print Batch #1',
-    startSerial: 'QR-000001',
-    endSerial: 'QR-000100',
+    startSerial: 'cqr-A001',
+    endSerial: 'cqr-A100',
     quantity: 100,
     generatedBy: 'u-admin',
     generatedAt: new Date()
@@ -276,34 +276,35 @@ let mockQrBatches: any[] = [
 ];
 
 function seedMockInventory() {
-  if (mockQrInventory.length > 0) return;
+  if (mockQrAssets.length > 0) return;
 
   const qrCodes = [
-    'b1b1b1b1-1111-1111-1111-111111111111',
-    'b2b2b2b2-2222-2222-2222-222222222222',
-    'b3b3b3b3-3333-3333-3333-333333333333'
+    'cqr-A001',
+    'cqr-A002',
+    'cqr-A003'
   ];
 
   mockBusinesses.forEach((biz, idx) => {
     const invId = `inv-${biz.id}`;
-    mockQrInventory.push({
+    mockQrAssets.push({
       id: invId,
       qrCode: qrCodes[idx],
-      status: QRStatus.ACTIVE,
+      status: QRAssetStatus.ASSIGNED,
       assignedBusinessId: biz.id,
       assignedBy: biz.createdByRepId,
-      assignedAt: biz.createdAt,
-      replacementQrId: null,
-      createdAt: biz.createdAt
+      assignedDate: biz.createdAt,
+      revokedDate: null,
+      createdAt: biz.createdAt,
+      updatedAt: biz.createdAt
     });
 
-    mockAssignmentLogs.push({
+    mockQrHistory.push({
       id: `log-${biz.id}`,
-      qrInventoryId: invId,
+      qrAssetId: invId,
       businessId: biz.id,
       assignedBy: biz.createdByRepId,
-      action: 'ASSIGNED',
-      createdAt: biz.createdAt
+      assignedAt: biz.createdAt,
+      revokedAt: null
     });
   });
 }
@@ -439,8 +440,8 @@ export async function getBusinessById(id: string) {
             orderBy: { createdAt: 'desc' },
             take: 1
           },
-          qrInventory: {
-            where: { status: 'ACTIVE' },
+          qrAssets: {
+            where: { status: 'ASSIGNED' },
             take: 1
           }
         }
@@ -450,8 +451,8 @@ export async function getBusinessById(id: string) {
       const biz = mockBusinesses.find(b => b.id === id);
       if (!biz) return null;
       const subscriptions = mockSubscriptions.filter(s => s.businessId === id);
-      const qrInventory = mockQrInventory.filter(q => q.assignedBusinessId === id && q.status === 'ACTIVE');
-      return { ...biz, subscriptions, qrInventory };
+      const qrAssets = mockQrAssets.filter(q => q.assignedBusinessId === id && q.status === 'ASSIGNED');
+      return { ...biz, subscriptions, qrAssets };
     }
   );
   if (result) {
@@ -517,8 +518,8 @@ export async function getSuperAdminStats() {
         db.review.aggregate({ _avg: { rating: true } }),
         db.subscription.count({ where: { status: SubscriptionStatus.ACTIVE } }),
         db.subscription.count({ where: { status: SubscriptionStatus.EXPIRED } }),
-        db.qRInventory.count({ where: { status: QRStatus.ACTIVE } }),
-        db.qRInventory.count({ where: { status: QRStatus.ARCHIVED } }),
+        db.qRAsset.count({ where: { status: QRAssetStatus.ASSIGNED } }),
+        db.qRAsset.count({ where: { status: QRAssetStatus.FREE } }),
         db.review.count({ where: { createdAt: { gte: startOfMonth } } }),
         db.business.count({ where: { createdAt: { gte: startOfMonth }, deletedAt: null } }),
         db.callbackRequest.count({ where: { createdAt: { gte: startOfMonth } } }),
@@ -577,8 +578,8 @@ export async function getSuperAdminStats() {
       const activeSubscriptions = mockSubscriptions.filter(s => s.status === SubscriptionStatus.ACTIVE).length;
       const expiredSubscriptions = mockSubscriptions.filter(s => s.status === SubscriptionStatus.EXPIRED).length;
 
-      const assignedQRs = mockQrInventory.filter(q => q.status === QRStatus.ACTIVE).length;
-      const unassignedQRs = mockQrInventory.filter(q => q.status === QRStatus.ARCHIVED).length;
+      const assignedQRs = mockQrAssets.filter(q => q.status === QRAssetStatus.ASSIGNED).length;
+      const unassignedQRs = mockQrAssets.filter(q => q.status === QRAssetStatus.FREE).length;
 
       const reviewsThisMonth = mockReviews.filter(r => r.createdAt >= startOfMonth).length;
       const businessesThisMonth = mockBusinesses.filter(b => b.createdAt >= startOfMonth && b.deletedAt === null).length;
@@ -629,7 +630,7 @@ export async function getAllBusinesses(includeDeleted = false) {
             orderBy: { createdAt: 'desc' },
             take: 1
           },
-          qrInventory: {
+          qrAssets: {
             orderBy: { createdAt: 'desc' }
           }
         }
@@ -656,7 +657,7 @@ export async function getAllBusinesses(includeDeleted = false) {
         .map(b => {
           const rep = mockUsers.find(u => u.id === b.createdByRepId) || null;
           const subscriptions = mockSubscriptions.filter(s => s.businessId === b.id);
-          const qrInventory = mockQrInventory.filter(q => q.assignedBusinessId === b.id);
+          const qrAssets = mockQrAssets.filter(q => q.assignedBusinessId === b.id);
           const logs = mockLogs.filter(log => log.action === 'QR_DOWNLOAD' && log.entityType === 'BUSINESS' && log.entityId === b.id)
             .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
           
@@ -664,7 +665,7 @@ export async function getAllBusinesses(includeDeleted = false) {
             ...b,
             createdByRep: rep ? { id: rep.id, name: rep.name } : null,
             subscriptions,
-            qrInventory,
+            qrAssets,
             totalDownloads: logs.length,
             lastDownloadDate: logs.length > 0 ? logs[0].createdAt.toISOString() : null
           };
@@ -686,6 +687,27 @@ export async function getAllUsers() {
   );
 }
 
+export function computeNextQrCode(latestCode: string): string {
+  const match = latestCode.match(/^cqr-([A-Z]+)(\d+)$/i);
+  if (!match) {
+    return 'cqr-A001';
+  }
+
+  const letter = match[1].toUpperCase();
+  const numStr = match[2];
+  const num = parseInt(numStr, 10);
+  const nextNum = num + 1;
+  const padLength = Math.max(3, numStr.length);
+
+  if (nextNum > 999 && letter.length === 1) {
+    const letterCode = letter.charCodeAt(0);
+    const nextLetter = String.fromCharCode(letterCode + 1);
+    return `cqr-${nextLetter}${String(1).padStart(padLength, '0')}`;
+  }
+
+  return `cqr-${letter}${String(nextNum).padStart(padLength, '0')}`;
+}
+
 export async function onboardBusiness(data: {
   name: string;
   passwordHash: string;
@@ -693,7 +715,7 @@ export async function onboardBusiness(data: {
   phone?: string | null;
   address?: string | null;
   googleReviewUrl?: string | null;
-  plan?: SubscriptionPlan;
+  plan?: string;
   createdByRepId: string;
   description?: string | null;
   contactPerson?: string | null;
@@ -701,6 +723,7 @@ export async function onboardBusiness(data: {
   website?: string | null;
   googleMapsUrl?: string | null;
   logoUrl?: string | null;
+  qrCode?: string | null;
 }) {
   return runQuery(
     async () => {
@@ -743,37 +766,104 @@ export async function onboardBusiness(data: {
           }
         });
 
-        // Auto-generate active QR code on onboarding
-        const qrCode = crypto.randomUUID();
-        const qr = await tx.qRInventory.create({
+        // 1. Locate / Create QR Asset to assign
+        let qrAsset = null;
+
+        if (data.qrCode) {
+          qrAsset = await tx.qRAsset.findUnique({
+            where: { qrCode: data.qrCode }
+          });
+          if (!qrAsset) {
+            throw new Error(`Manual QR Code "${data.qrCode}" does not exist in inventory.`);
+          }
+          if (qrAsset.status === QRAssetStatus.ASSIGNED) {
+            throw new Error(`Manual QR Code "${data.qrCode}" is already assigned.`);
+          }
+        } else {
+          // Auto assign the first available FREE QR asset
+          qrAsset = await tx.qRAsset.findFirst({
+            where: { status: QRAssetStatus.FREE },
+            orderBy: { qrCode: 'asc' }
+          });
+
+          if (!qrAsset) {
+            // Generate the next sequential cqr-XXXX code dynamically
+            const latestRecord = await tx.qRAsset.findFirst({
+              where: { qrCode: { startsWith: 'cqr-' } },
+              orderBy: { qrCode: 'desc' }
+            });
+            const nextCode = latestRecord ? computeNextQrCode(latestRecord.qrCode) : 'cqr-A001';
+            qrAsset = await tx.qRAsset.create({
+              data: {
+                qrCode: nextCode,
+                status: QRAssetStatus.FREE
+              }
+            });
+          }
+        }
+
+        // 2. Mark QR Asset as ASSIGNED
+        const updatedQr = await tx.qRAsset.update({
+          where: { id: qrAsset.id },
           data: {
-            qrCode,
-            status: QRStatus.ACTIVE,
+            status: QRAssetStatus.ASSIGNED,
             assignedBusinessId: business.id,
+            assignedDate: new Date(),
+            assignedBy: data.createdByRepId
+          }
+        });
+
+        // 3. Save assignedQrAssetId on Business
+        await tx.business.update({
+          where: { id: business.id },
+          data: {
+            assignedQrAssetId: updatedQr.id
+          }
+        });
+
+        // 4. Create History log entry
+        await tx.qRHistory.create({
+          data: {
+            qrAssetId: updatedQr.id,
+            businessId: business.id,
             assignedBy: data.createdByRepId,
             assignedAt: new Date()
           }
         });
 
-        await tx.assignmentLog.create({
-          data: {
-            qrInventoryId: qr.id,
-            businessId: business.id,
-            assignedBy: data.createdByRepId,
-            action: 'ASSIGNED'
-          }
-        });
+        let dbPlan: SubscriptionPlan = SubscriptionPlan.TRIAL;
+        let endDate = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000); // default 14 days
+
+        if (data.plan === 'TRIAL_14') {
+          dbPlan = SubscriptionPlan.TRIAL;
+          endDate = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000);
+        } else if (data.plan === 'TRIAL_28') {
+          dbPlan = SubscriptionPlan.TRIAL;
+          endDate = new Date(Date.now() + 28 * 24 * 60 * 60 * 1000);
+        } else if (data.plan === 'UNLIMITED') {
+          dbPlan = SubscriptionPlan.PRO;
+          endDate = new Date(Date.now() + 100 * 365 * 24 * 60 * 60 * 1000); // 100 years
+        } else if (data.plan === 'TRIAL') {
+          dbPlan = SubscriptionPlan.TRIAL;
+          endDate = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+        } else if (data.plan === 'BASIC') {
+          dbPlan = SubscriptionPlan.BASIC;
+          endDate = new Date(Date.now() + 180 * 24 * 60 * 60 * 1000);
+        } else if (data.plan === 'PRO') {
+          dbPlan = SubscriptionPlan.PRO;
+          endDate = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000);
+        }
 
         const subscription = await tx.subscription.create({
           data: {
             businessId: business.id,
-            plan: data.plan || SubscriptionPlan.TRIAL,
+            plan: dbPlan,
             status: SubscriptionStatus.ACTIVE,
-            endDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
+            endDate
           }
         });
 
-        return { business, subscription };
+        return { business: { ...business, qrAssets: [updatedQr] }, subscription };
       });
     },
     async () => {
@@ -793,6 +883,43 @@ export async function onboardBusiness(data: {
         }
       }
       const businessCode = `CR-${String(nextNumber).padStart(6, '0')}`;
+
+      // Create QR Asset
+      let qrAsset = null;
+      if (data.qrCode) {
+        qrAsset = mockQrAssets.find(q => q.qrCode === data.qrCode);
+        if (!qrAsset) {
+          throw new Error(`Manual QR Code "${data.qrCode}" does not exist in inventory.`);
+        }
+        if (qrAsset.status === QRAssetStatus.ASSIGNED) {
+          throw new Error(`Manual QR Code "${data.qrCode}" is already assigned.`);
+        }
+      } else {
+        qrAsset = mockQrAssets.find(q => q.status === QRAssetStatus.FREE);
+        if (!qrAsset) {
+          const latestRecord = mockQrAssets
+            .filter(q => q.qrCode.startsWith('cqr-'))
+            .sort((a, b) => b.qrCode.localeCompare(a.qrCode))[0];
+          const nextCode = latestRecord ? computeNextQrCode(latestRecord.qrCode) : 'cqr-A001';
+          qrAsset = {
+            id: `inv-${Math.random().toString(36).substring(2, 9)}`,
+            qrCode: nextCode,
+            status: QRAssetStatus.FREE,
+            assignedBusinessId: null,
+            assignedBy: null,
+            assignedDate: null,
+            revokedDate: null,
+            createdAt: new Date(),
+            updatedAt: new Date()
+          };
+          mockQrAssets.push(qrAsset);
+        }
+      }
+
+      qrAsset.status = QRAssetStatus.ASSIGNED;
+      qrAsset.assignedBusinessId = businessId;
+      qrAsset.assignedBy = data.createdByRepId;
+      qrAsset.assignedDate = new Date();
 
       const newBiz = {
         id: businessId,
@@ -817,46 +944,56 @@ export async function onboardBusiness(data: {
         enableManagerCallback: true,
         createdByRepId: data.createdByRepId,
         createdAt: new Date(),
-        updatedAt: new Date()
+        updatedAt: new Date(),
+        assignedQrAssetId: qrAsset.id
       };
 
-      // Auto-generate mock active QR inventory entry on onboarding
-      const qrCode = crypto.randomUUID();
-      const invId = `inv-${Math.random().toString(36).substring(2, 9)}`;
-      mockQrInventory.push({
-        id: invId,
-        qrCode,
-        status: QRStatus.ACTIVE,
-        assignedBusinessId: businessId,
-        assignedBy: data.createdByRepId,
-        assignedAt: new Date(),
-        replacementQrId: null,
-        createdAt: new Date()
-      });
-
-      mockAssignmentLogs.push({
+      mockQrHistory.push({
         id: `log-${Math.random().toString(36).substring(2, 9)}`,
-        qrInventoryId: invId,
+        qrAssetId: qrAsset.id,
         businessId,
         assignedBy: data.createdByRepId,
-        action: 'ASSIGNED',
-        createdAt: new Date()
+        assignedAt: new Date(),
+        revokedAt: null
       });
+
+      let dbPlan: SubscriptionPlan = SubscriptionPlan.TRIAL;
+      let endDate = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000); // default 14 days
+
+      if (data.plan === 'TRIAL_14') {
+        dbPlan = SubscriptionPlan.TRIAL;
+        endDate = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000);
+      } else if (data.plan === 'TRIAL_28') {
+        dbPlan = SubscriptionPlan.TRIAL;
+        endDate = new Date(Date.now() + 28 * 24 * 60 * 60 * 1000);
+      } else if (data.plan === 'UNLIMITED') {
+        dbPlan = SubscriptionPlan.PRO;
+        endDate = new Date(Date.now() + 100 * 365 * 24 * 60 * 60 * 1000); // 100 years
+      } else if (data.plan === 'TRIAL') {
+        dbPlan = SubscriptionPlan.TRIAL;
+        endDate = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+      } else if (data.plan === 'BASIC') {
+        dbPlan = SubscriptionPlan.BASIC;
+        endDate = new Date(Date.now() + 180 * 24 * 60 * 60 * 1000);
+      } else if (data.plan === 'PRO') {
+        dbPlan = SubscriptionPlan.PRO;
+        endDate = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000);
+      }
 
       const newSub = {
         id: `sub-${businessId}`,
         businessId,
-        plan: data.plan || SubscriptionPlan.TRIAL,
+        plan: dbPlan,
         status: SubscriptionStatus.ACTIVE,
         startDate: new Date(),
-        endDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+        endDate,
         createdAt: new Date(),
         updatedAt: new Date()
       };
 
       mockBusinesses.push(newBiz);
       mockSubscriptions.push(newSub);
-      return { business: newBiz, subscription: newSub };
+      return { business: { ...newBiz, qrAssets: [qrAsset] }, subscription: newSub };
     }
   );
 }
@@ -1690,95 +1827,198 @@ export async function updateCallbackRequestStatus(id: string, status: CallbackSt
 // QR CODES LIFECYCLE
 // ==========================================
 
-export async function generateQrInventory(quantity: number, adminId: string) {
+export async function generateQrAssetsCustom(
+  prefixLetter: string,
+  startNum: number,
+  endNum: number,
+  adminId: string
+) {
+  const letter = prefixLetter.trim().toUpperCase();
+  if (!/^[A-Z]+$/.test(letter)) {
+    throw new Error('Prefix must contain only letters (e.g. A, B, C).');
+  }
+  if (startNum < 1 || endNum < startNum) {
+    throw new Error('Invalid Start or End Number range.');
+  }
+
+  const quantity = endNum - startNum + 1;
+  const prefix = `cqr-${letter}`;
+
   return runQuery(
     async () => {
-      const batchCount = await db.qRBatch.count();
-
-      const latestRecord = await db.qRInventory.findFirst({
-        where: {
-          qrCode: { startsWith: 'QR-' }
-        },
-        orderBy: {
-          qrCode: 'desc'
-        }
-      });
-
-      let startNum = 1;
-      if (latestRecord) {
-        const latestNum = parseInt(latestRecord.qrCode.replace('QR-', ''));
-        if (!isNaN(latestNum)) {
-          startNum = latestNum + 1;
-        }
-      }
-
-      const newRecords = [];
-      const startSerial = `QR-${String(startNum).padStart(6, '0')}`;
-      const endSerial = `QR-${String(startNum + quantity - 1).padStart(6, '0')}`;
-
-      await db.qRBatch.create({
-        data: {
-          batchName: `Print Batch #${batchCount + 1}`,
-          startSerial,
-          endSerial,
-          quantity,
-          generatedBy: adminId
-        }
-      });
-
+      const codesToCheck: string[] = [];
       for (let i = 0; i < quantity; i++) {
-        const numStr = String(startNum + i).padStart(6, '0');
-        newRecords.push({
-          qrCode: `QR-${numStr}`,
-          status: QRStatus.ACTIVE
-        });
+        const code = prefix + String(startNum + i).padStart(3, '0');
+        codesToCheck.push(code);
       }
 
-      await db.qRInventory.createMany({
-        data: newRecords
+      const existing = await db.qRAsset.findMany({
+        where: { qrCode: { in: codesToCheck } },
+        select: { qrCode: true }
       });
+      if (existing.length > 0) {
+        throw new Error(`Duplicate QR codes detected: ${existing.map(e => e.qrCode).join(', ')}`);
+      }
 
-      return newRecords.length;
+      const startSerial = codesToCheck[0];
+      const endSerial = codesToCheck[codesToCheck.length - 1];
+
+      return await db.$transaction(async (tx) => {
+        const batch = await tx.qRBatch.create({
+          data: {
+            batchName: `Batch ${letter} (${startNum}-${endNum})`,
+            startSerial,
+            endSerial,
+            quantity,
+            generatedBy: adminId
+          }
+        });
+
+        await tx.qRAsset.createMany({
+          data: codesToCheck.map(code => ({
+            qrCode: code,
+            status: QRAssetStatus.FREE
+          }))
+        });
+
+        return batch;
+      });
     },
     async () => {
-      const batchCount = mockQrBatches.length;
-      let startNum = 1;
-      const filtered = mockQrInventory
-        .filter(q => q.qrCode.startsWith('QR-'))
-        .map(q => parseInt(q.qrCode.replace('QR-', '')))
-        .filter(n => !isNaN(n));
-      if (filtered.length > 0) {
-        startNum = Math.max(...filtered) + 1;
+      const codesToCheck: string[] = [];
+      for (let i = 0; i < quantity; i++) {
+        const code = prefix + String(startNum + i).padStart(3, '0');
+        codesToCheck.push(code);
       }
 
-      const startSerial = `QR-${String(startNum).padStart(6, '0')}`;
-      const endSerial = `QR-${String(startNum + quantity - 1).padStart(6, '0')}`;
+      const existing = mockQrAssets.filter(q => codesToCheck.includes(q.qrCode));
+      if (existing.length > 0) {
+        throw new Error(`Duplicate QR codes detected: ${existing.map(e => e.qrCode).join(', ')}`);
+      }
+
+      const startSerial = codesToCheck[0];
+      const endSerial = codesToCheck[codesToCheck.length - 1];
 
       const newBatch = {
-        id: `batch-${batchCount + 1}`,
-        batchName: `Print Batch #${batchCount + 1}`,
+        id: `batch-${mockQrBatches.length + 1}`,
+        batchName: `Batch ${letter} (${startNum}-${endNum})`,
         startSerial,
         endSerial,
         quantity,
         generatedBy: adminId,
         generatedAt: new Date()
       };
+
       mockQrBatches.push(newBatch);
 
-      for (let i = 0; i < quantity; i++) {
-        const numStr = String(startNum + i).padStart(6, '0');
-        mockQrInventory.push({
-          id: `inv-gen-${startNum + i}`,
-          qrCode: `QR-${numStr}`,
-          status: QRStatus.ACTIVE,
+      codesToCheck.forEach(code => {
+        mockQrAssets.push({
+          id: `inv-${Math.random().toString(36).substring(2, 9)}`,
+          qrCode: code,
+          status: QRAssetStatus.FREE,
           assignedBusinessId: null,
           assignedBy: null,
-          assignedAt: null,
-          replacementQrId: null,
-          createdAt: new Date()
+          assignedDate: null,
+          revokedDate: null,
+          createdAt: new Date(),
+          updatedAt: new Date()
         });
+      });
+
+      return newBatch;
+    }
+  );
+}
+
+export async function revokeQrAsset(qrCode: string, adminId: string) {
+  return runQuery(
+    async () => {
+      const qrRecord = await db.qRAsset.findUnique({
+        where: { qrCode }
+      });
+      if (!qrRecord) {
+        throw new Error('QR Asset does not exist.');
       }
-      return quantity;
+
+      const businessId = qrRecord.assignedBusinessId;
+
+      const updatedQr = await db.qRAsset.update({
+        where: { qrCode },
+        data: {
+          status: QRAssetStatus.FREE,
+          assignedBusinessId: null,
+          revokedDate: new Date()
+        }
+      });
+
+      if (businessId) {
+        await db.business.update({
+          where: { id: businessId },
+          data: {
+            assignedQrAssetId: null
+          }
+        });
+
+        const latestHistory = await db.qRHistory.findFirst({
+          where: { qrAssetId: qrRecord.id, businessId, revokedAt: null },
+          orderBy: { assignedAt: 'desc' }
+        });
+
+        if (latestHistory) {
+          await db.qRHistory.update({
+            where: { id: latestHistory.id },
+            data: {
+              revokedAt: new Date()
+            }
+          });
+        } else {
+          await db.qRHistory.create({
+            data: {
+              qrAssetId: qrRecord.id,
+              businessId,
+              assignedBy: adminId,
+              revokedAt: new Date(),
+              assignedAt: qrRecord.assignedDate || new Date()
+            }
+          });
+        }
+      }
+
+      return updatedQr;
+    },
+    async () => {
+      const qrRecord = mockQrAssets.find(q => q.qrCode === qrCode);
+      if (!qrRecord) {
+        throw new Error('QR Asset does not exist.');
+      }
+
+      const businessId = qrRecord.assignedBusinessId;
+      qrRecord.status = QRAssetStatus.FREE;
+      qrRecord.assignedBusinessId = null;
+      qrRecord.revokedDate = new Date();
+
+      if (businessId) {
+        const biz = mockBusinesses.find(b => b.id === businessId);
+        if (biz) {
+          biz.assignedQrAssetId = null;
+        }
+
+        const latestHistory = mockQrHistory.find(h => h.qrAssetId === qrRecord.id && h.businessId === businessId && h.revokedAt === null);
+        if (latestHistory) {
+          latestHistory.revokedAt = new Date();
+        } else {
+          mockQrHistory.push({
+            id: `history-${Math.random().toString(36).substring(2, 9)}`,
+            qrAssetId: qrRecord.id,
+            businessId,
+            assignedBy: adminId,
+            assignedAt: qrRecord.assignedDate || new Date(),
+            revokedAt: new Date()
+          });
+        }
+      }
+
+      return qrRecord;
     }
   );
 }
@@ -1791,32 +2031,70 @@ export async function assignQrToBusiness(data: {
   return runQuery(
     async () => {
       return await db.$transaction(async (tx) => {
-        const qrRecord = await tx.qRInventory.findUnique({
+        const qrRecord = await tx.qRAsset.findUnique({
           where: { qrCode: data.qrCode }
         });
         if (!qrRecord) {
-          throw new Error('QR Code does not exist in inventory.');
+          throw new Error('QR Asset does not exist in inventory.');
         }
-        if (qrRecord.assignedBusinessId) {
-          throw new Error(`QR Code is already assigned to a business.`);
+        if (qrRecord.status === QRAssetStatus.ASSIGNED) {
+          if (qrRecord.assignedBusinessId === data.businessId) {
+            return { success: true, qrInventory: qrRecord };
+          }
+          throw new Error(`QR Asset "${data.qrCode}" is already assigned to a business.`);
         }
 
-        const updatedQr = await tx.qRInventory.update({
+        // Revoke any current active QR asset of the business
+        const currentActive = await tx.qRAsset.findFirst({
+          where: { assignedBusinessId: data.businessId, status: QRAssetStatus.ASSIGNED }
+        });
+        if (currentActive) {
+          await tx.qRAsset.update({
+            where: { id: currentActive.id },
+            data: {
+              status: QRAssetStatus.FREE,
+              assignedBusinessId: null,
+              revokedDate: new Date()
+            }
+          });
+          const currentHist = await tx.qRHistory.findFirst({
+            where: { qrAssetId: currentActive.id, businessId: data.businessId, revokedAt: null },
+            orderBy: { assignedAt: 'desc' }
+          });
+          if (currentHist) {
+            await tx.qRHistory.update({
+              where: { id: currentHist.id },
+              data: { revokedAt: new Date() }
+            });
+          }
+        }
+
+        // Assign the new QR asset
+        const updatedQr = await tx.qRAsset.update({
           where: { qrCode: data.qrCode },
           data: {
-            status: QRStatus.ACTIVE,
+            status: QRAssetStatus.ASSIGNED,
             assignedBusinessId: data.businessId,
-            assignedBy: data.repId,
-            assignedAt: new Date()
+            assignedDate: new Date(),
+            assignedBy: data.repId
           }
         });
 
-        await tx.assignmentLog.create({
+        // Set pointer on Business
+        await tx.business.update({
+          where: { id: data.businessId },
           data: {
-            qrInventoryId: updatedQr.id,
+            assignedQrAssetId: updatedQr.id
+          }
+        });
+
+        // Log this assignment in QRHistory
+        const history = await tx.qRHistory.create({
+          data: {
+            qrAssetId: updatedQr.id,
             businessId: data.businessId,
             assignedBy: data.repId,
-            action: 'ASSIGNED'
+            assignedAt: new Date()
           }
         });
 
@@ -1824,27 +2102,48 @@ export async function assignQrToBusiness(data: {
       });
     },
     async () => {
-      const qrRecord = mockQrInventory.find(q => q.qrCode === data.qrCode);
+      const qrRecord = mockQrAssets.find(q => q.qrCode === data.qrCode);
       if (!qrRecord) {
-        throw new Error('QR Code does not exist in inventory.');
+        throw new Error('QR Asset does not exist in inventory.');
       }
-      if (qrRecord.assignedBusinessId) {
-        throw new Error(`QR Code is already assigned to a business.`);
+      if (qrRecord.status === QRAssetStatus.ASSIGNED) {
+        if (qrRecord.assignedBusinessId === data.businessId) {
+          return { success: true, qrInventory: qrRecord };
+        }
+        throw new Error(`QR Asset "${data.qrCode}" is already assigned.`);
       }
 
-      qrRecord.status = QRStatus.ACTIVE;
+      // Revoke current active mock QR asset
+      const currentActive = mockQrAssets.find(q => q.assignedBusinessId === data.businessId && q.status === QRAssetStatus.ASSIGNED);
+      if (currentActive) {
+        currentActive.status = QRAssetStatus.FREE;
+        currentActive.assignedBusinessId = null;
+        currentActive.revokedDate = new Date();
+
+        const currentHist = mockQrHistory.find(h => h.qrAssetId === currentActive.id && h.businessId === data.businessId && h.revokedAt === null);
+        if (currentHist) {
+          currentHist.revokedAt = new Date();
+        }
+      }
+
+      qrRecord.status = QRAssetStatus.ASSIGNED;
       qrRecord.assignedBusinessId = data.businessId;
       qrRecord.assignedBy = data.repId;
-      qrRecord.assignedAt = new Date();
+      qrRecord.assignedDate = new Date();
 
-      const logId = `log-${Math.random().toString(36).substring(2, 9)}`;
-      mockAssignmentLogs.push({
-        id: logId,
-        qrInventoryId: qrRecord.id,
+      // Update mock business active asset pointer
+      const biz = mockBusinesses.find(b => b.id === data.businessId);
+      if (biz) {
+        biz.assignedQrAssetId = qrRecord.id;
+      }
+
+      mockQrHistory.push({
+        id: `history-${Math.random().toString(36).substring(2, 9)}`,
+        qrAssetId: qrRecord.id,
         businessId: data.businessId,
         assignedBy: data.repId,
-        action: 'ASSIGNED',
-        createdAt: new Date()
+        assignedAt: new Date(),
+        revokedAt: null
       });
 
       return { success: true, qrInventory: qrRecord };
@@ -1861,11 +2160,11 @@ export async function replaceDamagedQr(data: {
   return runQuery(
     async () => {
       return await db.$transaction(async (tx) => {
-        const oldQr = await tx.qRInventory.findUnique({
+        const oldQr = await tx.qRAsset.findUnique({
           where: { qrCode: data.oldQrCode }
         });
-        if (!oldQr || oldQr.status !== QRStatus.ACTIVE) {
-          throw new Error('Old QR code is not in ACTIVE status.');
+        if (!oldQr || oldQr.status !== QRAssetStatus.ASSIGNED) {
+          throw new Error('Old QR code is not currently ASSIGNED to any business.');
         }
 
         const businessId = oldQr.assignedBusinessId;
@@ -1883,39 +2182,74 @@ export async function replaceDamagedQr(data: {
           }
         }
 
-        // Set old QR to ARCHIVED
-        const updatedOldQr = await tx.qRInventory.update({
+        const newQrAsset = await tx.qRAsset.findUnique({
+          where: { qrCode: data.newQrCode }
+        });
+        if (!newQrAsset) {
+          throw new Error(`New QR code "${data.newQrCode}" does not exist in inventory.`);
+        }
+        if (newQrAsset.status !== QRAssetStatus.FREE) {
+          throw new Error(`New QR code "${data.newQrCode}" is already assigned to a business.`);
+        }
+
+        // 1. Revoke the old QR code
+        const updatedOldQr = await tx.qRAsset.update({
           where: { qrCode: data.oldQrCode },
-          data: { status: QRStatus.ARCHIVED }
+          data: {
+            status: QRAssetStatus.FREE,
+            assignedBusinessId: null,
+            revokedDate: new Date()
+          }
         });
 
-        // Create new QR as ACTIVE
-        const newQr = await tx.qRInventory.create({
+        // Update old QR history
+        const oldHistory = await tx.qRHistory.findFirst({
+          where: { qrAssetId: oldQr.id, businessId, revokedAt: null },
+          orderBy: { assignedAt: 'desc' }
+        });
+        if (oldHistory) {
+          await tx.qRHistory.update({
+            where: { id: oldHistory.id },
+            data: { revokedAt: new Date() }
+          });
+        }
+
+        // 2. Assign the new QR code
+        const updatedNewQr = await tx.qRAsset.update({
+          where: { qrCode: data.newQrCode },
           data: {
-            qrCode: data.newQrCode || crypto.randomUUID(),
-            status: QRStatus.ACTIVE,
+            status: QRAssetStatus.ASSIGNED,
             assignedBusinessId: businessId,
+            assignedDate: new Date(),
+            assignedBy: data.repId
+          }
+        });
+
+        // 3. Update pointer on Business
+        await tx.business.update({
+          where: { id: businessId },
+          data: {
+            assignedQrAssetId: updatedNewQr.id
+          }
+        });
+
+        // 4. Create new QR assignment log history
+        await tx.qRHistory.create({
+          data: {
+            qrAssetId: updatedNewQr.id,
+            businessId,
             assignedBy: data.repId,
             assignedAt: new Date()
           }
         });
 
-        await tx.assignmentLog.create({
-          data: {
-            qrInventoryId: newQr.id,
-            businessId,
-            assignedBy: data.repId,
-            action: 'REPLACED'
-          }
-        });
-
-        return { success: true, oldQr: updatedOldQr, newQr };
+        return { success: true, oldQr: updatedOldQr, newQr: updatedNewQr };
       });
     },
     async () => {
-      const oldQr = mockQrInventory.find(q => q.qrCode === data.oldQrCode);
-      if (!oldQr || oldQr.status !== QRStatus.ACTIVE) {
-        throw new Error('Old QR code is not in ACTIVE status.');
+      const oldQr = mockQrAssets.find(q => q.qrCode === data.oldQrCode);
+      if (!oldQr || oldQr.status !== QRAssetStatus.ASSIGNED) {
+        throw new Error('Old QR code is not currently ASSIGNED.');
       }
 
       const businessId = oldQr.assignedBusinessId;
@@ -1923,7 +2257,6 @@ export async function replaceDamagedQr(data: {
         throw new Error('Old QR code is not assigned to any business.');
       }
 
-      // Security check: IDOR check for REP role
       if (data.repRole === 'REP') {
         const business = mockBusinesses.find(b => b.id === businessId);
         if (business && business.createdByRepId !== data.repId) {
@@ -1931,28 +2264,40 @@ export async function replaceDamagedQr(data: {
         }
       }
 
-      oldQr.status = QRStatus.ARCHIVED;
+      const newQr = mockQrAssets.find(q => q.qrCode === data.newQrCode);
+      if (!newQr) {
+        throw new Error(`New QR code "${data.newQrCode}" does not exist in inventory.`);
+      }
+      if (newQr.status !== QRAssetStatus.FREE) {
+        throw new Error(`New QR code "${data.newQrCode}" is already assigned.`);
+      }
 
-      const newQr = {
-        id: `inv-${Math.random().toString(36).substring(2, 9)}`,
-        qrCode: data.newQrCode || crypto.randomUUID(),
-        status: QRStatus.ACTIVE,
-        assignedBusinessId: businessId,
-        assignedBy: data.repId,
-        assignedAt: new Date(),
-        replacementQrId: null,
-        createdAt: new Date()
-      };
-      mockQrInventory.push(newQr);
+      oldQr.status = QRAssetStatus.FREE;
+      oldQr.assignedBusinessId = null;
+      oldQr.revokedDate = new Date();
 
-      const logId = `log-${Math.random().toString(36).substring(2, 9)}`;
-      mockAssignmentLogs.push({
-        id: logId,
-        qrInventoryId: newQr.id,
+      const oldHist = mockQrHistory.find(h => h.qrAssetId === oldQr.id && h.businessId === businessId && h.revokedAt === null);
+      if (oldHist) {
+        oldHist.revokedAt = new Date();
+      }
+
+      newQr.status = QRAssetStatus.ASSIGNED;
+      newQr.assignedBusinessId = businessId;
+      newQr.assignedBy = data.repId;
+      newQr.assignedDate = new Date();
+
+      const biz = mockBusinesses.find(b => b.id === businessId);
+      if (biz) {
+        biz.assignedQrAssetId = newQr.id;
+      }
+
+      mockQrHistory.push({
+        id: `history-${Math.random().toString(36).substring(2, 9)}`,
+        qrAssetId: newQr.id,
         businessId,
         assignedBy: data.repId,
-        action: 'REPLACED',
-        createdAt: new Date()
+        assignedAt: new Date(),
+        revokedAt: null
       });
 
       return { success: true, oldQr, newQr };
@@ -1961,14 +2306,14 @@ export async function replaceDamagedQr(data: {
 };
 
 export async function toggleQrInactive(qrCode: string, inactive: boolean, repId: string, repRole?: string) {
-  const targetStatus = inactive ? QRStatus.ARCHIVED : QRStatus.ACTIVE;
+  const targetStatus = inactive ? QRAssetStatus.FREE : QRAssetStatus.ASSIGNED;
   return runQuery(
     async () => {
-      const qrRecord = await db.qRInventory.findUnique({
+      const qrRecord = await db.qRAsset.findUnique({
         where: { qrCode }
       });
       if (!qrRecord) {
-        throw new Error('QR Code does not exist in inventory.');
+        throw new Error('QR Asset does not exist in inventory.');
       }
       if (repRole === 'REP') {
         const businessId = qrRecord.assignedBusinessId;
@@ -1982,16 +2327,39 @@ export async function toggleQrInactive(qrCode: string, inactive: boolean, repId:
         }
       }
 
-      const updated = await db.qRInventory.update({
+      const updated = await db.qRAsset.update({
         where: { qrCode },
-        data: { status: targetStatus }
+        data: {
+          status: targetStatus,
+          assignedBusinessId: inactive ? null : qrRecord.assignedBusinessId,
+          revokedDate: inactive ? new Date() : qrRecord.revokedDate
+        }
       });
+
+      if (inactive && qrRecord.assignedBusinessId) {
+        await db.business.update({
+          where: { id: qrRecord.assignedBusinessId },
+          data: { assignedQrAssetId: null }
+        });
+        
+        const latestHist = await db.qRHistory.findFirst({
+          where: { qrAssetId: qrRecord.id, businessId: qrRecord.assignedBusinessId, revokedAt: null },
+          orderBy: { assignedAt: 'desc' }
+        });
+        if (latestHist) {
+          await db.qRHistory.update({
+            where: { id: latestHist.id },
+            data: { revokedAt: new Date() }
+          });
+        }
+      }
+
       return updated;
     },
     async () => {
-      const qrRecord = mockQrInventory.find(q => q.qrCode === qrCode);
+      const qrRecord = mockQrAssets.find(q => q.qrCode === qrCode);
       if (!qrRecord) {
-        throw new Error('QR Code does not exist in inventory.');
+        throw new Error('QR Asset does not exist.');
       }
       if (repRole === 'REP') {
         const businessId = qrRecord.assignedBusinessId;
@@ -2003,6 +2371,19 @@ export async function toggleQrInactive(qrCode: string, inactive: boolean, repId:
         }
       }
       qrRecord.status = targetStatus;
+      if (inactive && qrRecord.assignedBusinessId) {
+        const bizId = qrRecord.assignedBusinessId;
+        qrRecord.assignedBusinessId = null;
+        qrRecord.revokedDate = new Date();
+        const biz = mockBusinesses.find(b => b.id === bizId);
+        if (biz) {
+          biz.assignedQrAssetId = null;
+        }
+        const latestHist = mockQrHistory.find(h => h.qrAssetId === qrRecord.id && h.businessId === bizId && h.revokedAt === null);
+        if (latestHist) {
+          latestHist.revokedAt = new Date();
+        }
+      }
       return qrRecord;
     }
   );
@@ -2018,29 +2399,38 @@ export async function getRepAssignmentsHistory(repId: string, search?: string | 
         const query = search.trim();
         whereClause.OR = [
           { business: { name: { contains: query, mode: 'insensitive' } } },
-          { qrInventory: { qrCode: { contains: query, mode: 'insensitive' } } }
+          { qrAsset: { qrCode: { contains: query, mode: 'insensitive' } } }
         ];
       }
 
-      return await db.assignmentLog.findMany({
+      const history = await db.qRHistory.findMany({
         where: whereClause,
-        orderBy: { createdAt: 'desc' },
+        orderBy: { assignedAt: 'desc' },
         take: 100,
         include: {
-          qrInventory: true,
+          qrAsset: true,
           business: { select: { name: true, industry: true } }
         }
       });
+
+      return history.map(h => ({
+        ...h,
+        createdAt: h.assignedAt,
+        action: h.revokedAt ? 'REVOKED' : 'ASSIGNED',
+        qrInventory: h.qrAsset
+      }));
     },
     async () => {
-      let logs = mockAssignmentLogs.filter(log => log.assignedBy === repId);
+      let logs = mockQrHistory.filter(log => log.assignedBy === repId);
 
       let resolvedLogs = logs.map(log => {
-        const qrInventory = mockQrInventory.find(q => q.id === log.qrInventoryId);
+        const qrAsset = mockQrAssets.find(q => q.id === log.qrAssetId);
         const business = mockBusinesses.find(b => b.id === log.businessId);
         return {
           ...log,
-          qrInventory,
+          createdAt: log.assignedAt,
+          action: log.revokedAt ? 'REVOKED' : 'ASSIGNED',
+          qrInventory: qrAsset,
           business: business ? { name: business.name, industry: business.industry } : null
         };
       });
@@ -2113,7 +2503,7 @@ export async function getRepStats(repId: string) {
 }
 
 
-export async function getQrInventory(filters?: { status?: QRStatus | null; search?: string | null; businessId?: string | null; batchId?: string | null }) {
+export async function getQrInventory(filters?: { status?: QRAssetStatus | null; search?: string | null; businessId?: string | null; batchId?: string | null }) {
   return runQuery(
     async () => {
       const whereClause: any = {};
@@ -2134,7 +2524,7 @@ export async function getQrInventory(filters?: { status?: QRStatus | null; searc
         ];
       }
 
-      return await db.qRInventory.findMany({
+      return await db.qRAsset.findMany({
         where: whereClause,
         orderBy: { createdAt: 'desc' },
         take: 200,
@@ -2152,7 +2542,7 @@ export async function getQrInventory(filters?: { status?: QRStatus | null; searc
       });
     },
     async () => {
-      let list = [...mockQrInventory];
+      let list = [...mockQrAssets];
 
       if (filters?.status) {
         list = list.filter(q => q.status === filters.status);
@@ -2194,36 +2584,37 @@ export async function getQrInventory(filters?: { status?: QRStatus | null; searc
 export async function getQrInventoryStats() {
   return runQuery(
     async () => {
-      const [total, active, archived] = await Promise.all([
-        db.qRInventory.count(),
-        db.qRInventory.count({ where: { status: QRStatus.ACTIVE } }),
-        db.qRInventory.count({ where: { status: QRStatus.ARCHIVED } })
+      const [total, assigned, free] = await Promise.all([
+        db.qRAsset.count(),
+        db.qRAsset.count({ where: { status: QRAssetStatus.ASSIGNED } }),
+        db.qRAsset.count({ where: { status: QRAssetStatus.FREE } })
       ]);
 
-      return { total, active, archived, assigned: active, unassigned: 0, damaged: 0, replaced: 0, inactive: archived };
+      return { total, active: assigned, archived: 0, assigned, unassigned: free, free };
     },
     async () => {
-      const total = mockQrInventory.length;
-      const active = mockQrInventory.filter(q => q.status === QRStatus.ACTIVE).length;
-      const archived = mockQrInventory.filter(q => q.status === QRStatus.ARCHIVED).length;
+      const total = mockQrAssets.length;
+      const assigned = mockQrAssets.filter(q => q.status === QRAssetStatus.ASSIGNED).length;
+      const free = mockQrAssets.filter(q => q.status === QRAssetStatus.FREE).length;
 
-      return { total, active, archived, assigned: active, unassigned: 0, damaged: 0, replaced: 0, inactive: archived };
+      return { total, active: assigned, archived: 0, assigned, unassigned: free, free };
     }
   );
 }
 
 export async function validateQrCode(qrCode: string) {
+  const normalizedCode = qrCode.toLowerCase().trim();
   return runQuery(
     async () => {
-      return await db.qRInventory.findUnique({
-        where: { qrCode },
+      return await db.qRAsset.findUnique({
+        where: { qrCode: normalizedCode },
         include: {
           business: true
         }
       });
     },
     async () => {
-      const qrRecord = mockQrInventory.find(q => q.qrCode === qrCode);
+      const qrRecord = mockQrAssets.find(q => q.qrCode.toLowerCase() === normalizedCode);
       if (!qrRecord) return null;
       const business = mockBusinesses.find(b => b.id === qrRecord.assignedBusinessId) || null;
       return {
@@ -2265,105 +2656,7 @@ export async function getQrBatches() {
   );
 }
 
-export async function generateQrBatchCustom(batchName: string, startSerial: string, quantity: number, adminId: string) {
-  // Validate batch limit
-  if (quantity < 1 || quantity > 1000) {
-    throw new Error('Batch size must be between 1 and 1000 QR codes.');
-  }
 
-  const match = startSerial.match(/^(QR-)(\d+)$/i);
-  if (!match) {
-    throw new Error('Invalid Starting QR Number format. Expected format: QR-XXXXXX where X is numeric.');
-  }
-
-  const prefix = match[1];
-  const startNumStr = match[2];
-  const startNum = parseInt(startNumStr, 10);
-  const padLength = startNumStr.length;
-
-  return runQuery(
-    async () => {
-      const codesToCheck: string[] = [];
-      for (let i = 0; i < quantity; i++) {
-        const code = prefix + String(startNum + i).padStart(padLength, '0');
-        codesToCheck.push(code);
-      }
-
-      // Check duplicates
-      const existing = await db.qRInventory.findMany({
-        where: { qrCode: { in: codesToCheck } },
-        select: { qrCode: true }
-      });
-      if (existing.length > 0) {
-        throw new Error(`Duplicate QR codes detected. The following codes already exist: ${existing.map(e => e.qrCode).join(', ')}`);
-      }
-
-      const endSerial = codesToCheck[codesToCheck.length - 1];
-
-      return await db.$transaction(async (tx) => {
-        // Create batch record
-        const batch = await tx.qRBatch.create({
-          data: {
-            batchName,
-            startSerial,
-            endSerial,
-            quantity,
-            generatedBy: adminId
-          }
-        });
-
-        // Create QR codes
-        await tx.qRInventory.createMany({
-          data: codesToCheck.map(code => ({
-            qrCode: code,
-            status: QRStatus.ACTIVE
-          }))
-        });
-
-        return batch;
-      });
-    },
-    async () => {
-      const codesToCheck: string[] = [];
-      for (let i = 0; i < quantity; i++) {
-        const code = prefix + String(startNum + i).padStart(padLength, '0');
-        codesToCheck.push(code);
-      }
-
-      const existing = mockQrInventory.filter(q => codesToCheck.includes(q.qrCode));
-      if (existing.length > 0) {
-        throw new Error(`Duplicate QR codes detected: ${existing.map(e => e.qrCode).join(', ')}`);
-      }
-
-      const endSerial = codesToCheck[codesToCheck.length - 1];
-      const newBatch = {
-        id: `batch-${mockQrBatches.length + 1}`,
-        batchName,
-        startSerial,
-        endSerial,
-        quantity,
-        generatedBy: adminId,
-        generatedAt: new Date()
-      };
-      mockQrBatches.push(newBatch);
-
-      codesToCheck.forEach(code => {
-        mockQrInventory.push({
-          id: `inv-gen-${code}`,
-          qrCode: code,
-          status: QRStatus.ACTIVE,
-          assignedBusinessId: null,
-          assignedBy: null,
-          assignedAt: null,
-          replacementQrId: null,
-          createdAt: new Date()
-        });
-      });
-
-      return newBatch;
-    }
-  );
-}
 
 export async function getSuperAdminAnalyticsFiltered(period = '30d') {
   return runQuery(
@@ -2403,9 +2696,9 @@ export async function getSuperAdminAnalyticsFiltered(period = '30d') {
           where: { createdByRepId: { not: null }, createdAt: { gte: start } },
           _count: { id: true }
         }),
-        db.assignmentLog.groupBy({
+        db.qRHistory.groupBy({
           by: ['assignedBy'],
-          where: { createdAt: { gte: start } },
+          where: { assignedAt: { gte: start } },
           _count: { id: true }
         })
       ]);
@@ -2551,7 +2844,7 @@ export async function getSuperAdminAnalyticsFiltered(period = '30d') {
       const reps = mockUsers.filter(u => u.role === UserRole.REP);
       const repRankings = reps.map(rep => {
         const onboarded = mockBusinesses.filter(b => b.createdByRepId === rep.id && b.createdAt >= start).length;
-        const assignments = mockAssignmentLogs.filter(l => l.assignedBy === rep.id && l.createdAt >= start).length;
+        const assignments = mockQrHistory.filter(l => l.assignedBy === rep.id && l.assignedAt >= start).length;
         return {
           id: rep.id,
           name: rep.name,
@@ -2742,7 +3035,7 @@ export async function getActivityLogsFiltered(filters: { date?: string; role?: s
 
 export async function updateSubscription(
   businessId: string,
-  plan: SubscriptionPlan,
+  plan: string,
   action: 'upgrade' | 'downgrade' | 'extend' | 'expire' | 'activate',
   months = 1,
   adminId: string
@@ -2754,15 +3047,41 @@ export async function updateSubscription(
         orderBy: { createdAt: 'desc' }
       });
 
+      let dbPlan: SubscriptionPlan = SubscriptionPlan.TRIAL;
       let startDate = new Date();
       let endDate = new Date(Date.now() + months * 30 * 24 * 60 * 60 * 1000);
       let targetStatus: SubscriptionStatus = SubscriptionStatus.ACTIVE;
+
+      if (plan === 'TRIAL_14') {
+        dbPlan = SubscriptionPlan.TRIAL;
+        endDate = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000);
+      } else if (plan === 'TRIAL_28') {
+        dbPlan = SubscriptionPlan.TRIAL;
+        endDate = new Date(Date.now() + 28 * 24 * 60 * 60 * 1000);
+      } else if (plan === 'UNLIMITED') {
+        dbPlan = SubscriptionPlan.PRO;
+        endDate = new Date(Date.now() + 100 * 365 * 24 * 60 * 60 * 1000);
+      } else if (plan === 'TRIAL') {
+        dbPlan = SubscriptionPlan.TRIAL;
+      } else if (plan === 'BASIC') {
+        dbPlan = SubscriptionPlan.BASIC;
+      } else if (plan === 'PRO') {
+        dbPlan = SubscriptionPlan.PRO;
+      }
 
       if (latestSub) {
         startDate = latestSub.startDate;
         if (action === 'extend') {
           const baseDate = latestSub.endDate.getTime() > Date.now() ? latestSub.endDate : new Date();
-          endDate = new Date(baseDate.getTime() + months * 30 * 24 * 60 * 60 * 1000);
+          if (plan === 'TRIAL_14') {
+            endDate = new Date(baseDate.getTime() + 14 * 24 * 60 * 60 * 1000);
+          } else if (plan === 'TRIAL_28') {
+            endDate = new Date(baseDate.getTime() + 28 * 24 * 60 * 60 * 1000);
+          } else if (plan === 'UNLIMITED') {
+            endDate = new Date(baseDate.getTime() + 100 * 365 * 24 * 60 * 60 * 1000);
+          } else {
+            endDate = new Date(baseDate.getTime() + months * 30 * 24 * 60 * 60 * 1000);
+          }
         } else if (action === 'expire') {
           endDate = new Date(Date.now() - 24 * 60 * 60 * 1000);
           targetStatus = SubscriptionStatus.EXPIRED;
@@ -2776,7 +3095,7 @@ export async function updateSubscription(
       const newSub = await db.subscription.create({
         data: {
           businessId,
-          plan,
+          plan: dbPlan,
           status: targetStatus,
           startDate,
           endDate
@@ -2810,9 +3129,27 @@ export async function updateSubscription(
     },
     async () => {
       const subs = mockSubscriptions.filter(s => s.businessId === businessId);
+      let dbPlan: SubscriptionPlan = SubscriptionPlan.TRIAL;
       let startDate = new Date();
       let endDate = new Date(Date.now() + months * 30 * 24 * 60 * 60 * 1000);
       let targetStatus: SubscriptionStatus = SubscriptionStatus.ACTIVE;
+
+      if (plan === 'TRIAL_14') {
+        dbPlan = SubscriptionPlan.TRIAL;
+        endDate = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000);
+      } else if (plan === 'TRIAL_28') {
+        dbPlan = SubscriptionPlan.TRIAL;
+        endDate = new Date(Date.now() + 28 * 24 * 60 * 60 * 1000);
+      } else if (plan === 'UNLIMITED') {
+        dbPlan = SubscriptionPlan.PRO;
+        endDate = new Date(Date.now() + 100 * 365 * 24 * 60 * 60 * 1000);
+      } else if (plan === 'TRIAL') {
+        dbPlan = SubscriptionPlan.TRIAL;
+      } else if (plan === 'BASIC') {
+        dbPlan = SubscriptionPlan.BASIC;
+      } else if (plan === 'PRO') {
+        dbPlan = SubscriptionPlan.PRO;
+      }
 
       if (subs.length > 0) {
         subs.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
@@ -2820,21 +3157,25 @@ export async function updateSubscription(
         startDate = latestSub.startDate;
         if (action === 'extend') {
           const baseDate = latestSub.endDate.getTime() > Date.now() ? latestSub.endDate : new Date();
-          endDate = new Date(baseDate.getTime() + months * 30 * 24 * 60 * 60 * 1000);
+          if (plan === 'TRIAL_14') {
+            endDate = new Date(baseDate.getTime() + 14 * 24 * 60 * 60 * 1000);
+          } else if (plan === 'TRIAL_28') {
+            endDate = new Date(baseDate.getTime() + 28 * 24 * 60 * 60 * 1000);
+          } else if (plan === 'UNLIMITED') {
+            endDate = new Date(baseDate.getTime() + 100 * 365 * 24 * 60 * 60 * 1000);
+          } else {
+            endDate = new Date(baseDate.getTime() + months * 30 * 24 * 60 * 60 * 1000);
+          }
         } else if (action === 'expire') {
           endDate = new Date(Date.now() - 24 * 60 * 60 * 1000);
           targetStatus = SubscriptionStatus.EXPIRED;
         }
       }
 
-      if (action === 'expire') {
-        targetStatus = SubscriptionStatus.EXPIRED;
-      }
-
       const newSub = {
         id: `sub-${Math.random().toString(36).substring(2, 9)}`,
         businessId,
-        plan,
+        plan: dbPlan,
         status: targetStatus,
         startDate,
         endDate,
@@ -2874,72 +3215,113 @@ export async function updateSubscription(
 // ==========================================
 
 export async function generateQrForBusiness(businessId: string, userId: string) {
-  const qrCode = crypto.randomUUID();
-
   return runQuery(
     async () => {
-      // Find current active QRs and archive them
-      await db.qRInventory.updateMany({
-        where: { assignedBusinessId: businessId, status: QRStatus.ACTIVE },
-        data: { status: QRStatus.ARCHIVED }
+      let qrAsset = await db.qRAsset.findFirst({
+        where: { status: QRAssetStatus.FREE },
+        orderBy: { qrCode: 'asc' }
       });
 
-      // Create new QR record
-      const qr = await db.qRInventory.create({
+      if (!qrAsset) {
+        const latestRecord = await db.qRAsset.findFirst({
+          where: { qrCode: { startsWith: 'cqr-' } },
+          orderBy: { qrCode: 'desc' }
+        });
+        const nextCode = latestRecord ? computeNextQrCode(latestRecord.qrCode) : 'cqr-A001';
+        qrAsset = await db.qRAsset.create({
+          data: {
+            qrCode: nextCode,
+            status: QRAssetStatus.FREE
+          }
+        });
+      }
+
+      await db.qRAsset.updateMany({
+        where: { assignedBusinessId: businessId, status: QRAssetStatus.ASSIGNED },
         data: {
-          qrCode,
-          status: QRStatus.ACTIVE,
+          status: QRAssetStatus.FREE,
+          assignedBusinessId: null,
+          revokedDate: new Date()
+        }
+      });
+
+      const updatedQr = await db.qRAsset.update({
+        where: { id: qrAsset.id },
+        data: {
+          status: QRAssetStatus.ASSIGNED,
           assignedBusinessId: businessId,
+          assignedDate: new Date(),
+          assignedBy: userId
+        }
+      });
+
+      await db.business.update({
+        where: { id: businessId },
+        data: {
+          assignedQrAssetId: updatedQr.id
+        }
+      });
+
+      await db.qRHistory.create({
+        data: {
+          qrAssetId: updatedQr.id,
+          businessId,
           assignedBy: userId,
           assignedAt: new Date()
         }
       });
 
-      // Log the assignment
-      await db.assignmentLog.create({
-        data: {
-          qrInventoryId: qr.id,
-          businessId,
-          assignedBy: userId,
-          action: 'ASSIGNED'
-        }
-      });
-
-      return qr;
+      return updatedQr;
     },
     async () => {
-      // Mock update: set existing active QRs for this business to ARCHIVED
-      mockQrInventory.forEach(q => {
-        if (q.assignedBusinessId === businessId && q.status === QRStatus.ACTIVE) {
-          q.status = QRStatus.ARCHIVED;
+      let qrAsset = mockQrAssets.find(q => q.status === QRAssetStatus.FREE);
+      if (!qrAsset) {
+        const latestRecord = mockQrAssets
+          .filter(q => q.qrCode.startsWith('cqr-'))
+          .sort((a, b) => b.qrCode.localeCompare(a.qrCode))[0];
+        const nextCode = latestRecord ? computeNextQrCode(latestRecord.qrCode) : 'cqr-A001';
+        qrAsset = {
+          id: `inv-${Math.random().toString(36).substring(2, 9)}`,
+          qrCode: nextCode,
+          status: QRAssetStatus.FREE,
+          assignedBusinessId: null,
+          assignedBy: null,
+          assignedDate: null,
+          revokedDate: null,
+          createdAt: new Date(),
+          updatedAt: new Date()
+        };
+        mockQrAssets.push(qrAsset);
+      }
+
+      mockQrAssets.forEach(q => {
+        if (q.assignedBusinessId === businessId && q.status === QRAssetStatus.ASSIGNED) {
+          q.status = QRAssetStatus.FREE;
+          q.assignedBusinessId = null;
+          q.revokedDate = new Date();
         }
       });
 
-      // Create new mock QR Inventory entry
-      const invId = `inv-${Math.random().toString(36).substring(2, 9)}`;
-      const qr = {
-        id: invId,
-        qrCode,
-        status: QRStatus.ACTIVE,
-        assignedBusinessId: businessId,
-        assignedBy: userId,
-        assignedAt: new Date(),
-        replacementQrId: null,
-        createdAt: new Date()
-      };
-      mockQrInventory.push(qr);
+      qrAsset.status = QRAssetStatus.ASSIGNED;
+      qrAsset.assignedBusinessId = businessId;
+      qrAsset.assignedBy = userId;
+      qrAsset.assignedDate = new Date();
 
-      // Create mock AssignmentLog entry
-      mockAssignmentLogs.push({
-        id: `log-${Math.random().toString(36).substring(2, 9)}`,
-        qrInventoryId: invId,
+      const biz = mockBusinesses.find(b => b.id === businessId);
+      if (biz) {
+        biz.assignedQrAssetId = qrAsset.id;
+      }
+
+      mockQrHistory.push({
+        id: `history-${Math.random().toString(36).substring(2, 9)}`,
+        qrAssetId: qrAsset.id,
         businessId,
         assignedBy: userId,
-        action: 'ASSIGNED',
-        createdAt: new Date()
+        assignedAt: new Date(),
+        revokedAt: null
       });
 
-      return qr;
+      return qrAsset;
     }
   );
 }
@@ -2994,48 +3376,49 @@ export async function getQrDownloadStats(businessId: string) {
 }
 
 export async function resolveBusinessByIdentifier(identifier: string) {
+  const normalizedIdentifier = identifier.toLowerCase().trim();
   return runQuery(
     async () => {
       // 1. Try to find by ID (UUID)
       const bizById = await db.business.findUnique({
         where: { id: identifier },
-        include: { qrInventory: { where: { status: QRStatus.ACTIVE }, take: 1 } }
+        include: { qrAssets: { where: { status: QRAssetStatus.ASSIGNED }, take: 1 } }
       });
 
       if (bizById) {
-        const activeQr = bizById.qrInventory.length > 0 ? bizById.qrInventory[0] : null;
+        const activeQr = bizById.qrAssets.length > 0 ? bizById.qrAssets[0] : null;
         return { business: bizById, qrCode: activeQr?.qrCode || 'NO_QR', qrStatus: activeQr?.status || 'Not Generated' };
       }
 
       // 2. Try to find by Business Code
       const bizByCode = await db.business.findUnique({
         where: { businessCode: identifier },
-        include: { qrInventory: { where: { status: QRStatus.ACTIVE }, take: 1 } }
+        include: { qrAssets: { where: { status: QRAssetStatus.ASSIGNED }, take: 1 } }
       });
 
       if (bizByCode) {
-        const activeQr = bizByCode.qrInventory.length > 0 ? bizByCode.qrInventory[0] : null;
+        const activeQr = bizByCode.qrAssets.length > 0 ? bizByCode.qrAssets[0] : null;
         return { business: bizByCode, qrCode: activeQr?.qrCode || 'NO_QR', qrStatus: activeQr?.status || 'Not Generated' };
       }
 
       // 3. Try to find by slug
       const bizBySlug = await db.business.findUnique({
         where: { slug: identifier },
-        include: { qrInventory: { where: { status: QRStatus.ACTIVE }, take: 1 } }
+        include: { qrAssets: { where: { status: QRAssetStatus.ASSIGNED }, take: 1 } }
       });
 
       if (bizBySlug) {
-        const activeQr = bizBySlug.qrInventory.length > 0 ? bizBySlug.qrInventory[0] : null;
+        const activeQr = bizBySlug.qrAssets.length > 0 ? bizBySlug.qrAssets[0] : null;
         return { business: bizBySlug, qrCode: activeQr?.qrCode || 'NO_QR', qrStatus: activeQr?.status || 'Not Generated' };
       }
 
-      // 4. Try to find by QR code UUID
-      const qrRecord = await db.qRInventory.findUnique({
-        where: { qrCode: identifier },
+      // 4. Try to find by QR code identifier (case-insensitive)
+      const qrRecord = await db.qRAsset.findUnique({
+        where: { qrCode: normalizedIdentifier },
         include: { business: true }
       });
 
-      if (qrRecord && qrRecord.business) {
+      if (qrRecord) {
         return { business: qrRecord.business, qrCode: qrRecord.qrCode, qrStatus: qrRecord.status };
       }
 
@@ -3046,7 +3429,7 @@ export async function resolveBusinessByIdentifier(identifier: string) {
       // 1. Try ID
       const bizById = mockBusinesses.find(b => b.id === identifier);
       if (bizById) {
-        const activeQr = mockQrInventory.find(q => q.assignedBusinessId === bizById.id && q.status === QRStatus.ACTIVE);
+        const activeQr = mockQrAssets.find(q => q.assignedBusinessId === bizById.id && q.status === QRAssetStatus.ASSIGNED);
         return {
           business: bizById,
           qrCode: activeQr?.qrCode || 'NO_QR',
@@ -3057,7 +3440,7 @@ export async function resolveBusinessByIdentifier(identifier: string) {
       // 2. Try Business Code
       const bizByCode = mockBusinesses.find(b => b.businessCode === identifier);
       if (bizByCode) {
-        const activeQr = mockQrInventory.find(q => q.assignedBusinessId === bizByCode.id && q.status === QRStatus.ACTIVE);
+        const activeQr = mockQrAssets.find(q => q.assignedBusinessId === bizByCode.id && q.status === QRAssetStatus.ASSIGNED);
         return {
           business: bizByCode,
           qrCode: activeQr?.qrCode || 'NO_QR',
@@ -3068,7 +3451,7 @@ export async function resolveBusinessByIdentifier(identifier: string) {
       // 3. Try Slug
       const bizBySlug = mockBusinesses.find(b => b.slug === identifier);
       if (bizBySlug) {
-        const activeQr = mockQrInventory.find(q => q.assignedBusinessId === bizBySlug.id && q.status === QRStatus.ACTIVE);
+        const activeQr = mockQrAssets.find(q => q.assignedBusinessId === bizBySlug.id && q.status === QRAssetStatus.ASSIGNED);
         return {
           business: bizBySlug,
           qrCode: activeQr?.qrCode || 'NO_QR',
@@ -3076,13 +3459,11 @@ export async function resolveBusinessByIdentifier(identifier: string) {
         };
       }
 
-      // 4. Try QR Code UUID
-      const qrRecord = mockQrInventory.find(q => q.qrCode === identifier);
+      // 4. Try QR Code (case-insensitive)
+      const qrRecord = mockQrAssets.find(q => q.qrCode.toLowerCase() === normalizedIdentifier);
       if (qrRecord) {
-        const biz = mockBusinesses.find(b => b.id === qrRecord.assignedBusinessId);
-        if (biz) {
-          return { business: biz, qrCode: qrRecord.qrCode, qrStatus: qrRecord.status };
-        }
+        const biz = mockBusinesses.find(b => b.id === qrRecord.assignedBusinessId) || null;
+        return { business: biz, qrCode: qrRecord.qrCode, qrStatus: qrRecord.status };
       }
 
       return null;

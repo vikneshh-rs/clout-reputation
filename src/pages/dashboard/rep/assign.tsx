@@ -14,12 +14,12 @@ import {
   RotateCcw,
   Briefcase
 } from 'lucide-react';
-import { Industry, QRStatus } from '@prisma/client';
+import { Industry, QRAssetStatus } from '@prisma/client';
 
 interface QRRecord {
   id: string;
   qrCode: string;
-  status: QRStatus;
+  status: QRAssetStatus;
   assignedBusinessId: string | null;
   business?: { name: string; slug: string; industry: string } | null;
 }

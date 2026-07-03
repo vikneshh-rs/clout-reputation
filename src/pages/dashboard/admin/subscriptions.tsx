@@ -20,7 +20,7 @@ import {
 interface Subscription {
   id: string;
   businessId: string;
-  plan: 'TRIAL' | 'BASIC' | 'PRO';
+  plan: string;
   status: 'ACTIVE' | 'EXPIRED' | 'CANCELLED';
   startDate: string;
   endDate: string;
@@ -49,7 +49,7 @@ export default function SubscriptionsManagementPage(props: any) {
   const [selectedSub, setSelectedSub] = useState<Subscription | null>(null);
 
   // Form State
-  const [plan, setPlan] = useState<'TRIAL' | 'BASIC' | 'PRO'>('TRIAL');
+  const [plan, setPlan] = useState<string>('TRIAL_14');
   const [action, setAction] = useState<'upgrade' | 'downgrade' | 'extend' | 'expire' | 'activate'>('upgrade');
   const [months, setMonths] = useState<number>(1);
   const [submitting, setSubmitting] = useState(false);
@@ -245,13 +245,11 @@ export default function SubscriptionsManagementPage(props: any) {
                     </td>
                     <td className="px-6 py-3.5">
                       <span className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold ${
-                        sub.plan === 'PRO' 
+                        sub.plan === 'PRO' || sub.plan === 'UNLIMITED'
                           ? 'bg-indigo-50 text-indigo-750 border border-indigo-150'
-                          : sub.plan === 'BASIC'
-                          ? 'bg-blue-50 text-blue-750 border border-blue-150'
                           : 'bg-zinc-100 text-zinc-700 border border-zinc-200'
                       }`}>
-                        {sub.plan}
+                        {sub.plan === 'PRO' || sub.plan === 'UNLIMITED' ? 'UNLIMITED' : 'TRIAL'}
                       </span>
                     </td>
                     <td className="px-6 py-3.5">
@@ -267,7 +265,7 @@ export default function SubscriptionsManagementPage(props: any) {
                       {new Date(sub.startDate).toLocaleDateString()}
                     </td>
                     <td className="px-6 py-3.5 text-zinc-750 font-medium">
-                      {new Date(sub.endDate).toLocaleDateString()}
+                      {new Date(sub.endDate).getFullYear() > 2100 ? "Unlimited" : new Date(sub.endDate).toLocaleDateString()}
                       {new Date(sub.endDate).getTime() < Date.now() && sub.status === 'ACTIVE' && (
                         <span className="block text-[8px] text-red-550 font-semibold mt-0.5">Overdue / Expired</span>
                       )}
@@ -320,15 +318,15 @@ export default function SubscriptionsManagementPage(props: any) {
                 {/* Plan Selection */}
                 <div>
                   <label className="block text-[10px] font-bold text-zinc-550 uppercase tracking-wider mb-1">Target Plan Tier</label>
-                  <select
-                    value={plan}
-                    onChange={(e) => setPlan(e.target.value as any)}
-                    className="w-full text-xs border border-slate-200 rounded-xl bg-white px-2.5 py-1.5 focus:border-[#073afe] focus:outline-none font-medium text-black"
-                  >
-                    <option value="TRIAL">TRIAL Tier (30 days default)</option>
-                    <option value="BASIC">BASIC Tier (180 days default)</option>
-                    <option value="PRO">PRO Tier (365 days default)</option>
-                  </select>
+                    <select
+                      value={plan}
+                      onChange={(e) => setPlan(e.target.value)}
+                      className="w-full text-xs p-3 border border-slate-200 rounded-2xl bg-white focus:ring-2 focus:ring-[#073afe]/10 focus:outline-none"
+                    >
+                      <option value="TRIAL_14">Trial (14 days)</option>
+                      <option value="TRIAL_28">Trial (28 days)</option>
+                      <option value="UNLIMITED">Unlimited Plan</option>
+                    </select>
                 </div>
 
                 {/* Action Selection */}

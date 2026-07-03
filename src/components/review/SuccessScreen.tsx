@@ -13,24 +13,24 @@ export default function SuccessScreen({
   onContinue,
 }: SuccessScreenProps) {
   return (
-    <div className="flex h-full flex-col items-center text-center px-8 pt-12 pb-6 animate-fadeIn">
+    <div className="flex h-full flex-col items-center text-center px-0 pt-6 pb-4 animate-fadeIn">
 
       {/* Success Icon */}
-      <div className="flex h-[76px] w-[76px] items-center justify-center rounded-full bg-green-50">
+      <div className="flex h-[60px] w-[60px] items-center justify-center rounded-full bg-green-50">
         <CheckCircle2
-          size={42}
+          size={32}
           className="text-green-600"
           strokeWidth={2.2}
         />
       </div>
 
       {/* Title */}
-      <h2 className="mt-8 text-[32px] font-extrabold tracking-tight text-slate-900">
+      <h2 className="mt-4 text-[24px] font-extrabold tracking-tight text-slate-900">
         Thank You!
       </h2>
 
       {/* Description */}
-      <p className="mt-4 max-w-[300px] text-[17px] leading-7 text-slate-500">
+      <p className="mt-2 max-w-[300px] text-[14px] leading-relaxed text-slate-500">
         {positive
           ? "We appreciate your support. You'll be redirected to Google Reviews shortly."
           : "Your feedback has been shared with the management. Thank you for helping us improve."}
@@ -40,13 +40,13 @@ export default function SuccessScreen({
       {positive && (
         <>
           {/* Countdown */}
-          <div className="mt-8 w-full max-w-[220px]">
-            <div className="mb-2 flex justify-between text-sm text-slate-500">
+          <div className="mt-4 w-full max-w-[220px]">
+            <div className="mb-2 flex justify-between text-xs text-slate-500">
               <span>Redirecting...</span>
               <span>{countdown}s</span>
             </div>
 
-            <div className="h-2 overflow-hidden rounded-full bg-slate-200">
+            <div className="h-1.5 overflow-hidden rounded-full bg-slate-200">
               <div
                 className="h-full rounded-full bg-[#073AFE] transition-all duration-1000"
                 style={{
@@ -60,17 +60,18 @@ export default function SuccessScreen({
           <button
             onClick={onContinue}
             className="
-              mt-10
+              mt-5
               flex
-              h-[54px]
+              h-11
               w-full
-              max-w-[300px]
+              max-w-[260px]
               items-center
               justify-center
               gap-2
-              rounded-2xl
+              rounded-xl
               bg-[#073AFE]
               text-white
+              text-sm
               font-semibold
               transition-all
               duration-200
@@ -79,15 +80,15 @@ export default function SuccessScreen({
             "
           >
             Continue to Google Reviews
-            <ArrowUpRight size={18} />
+            <ArrowUpRight size={16} />
           </button>
         </>
       )}
 
       {/* Negative Flow */}
       {!positive && (
-        <div className="mt-10 rounded-2xl bg-slate-50 px-5 py-4">
-          <p className="text-sm leading-6 text-slate-500">
+        <div className="mt-6 rounded-xl bg-slate-50 px-4 py-3">
+          <p className="text-xs leading-relaxed text-slate-500">
             Our management team will review your feedback and work to improve
             your future experience.
           </p>

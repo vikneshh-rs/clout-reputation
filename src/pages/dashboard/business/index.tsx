@@ -22,7 +22,8 @@ import {
   ChevronRight,
   User,
   Clock,
-  Smartphone
+  Smartphone,
+  ShoppingBag
 } from 'lucide-react';
 import Card from '@/components/ui/Card';
 import Badge from '@/components/ui/Badge';
@@ -477,17 +478,17 @@ export default function BusinessDashboard(props: any) {
             </h4>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
               
-              <Link href={getLink('/dashboard/business/settings')} className="group block">
+              <a href="https://cloutation.com/shop" target="_blank" rel="noopener noreferrer" className="group block">
                 <div className="bg-white border border-slate-100 rounded-[20px] shadow-[0_4px_20px_rgba(0,0,0,0.01)] p-5 hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-sm transition-all duration-200 cursor-pointer h-full flex items-start gap-4">
-                  <div className="p-2.5 bg-slate-50 text-slate-700 rounded-xl group-hover:bg-[#EFF3FF] group-hover:text-[#073afe] transition-all">
-                    <QrCode size={18} />
+                  <div className="p-2.5 bg-slate-50 text-slate-750 rounded-xl group-hover:bg-[#EFF3FF] group-hover:text-[#073afe] transition-all">
+                    <ShoppingBag size={18} />
                   </div>
                   <div>
-                    <h5 className="text-xs font-bold text-slate-900 group-hover:text-[#073afe] transition-colors">Download QR Flyers</h5>
-                    <p className="text-[10px] text-slate-450 mt-1 leading-relaxed">Save your high-res table flyer PDF for printing.</p>
+                    <h5 className="text-xs font-bold text-slate-900 group-hover:text-[#073afe] transition-colors">Shop More Clout Cards</h5>
+                    <p className="text-[10px] text-slate-450 mt-1 leading-relaxed">Purchase additional NFC review cards, decals, and table stands.</p>
                   </div>
                 </div>
-              </Link>
+              </a>
 
               <Link href={getLink('/dashboard/business/reviews')} className="group block">
                 <div className="bg-white border border-slate-100 rounded-[20px] shadow-[0_4px_20px_rgba(0,0,0,0.01)] p-5 hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-sm transition-all duration-200 cursor-pointer h-full flex items-start gap-4">

@@ -1,7 +1,7 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { getSessionUser } from '@/lib/auth';
-import { getQrInventory, getQrInventoryStats, generateQrInventory, getQrBatches, logActivity } from '@/lib/data';
-import { QRStatus } from '@prisma/client';
+import { getQrInventory, getQrInventoryStats, generateQrAssetsCustom, getQrBatches, logActivity } from '@/lib/data';
+import { QRAssetStatus } from '@prisma/client';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {
@@ -14,7 +14,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       const { status, search, batchId } = req.query;
       const [inventory, stats, batches] = await Promise.all([
         getQrInventory({
-          status: status && status !== 'ALL' ? (status as QRStatus) : null,
+          status: status && status !== 'ALL' ? (status as QRAssetStatus) : null,
           search: search ? String(search) : null,
           batchId: batchId ? String(batchId) : null
         }),
@@ -33,13 +33,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
       const mappedInventory = inventory.map(item => {
         const batch = batches.find(b => {
-          const matchItem = item.qrCode.match(/^QR-(\d+)$/);
-          const matchStart = b.startSerial.match(/^QR-(\d+)$/);
-          const matchEnd = b.endSerial.match(/^QR-(\d+)$/);
-          if (matchItem && matchStart && matchEnd) {
-            const itemNum = parseInt(matchItem[1], 10);
-            const startNum = parseInt(matchStart[1], 10);
-            const endNum = parseInt(matchEnd[1], 10);
+          const matchItem = item.qrCode.match(/^cqr-([A-Z]+)(\d+)$/i);
+          const matchStart = b.startSerial.match(/^cqr-([A-Z]+)(\d+)$/i);
+          const matchEnd = b.endSerial.match(/^cqr-([A-Z]+)(\d+)$/i);
+          if (matchItem && matchStart && matchEnd && matchItem[1].toUpperCase() === matchStart[1].toUpperCase()) {
+            const itemNum = parseInt(matchItem[2], 10);
+            const startNum = parseInt(matchStart[2], 10);
+            const endNum = parseInt(matchEnd[2], 10);
             return itemNum >= startNum && itemNum <= endNum;
           }
           return item.qrCode >= b.startSerial && item.qrCode <= b.endSerial;
@@ -60,7 +60,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         return res.status(400).json({ error: 'Quantity must be a positive integer.' });
       }
 
-      const count = await generateQrInventory(qty, sessionUser.id);
+      // Legacy fallback: generate with Prefix A starting from 1 to qty
+      const result = await generateQrAssetsCustom('A', 1, qty, sessionUser.id);
 
       // Log activity
       await logActivity(
@@ -72,13 +73,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       );
 
       return res.status(201).json({
-        message: `Successfully generated ${count} QR codes in inventory.`
+        message: `Successfully generated QR codes in inventory.`,
+        batch: result
       });
     }
 
     return res.status(405).json({ error: 'Method not allowed' });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Super Admin QR Inventory API error:', error);
-    return res.status(500).json({ error: 'Internal server error managing QR inventory.' });
+    return res.status(500).json({ error: error.message || 'Internal server error managing QR inventory.' });
   }
 }

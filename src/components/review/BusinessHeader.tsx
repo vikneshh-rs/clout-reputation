@@ -14,18 +14,19 @@ export default function BusinessHeader({
       {/* Business Name */}
       <h1
         className="
-          mt-[16px]
-          md:mt-[24px]
+          mt-[8px]
+          md:mt-[10px]
           text-white
           font-extrabold
-          tracking-[-0.03em]
-          leading-[1.05]
+          tracking-[-0.02em]
+          leading-[1.1]
           drop-shadow-sm
           animate-headerSlide
+          text-[24px]
+          md:text-[28px]
         "
         style={{
           fontFamily: "Inter, system-ui, sans-serif",
-          fontSize: "56px",
           maxWidth: "340px",
           color: "#FFFFFF",
         }}
@@ -36,17 +37,19 @@ export default function BusinessHeader({
       {/* Subtitle */}
       <p
         className="
-          mt-[8px]
-          md:mt-[16px]
+          mt-[4px]
+          md:mt-[6px]
           text-white
           font-normal
           tracking-normal
           leading-[1.4]
           animate-headerSlide
+          text-[13px]
+          md:text-[15px]
         "
         style={{
           fontFamily: "Inter, system-ui, sans-serif",
-          fontSize: "24px",
+          color: "#FFFFFF",
         }}
       >
         {subtitle}

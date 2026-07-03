@@ -1,7 +1,7 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { getSessionUser, hashPassword } from '@/lib/auth';
 import { db } from '@/lib/db';
-import { logActivity, runQuery, mockUsers, mockBusinesses, mockAssignmentLogs, mockLogs } from '@/lib/data';
+import { logActivity, runQuery, mockUsers, mockBusinesses, mockQrHistory, mockLogs } from '@/lib/data';
 import { UserRole } from '@prisma/client';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
@@ -27,7 +27,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
               where: { createdByRepId: { in: repIds } },
               _count: { id: true }
             }),
-            db.assignmentLog.groupBy({
+            db.qRHistory.groupBy({
               by: ['assignedBy'],
               where: { assignedBy: { in: repIds } },
               _count: { id: true }
@@ -63,7 +63,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           const reps = mockUsers.filter((u) => u.role === 'REP');
           return reps.map((rep) => {
             const onboarded = mockBusinesses.filter((b) => b.createdByRepId === rep.id).length;
-            const assignments = mockAssignmentLogs.filter((l) => l.assignedBy === rep.id).length;
+            const assignments = mockQrHistory.filter((l) => l.assignedBy === rep.id).length;
             const logs = mockLogs.filter((l) => l.userId === rep.id);
             logs.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
             const lastActivity = logs.length > 0 ? logs[0].createdAt : null;

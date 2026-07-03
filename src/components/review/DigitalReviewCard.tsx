@@ -18,15 +18,14 @@ export default function DigitalReviewCard({
   children,
 }: DigitalReviewCardProps) {
   return (
-    <div className="min-h-screen bg-slate-50 flex items-center justify-center px-4 py-10">
+    <div className="fixed inset-0 h-[100dvh] w-screen overflow-hidden bg-[#F8FAFC] flex items-center justify-center p-4">
       <div
-        className="
+        className={`
           relative
           w-[calc(100vw-32px)]
-          md:w-[420px]
-          max-w-[420px]
-          min-h-[580px]
-          md:min-h-[720px]
+          md:w-[400px]
+          max-w-[400px]
+          ${isRating ? 'aspect-square h-[calc(100vw-32px)] md:h-[400px]' : 'min-h-[450px] md:min-h-[470px]'}
           bg-white
           rounded-[32px]
           overflow-hidden
@@ -34,7 +33,7 @@ export default function DigitalReviewCard({
           flex
           flex-col
           animate-cardFadeIn
-        "
+        `}
       >
         {/* ===========================
             BLUE HEADER
@@ -42,7 +41,8 @@ export default function DigitalReviewCard({
         <div
           className="
             relative
-            h-[315px]
+            h-[145px]
+            md:h-[165px]
             bg-[#073AFE]
             rounded-t-[32px]
             overflow-hidden
@@ -60,8 +60,8 @@ export default function DigitalReviewCard({
               flex-col
               items-center
               w-full
-              pt-[28px]
-              md:pt-[44px]
+              pt-[16px]
+              md:pt-[24px]
             "
           >
             <GoogleBadge />
