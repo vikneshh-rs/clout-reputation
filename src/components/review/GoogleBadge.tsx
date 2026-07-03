@@ -2,8 +2,8 @@ import React from 'react';
 
 export default function GoogleBadge() {
   return (
-    <div className="w-[56px] h-[56px] md:w-[64px] md:h-[64px] rounded-full bg-white flex items-center justify-center animate-logoScale shadow-[0_6px_18px_rgba(0,0,0,0.08)] select-none pointer-events-none relative z-20">
-      <svg className="w-[30px] h-[30px] md:w-[34px] md:h-[34px]" viewBox="0 0 24 24">
+    <div className="w-[48px] h-[48px] md:w-[56px] md:h-[56px] rounded-full bg-white flex items-center justify-center animate-logoScale shadow-[0_6px_18px_rgba(0,0,0,0.08)] select-none pointer-events-none relative z-20">
+      <svg className="w-[26px] h-[26px] md:w-[30px] md:h-[30px]" viewBox="0 0 24 24">
         <path
           fill="#4285F4"
           d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"

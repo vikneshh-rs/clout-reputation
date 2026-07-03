@@ -14,8 +14,8 @@ export default function BusinessHeader({
       {/* Business Name */}
       <h1
         className="
-          mt-[8px]
-          md:mt-[10px]
+          mt-[6px]
+          md:mt-[8px]
           text-white
           font-extrabold
           tracking-[-0.02em]
@@ -26,7 +26,7 @@ export default function BusinessHeader({
           md:text-[28px]
         "
         style={{
-          fontFamily: "Inter, system-ui, sans-serif",
+          fontFamily: "'Google Sans Flex', 'Inter', sans-serif",
           maxWidth: "340px",
           color: "#FFFFFF",
         }}
@@ -37,8 +37,8 @@ export default function BusinessHeader({
       {/* Subtitle */}
       <p
         className="
-          mt-[4px]
-          md:mt-[6px]
+          mt-[2px]
+          md:mt-[4px]
           text-white
           font-normal
           tracking-normal
@@ -48,7 +48,7 @@ export default function BusinessHeader({
           md:text-[15px]
         "
         style={{
-          fontFamily: "Inter, system-ui, sans-serif",
+          fontFamily: "'Google Sans Flex', 'Inter', sans-serif",
           color: "#FFFFFF",
         }}
       >

@@ -2656,8 +2656,8 @@ export async function validateQrCode(qrCode: string) {
   const normalizedCode = qrCode.toLowerCase().trim();
   return runQuery(
     async () => {
-      return await db.qRAsset.findUnique({
-        where: { qrCode: normalizedCode },
+      return await db.qRAsset.findFirst({
+        where: { qrCode: { equals: qrCode.trim(), mode: 'insensitive' } },
         include: {
           business: true
         }
@@ -3463,8 +3463,8 @@ export async function resolveBusinessByIdentifier(identifier: string) {
       }
 
       // 4. Try to find by QR code identifier (case-insensitive)
-      const qrRecord = await db.qRAsset.findUnique({
-        where: { qrCode: normalizedIdentifier },
+      const qrRecord = await db.qRAsset.findFirst({
+        where: { qrCode: { equals: identifier.trim(), mode: 'insensitive' } },
         include: { business: true }
       });
 

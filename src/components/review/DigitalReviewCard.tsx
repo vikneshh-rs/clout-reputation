@@ -41,8 +41,8 @@ export default function DigitalReviewCard({
         <div
           className="
             relative
-            h-[145px]
-            md:h-[165px]
+            h-[155px]
+            md:h-[180px]
             bg-[#073AFE]
             rounded-t-[32px]
             overflow-hidden
@@ -60,8 +60,8 @@ export default function DigitalReviewCard({
               flex-col
               items-center
               w-full
-              pt-[16px]
-              md:pt-[24px]
+              pt-[12px]
+              md:pt-[18px]
             "
           >
             <GoogleBadge />
