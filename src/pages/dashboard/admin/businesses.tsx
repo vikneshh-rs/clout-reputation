@@ -26,7 +26,8 @@ import {
   Check,
   ChevronRight,
   Sliders,
-  Play
+  Play,
+  Trash2
 } from 'lucide-react';
 
 interface Subscription {
@@ -115,6 +116,32 @@ export default function BusinessesManagementPage(props: any) {
   // QR Actions State
   const [qrGenerating, setQrGenerating] = useState(false);
   const [qrActionMsg, setQrActionMsg] = useState('');
+
+  // Deletion State
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [businessToDelete, setBusinessToDelete] = useState<Business | null>(null);
+  const [deleting, setDeleting] = useState(false);
+
+  // Free QR Assignment State (for onboarding form)
+  const [freeQrs, setFreeQrs] = useState<string[]>([]);
+  const [freeQrsLoading, setFreeQrsLoading] = useState(false);
+  const [selectedQrCode, setSelectedQrCode] = useState('');
+
+  const fetchFreeQrs = async () => {
+    try {
+      setFreeQrsLoading(true);
+      const res = await fetch('/api/rep/free-qrs');
+      if (res.ok) {
+        const data = await res.json();
+        setFreeQrs(data.qrCodes || []);
+      }
+    } catch (_) {
+      // silently fail — user can still auto-assign
+    } finally {
+      setFreeQrsLoading(false);
+    }
+  };
+
 
   const fetchBusinesses = async () => {
     try {
@@ -227,6 +254,8 @@ export default function BusinessesManagementPage(props: any) {
     setLogoPreview('');
     setFormError('');
     setGoogleUrlWarning('');
+    setSelectedQrCode('');
+    fetchFreeQrs();
     setIsModalOpen(true);
   };
 
@@ -246,7 +275,7 @@ export default function BusinessesManagementPage(props: any) {
       const res = await fetch('/api/super-admin/businesses', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData)
+        body: JSON.stringify({ ...formData, qrCode: selectedQrCode || null })
       });
 
       const data = await res.json();
@@ -262,6 +291,37 @@ export default function BusinessesManagementPage(props: any) {
       setFormError('Network error onboarding business.');
     } finally {
       setSubmitting(false);
+    }
+  };
+
+  const openDeleteModal = (biz: Business) => {
+    setBusinessToDelete(biz);
+    setIsDeleteModalOpen(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!businessToDelete) return;
+    try {
+      setDeleting(true);
+      setError('');
+      setSuccess('');
+      
+      const res = await fetch(`/api/super-admin/businesses?id=${businessToDelete.id}`, {
+        method: 'DELETE'
+      });
+      
+      if (res.ok) {
+        setSuccess(`Business "${businessToDelete.name}" deleted successfully.`);
+        setIsDeleteModalOpen(false);
+        fetchBusinesses(); // Refresh the list
+      } else {
+        const data = await res.json();
+        setError(data.error || 'Failed to delete business.');
+      }
+    } catch (err) {
+      setError('Network error deleting business.');
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -664,6 +724,13 @@ export default function BusinessesManagementPage(props: any) {
                         >
                           {biz.status === 'ACTIVE' ? 'Suspend' : 'Activate'}
                         </button>
+
+                        <button
+                          onClick={() => openDeleteModal(biz)}
+                          className="inline-flex items-center px-2.5 py-1.5 border border-rose-200 bg-rose-55 hover:bg-rose-100/80 text-rose-700 font-bold text-[10px] shadow-sm rounded-xl transition-all"
+                        >
+                          Delete
+                        </button>
                       </td>
                     </tr>
                   );
@@ -899,6 +966,31 @@ export default function BusinessesManagementPage(props: any) {
                     <option value="TRIAL_28">Trial (28 days)</option>
                     <option value="UNLIMITED">Unlimited Plan</option>
                   </select>
+                </div>
+
+                {/* QR Code Assignment */}
+                <div>
+                  <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">
+                    Assign QR Code
+                  </label>
+                  <select
+                    value={selectedQrCode}
+                    onChange={(e) => setSelectedQrCode(e.target.value)}
+                    disabled={freeQrsLoading}
+                    className="w-full text-xs p-3 border border-slate-200 rounded-2xl focus:border-[#073afe] focus:outline-none focus:ring-4 focus:ring-blue-500/5 bg-white disabled:opacity-60"
+                  >
+                    <option value="">⚡ Auto-assign next available QR</option>
+                    {freeQrsLoading && <option disabled>Loading QR codes...</option>}
+                    {freeQrs.map(code => (
+                      <option key={code} value={code}>{code}</option>
+                    ))}
+                    {!freeQrsLoading && freeQrs.length === 0 && (
+                      <option disabled>No free QR codes available</option>
+                    )}
+                  </select>
+                  <p className="text-[10px] text-slate-400 mt-1.5">
+                    Leave as Auto-assign to automatically pick the next free QR code.
+                  </p>
                 </div>
               </div>
 
@@ -1172,6 +1264,42 @@ export default function BusinessesManagementPage(props: any) {
               >
                 Close Details
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {isDeleteModalOpen && businessToDelete && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm">
+          <div className="bg-white border border-slate-100 rounded-3xl shadow-2xl max-w-md w-full overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+            <div className="p-6">
+              <div className="flex items-center gap-3 text-rose-600 mb-4">
+                <AlertTriangle size={24} />
+                <h3 className="font-bold text-base text-slate-900">Delete Client Business</h3>
+              </div>
+              
+              <p className="text-xs text-slate-600 leading-relaxed mb-6">
+                Are you sure you want to delete <strong className="text-slate-900">{businessToDelete.name}</strong>?
+                This action is permanent and will soft-delete the business and revoke all its active QR codes.
+              </p>
+
+              <div className="flex justify-end gap-2 text-xs">
+                <button
+                  onClick={() => setIsDeleteModalOpen(false)}
+                  disabled={deleting}
+                  className="px-4 py-2 border border-slate-200 rounded-xl bg-white hover:bg-slate-50 text-slate-700 font-semibold"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleDeleteConfirm}
+                  disabled={deleting}
+                  className="px-4 py-2 bg-rose-600 hover:bg-rose-700 disabled:opacity-50 text-white font-bold rounded-xl shadow-sm cursor-pointer border-none"
+                >
+                  {deleting ? 'Deleting...' : 'Delete'}
+                </button>
+              </div>
             </div>
           </div>
         </div>

@@ -36,7 +36,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         contactPerson,
         category,
         website,
-        googleMapsUrl
+        googleMapsUrl,
+        qrCode
       } = req.body;
 
       const finalName = name?.trim() || `New Business - ${Math.floor(100000 + Math.random() * 900000)}`;
@@ -76,7 +77,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         contactPerson: contactPerson || null,
         category: category || null,
         website: website || null,
-        googleMapsUrl: googleMapsUrl || null
+        googleMapsUrl: googleMapsUrl || null,
+        qrCode: qrCode || null
       });
       
       // Log representative activity

@@ -109,6 +109,26 @@ export default function RepOnboardingPage(props: any) {
   const [qrGenerating, setQrGenerating] = useState(false);
   const [qrActionMsg, setQrActionMsg] = useState('');
 
+  // Free QR Assignment State (for onboarding form)
+  const [freeQrs, setFreeQrs] = useState<string[]>([]);
+  const [freeQrsLoading, setFreeQrsLoading] = useState(false);
+  const [selectedQrCode, setSelectedQrCode] = useState('');
+
+  const fetchFreeQrs = async () => {
+    try {
+      setFreeQrsLoading(true);
+      const res = await fetch('/api/rep/free-qrs');
+      if (res.ok) {
+        const data = await res.json();
+        setFreeQrs(data.qrCodes || []);
+      }
+    } catch (_) {
+      // silently fail
+    } finally {
+      setFreeQrsLoading(false);
+    }
+  };
+
   const fetchBusinesses = async () => {
     try {
       setLoading(true);
@@ -221,6 +241,8 @@ export default function RepOnboardingPage(props: any) {
     setLogoPreview('');
     setFormError('');
     setGoogleUrlWarning('');
+    setSelectedQrCode('');
+    fetchFreeQrs();
     setIsModalOpen(true);
   };
 
@@ -240,7 +262,7 @@ export default function RepOnboardingPage(props: any) {
       const res = await fetch('/api/rep/businesses', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData)
+        body: JSON.stringify({ ...formData, qrCode: selectedQrCode || null })
       });
 
       const data = await res.json();
@@ -819,6 +841,31 @@ export default function RepOnboardingPage(props: any) {
                       <span>{googleUrlWarning}</span>
                     </div>
                   )}
+                </div>
+
+                {/* QR Code Assignment */}
+                <div>
+                  <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">
+                    Assign QR Code
+                  </label>
+                  <select
+                    value={selectedQrCode}
+                    onChange={(e) => setSelectedQrCode(e.target.value)}
+                    disabled={freeQrsLoading}
+                    className="w-full text-xs p-3 border border-slate-200 rounded-2xl focus:border-[#073afe] focus:outline-none focus:ring-4 focus:ring-blue-500/5 bg-white disabled:opacity-60"
+                  >
+                    <option value="">⚡ Auto-assign next available QR</option>
+                    {freeQrsLoading && <option disabled>Loading QR codes...</option>}
+                    {freeQrs.map(code => (
+                      <option key={code} value={code}>{code}</option>
+                    ))}
+                    {!freeQrsLoading && freeQrs.length === 0 && (
+                      <option disabled>No free QR codes available</option>
+                    )}
+                  </select>
+                  <p className="text-[10px] text-slate-400 mt-1.5">
+                    Leave as Auto-assign to automatically pick the next free QR code.
+                  </p>
                 </div>
               </div>
 
