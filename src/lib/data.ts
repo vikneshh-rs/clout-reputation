@@ -1014,6 +1014,7 @@ export async function updateBusinessDetails(
     website?: string | null;
     googleMapsUrl?: string | null;
     status?: BusinessStatus;
+    passwordHash?: string;
   }
 ) {
   return runQuery(
@@ -1039,6 +1040,7 @@ export async function updateBusinessDetails(
         if (data.website !== undefined) biz.website = data.website;
         if (data.googleMapsUrl !== undefined) biz.googleMapsUrl = data.googleMapsUrl;
         if (data.status !== undefined) biz.status = data.status;
+        if (data.passwordHash !== undefined) biz.passwordHash = data.passwordHash;
         biz.updatedAt = new Date();
       }
       return biz || null;
@@ -3427,51 +3429,112 @@ export async function getQrDownloadStats(businessId: string) {
 
 export async function resolveBusinessByIdentifier(identifier: string) {
   const normalizedIdentifier = identifier.toLowerCase().trim();
-  return runQuery(
-    async () => {
-      // 1. Try to find by ID (UUID)
-      const bizById = await db.business.findUnique({
-        where: { id: identifier },
-        include: { qrAssets: { where: { status: QRAssetStatus.ASSIGNED }, take: 1 } }
-      });
+  
+  const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(normalizedIdentifier);
+  const isQrCode = /^cqr-/i.test(normalizedIdentifier);
+  const isBusinessCode = /^CR-\d+$/i.test(identifier.trim());
 
-      if (bizById) {
-        const activeQr = bizById.qrAssets.length > 0 ? bizById.qrAssets[0] : null;
-        return { business: bizById, qrCode: activeQr?.qrCode || 'NO_QR', qrStatus: activeQr?.status || 'Not Generated' };
+  return runQuery<any>(
+    async () => {
+      const selectFields = {
+        id: true,
+        name: true,
+        slug: true,
+        industry: true,
+        logoUrl: true,
+        googleReviewUrl: true,
+        enableGoogleReviewRedirect: true,
+        enableManagerCallback: true,
+        isActive: true,
+        status: true,
+        qrAssets: {
+          where: { status: QRAssetStatus.ASSIGNED },
+          take: 1,
+          select: {
+            qrCode: true,
+            status: true
+          }
+        }
+      };
+
+      // 1. Try to find by ID (UUID)
+      if (isUuid) {
+        const bizById = await db.business.findUnique({
+          where: { id: identifier.trim() },
+          select: selectFields
+        });
+        if (bizById) {
+          const activeQr = bizById.qrAssets.length > 0 ? bizById.qrAssets[0] : null;
+          return { business: bizById, qrCode: activeQr?.qrCode || 'NO_QR', qrStatus: activeQr?.status || 'Not Generated' };
+        }
       }
 
       // 2. Try to find by Business Code
-      const bizByCode = await db.business.findUnique({
-        where: { businessCode: identifier },
-        include: { qrAssets: { where: { status: QRAssetStatus.ASSIGNED }, take: 1 } }
-      });
-
-      if (bizByCode) {
-        const activeQr = bizByCode.qrAssets.length > 0 ? bizByCode.qrAssets[0] : null;
-        return { business: bizByCode, qrCode: activeQr?.qrCode || 'NO_QR', qrStatus: activeQr?.status || 'Not Generated' };
+      if (isBusinessCode) {
+        const bizByCode = await db.business.findUnique({
+          where: { businessCode: identifier.trim() },
+          select: selectFields
+        });
+        if (bizByCode) {
+          const activeQr = bizByCode.qrAssets.length > 0 ? bizByCode.qrAssets[0] : null;
+          return { business: bizByCode, qrCode: activeQr?.qrCode || 'NO_QR', qrStatus: activeQr?.status || 'Not Generated' };
+        }
       }
 
-      // 3. Try to find by slug
-      const bizBySlug = await db.business.findUnique({
-        where: { slug: identifier },
-        include: { qrAssets: { where: { status: QRAssetStatus.ASSIGNED }, take: 1 } }
-      });
+      // 3. Try to find by QR code identifier (case-insensitive)
+      if (isQrCode) {
+        // Normalize casing to standard pattern (e.g., cqr-ac001 -> cqr-AC001) to hit the unique B-tree index
+        let standardCasingCode = identifier.trim();
+        const match = standardCasingCode.match(/^cqr-([a-z]+)(\d+)$/i);
+        if (match) {
+          standardCasingCode = `cqr-${match[1].toUpperCase()}${match[2]}`;
+        }
 
-      if (bizBySlug) {
-        const activeQr = bizBySlug.qrAssets.length > 0 ? bizBySlug.qrAssets[0] : null;
-        return { business: bizBySlug, qrCode: activeQr?.qrCode || 'NO_QR', qrStatus: activeQr?.status || 'Not Generated' };
+        // Try exact match first (uses unique index, extremely fast)
+        let qrRecord = await db.qRAsset.findUnique({
+          where: { qrCode: standardCasingCode },
+          select: {
+            qrCode: true,
+            status: true,
+            business: {
+              select: selectFields
+            }
+          }
+        });
+
+        // Fallback to case-insensitive findFirst if exact match didn't find it
+        if (!qrRecord) {
+          qrRecord = await db.qRAsset.findFirst({
+            where: { qrCode: { equals: identifier.trim(), mode: 'insensitive' } },
+            select: {
+              qrCode: true,
+              status: true,
+              business: {
+                select: selectFields
+              }
+            }
+          });
+        }
+
+        if (qrRecord) {
+          return { business: qrRecord.business, qrCode: qrRecord.qrCode, qrStatus: qrRecord.status };
+        }
       }
 
-      // 4. Try to find by QR code identifier (case-insensitive)
-      const qrRecord = await db.qRAsset.findFirst({
-        where: { qrCode: { equals: identifier.trim(), mode: 'insensitive' } },
-        include: { business: true }
-      });
-
-      if (qrRecord) {
-        return { business: qrRecord.business, qrCode: qrRecord.qrCode, qrStatus: qrRecord.status };
+      // 4. Fallback/Default: Try to find by slug
+      if (!isUuid && !isQrCode && !isBusinessCode) {
+        const bizBySlug = await db.business.findUnique({
+          where: { slug: identifier.trim() },
+          select: selectFields
+        });
+        if (bizBySlug) {
+          const activeQr = bizBySlug.qrAssets.length > 0 ? bizBySlug.qrAssets[0] : null;
+          return { business: bizBySlug, qrCode: activeQr?.qrCode || 'NO_QR', qrStatus: activeQr?.status || 'Not Generated' };
+        }
       }
 
+      // Absolute safety net fallback: if all classification paths failed (e.g. invalid format but could match something),
+      // do a single broad check by slug or QR.
       return null;
     },
     async () => {
@@ -3516,9 +3579,8 @@ export async function resolveBusinessByIdentifier(identifier: string) {
         return { business: biz, qrCode: qrRecord.qrCode, qrStatus: qrRecord.status };
       }
 
-      return null;
     }
-  );
+  ) as any;
 }
 
 // ==========================================

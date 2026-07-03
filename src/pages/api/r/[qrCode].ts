@@ -10,7 +10,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   try {
+    const resolveStart = performance.now();
     const result = await resolveBusinessByIdentifier(qrCode);
+    const resolveEnd = performance.now();
+    console.log(`[PERF] resolveBusinessByIdentifier for "${qrCode}" took ${(resolveEnd - resolveStart).toFixed(2)}ms`);
 
     if (!result) {
       return res.status(404).json({ error: 'Business or review portal not found.', status: 'NOT_FOUND' });
@@ -35,15 +38,20 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     if (req.method === 'GET') {
-      // Log this scan in database
+      const apiStart = performance.now();
+      // Log this scan in database asynchronously (non-blocking)
       const userAgent = req.headers['user-agent'] || null;
-      await recordQrScan({
+      recordQrScan({
         businessId: business.id,
         qrCode: activeQrCode,
         userAgent: userAgent ? String(userAgent) : null
+      }).then(() => {
+        console.log(`[PERF] Background recordQrScan completed successfully for "${activeQrCode}"`);
+      }).catch(err => {
+        console.error('[PERF] Background recordQrScan failed:', err);
       });
 
-      return res.status(200).json({
+      const responsePayload = {
         qrCode: activeQrCode,
         status: qrStatus,
         business: {
@@ -56,7 +64,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           enableGoogleReviewRedirect: business.enableGoogleReviewRedirect,
           enableManagerCallback: business.enableManagerCallback
         }
-      });
+      };
+
+      const apiEnd = performance.now();
+      console.log(`[PERF] API payload assembly took ${(apiEnd - apiStart).toFixed(2)}ms. Total GET processing: ${(apiEnd - resolveStart).toFixed(2)}ms`);
+      return res.status(200).json(responsePayload);
     } else if (req.method === 'POST') {
       const { rating, comment, customerName, customerPhone, requestCallback, reviewSessionId } = req.body;
       

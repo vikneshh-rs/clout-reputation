@@ -6,7 +6,8 @@ import {
   updateBusinessStatus,
   softDeleteBusiness, 
   restoreBusiness, 
-  logActivity 
+  logActivity,
+  updateBusinessDetails
 } from '@/lib/data';
 import { BusinessStatus, Industry, SubscriptionPlan } from '@prisma/client';
 
@@ -101,7 +102,66 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     // PUT Request: Update status or restore
     if (req.method === 'PUT') {
-      const { action, id, status } = req.body;
+      const { 
+        action, 
+        id, 
+        status, 
+        name, 
+        password, 
+        industry, 
+        phone, 
+        address, 
+        googleReviewUrl, 
+        logoUrl, 
+        description, 
+        contactPerson, 
+        category, 
+        website, 
+        googleMapsUrl 
+      } = req.body;
+
+      if (action === 'edit') {
+        if (!id) {
+          return res.status(400).json({ error: 'Business ID is required.' });
+        }
+
+        const updateData: any = {
+          name,
+          industry,
+          phone: phone || null,
+          address: address || null,
+          googleReviewUrl: googleReviewUrl || null,
+          logoUrl: logoUrl || null,
+          description: description || null,
+          contactPerson: contactPerson || null,
+          category: category || null,
+          website: website || null,
+          googleMapsUrl: googleMapsUrl || null
+        };
+
+        if (password) {
+          updateData.passwordHash = await hashPassword(password);
+        }
+
+        const updated = await updateBusinessDetails(id, updateData);
+
+        if (!updated) {
+          return res.status(404).json({ error: 'Business not found.' });
+        }
+
+        await logActivity(
+          sessionUser.id,
+          'Business Details Updated by Admin',
+          'BUSINESS',
+          id,
+          { name: updated.name }
+        );
+
+        return res.status(200).json({
+          message: 'Business details updated successfully.',
+          business: updated
+        });
+      }
 
       if (action === 'status') {
         if (!id || !status) {
