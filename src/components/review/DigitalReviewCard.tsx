@@ -8,6 +8,7 @@ interface DigitalReviewCardProps {
   businessName: string;
   subtitle?: string;
   isRating?: boolean;
+  sheetOpen?: boolean;
   children: React.ReactNode;
 }
 
@@ -15,6 +16,7 @@ export default function DigitalReviewCard({
   businessName,
   subtitle = "How was your experience?",
   isRating = false,
+  sheetOpen = false,
   children,
 }: DigitalReviewCardProps) {
   return (
@@ -33,6 +35,10 @@ export default function DigitalReviewCard({
           flex
           flex-col
           animate-cardFadeIn
+          transition-all
+          duration-500
+          ease-[cubic-bezier(0.16,1,0.3,1)]
+          ${sheetOpen ? 'scale-[0.98] -translate-y-2.5 brightness-[0.93]' : 'scale-100 translate-y-0 brightness-100'}
         `}
       >
         {/* ===========================

@@ -4,8 +4,10 @@ import Head from 'next/head';
 import { AlertTriangle, Loader2 } from 'lucide-react';
 import DigitalReviewCard from '@/components/review/DigitalReviewCard';
 import RatingCard from '@/components/review/RatingCard';
-import RecoveryForm from '@/components/review/RecoveryForm';
+import FeedbackSheet from '@/components/review/FeedbackSheet';
 import SuccessScreen from '@/components/review/SuccessScreen';
+import { resolveBusinessByIdentifier, recordQrScan } from '@/lib/data';
+import { BusinessStatus, QRAssetStatus } from '@prisma/client';
 
 interface BusinessDetails {
   qrCode: string;
@@ -22,15 +24,23 @@ interface BusinessDetails {
   };
 }
 
-export default function PublicReviewPortal() {
+export default function PublicReviewPortal({
+  initialDetails = null,
+  initialError = null,
+  initialQrStatus = null,
+}: {
+  initialDetails?: BusinessDetails | null;
+  initialError?: string | null;
+  initialQrStatus?: string | null;
+}) {
   const router = useRouter();
   const { slug } = router.query;
 
   // Portal Details State
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [qrStatus, setQrStatus] = useState<string | null>(null);
-  const [details, setDetails] = useState<BusinessDetails | null>(null);
+  const [loading, setLoading] = useState(!initialDetails && !initialError);
+  const [error, setError] = useState<string | null>(initialError);
+  const [qrStatus, setQrStatus] = useState<string | null>(initialQrStatus);
+  const [details, setDetails] = useState<BusinessDetails | null>(initialDetails);
 
   // Session & Stage Tracking
   const [reviewSessionId, setReviewSessionId] = useState('');
@@ -42,6 +52,7 @@ export default function PublicReviewPortal() {
   const [rating, setRating] = useState(0);
   const [submitting, setSubmitting] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
+  const [sheetDismissed, setSheetDismissed] = useState(false);
 
   // Tap Safety Net Timer State
   const [selectionTimer, setSelectionTimer] = useState<NodeJS.Timeout | null>(null);
@@ -66,6 +77,7 @@ export default function PublicReviewPortal() {
             const isPos = parsed.submittedRating >= 4;
             setStep(isPos ? 'positive-redirect' : 'negative-completion');
             setRating(parsed.submittedRating);
+            setSheetDismissed(true);
           }
         });
       } catch (e) {
@@ -88,6 +100,10 @@ export default function PublicReviewPortal() {
   // Fetch Portal details
   useEffect(() => {
     if (!slug) return;
+    if (details && (details.business.slug === slug || details.qrCode === slug)) {
+      setLoading(false);
+      return;
+    }
 
     const fetchBusinessDetails = async () => {
       try {
@@ -111,7 +127,7 @@ export default function PublicReviewPortal() {
     };
 
     fetchBusinessDetails();
-  }, [slug]);
+  }, [slug, details]);
 
   // Log SCAN stage once details are fetched
   useEffect(() => {
@@ -183,6 +199,7 @@ export default function PublicReviewPortal() {
         submitPositiveRating(selectedRating);
       } else {
         setStep('negative-form');
+        setSheetDismissed(false);
       }
     }, 400);
 
@@ -346,6 +363,8 @@ export default function PublicReviewPortal() {
     );
   }
 
+  const isSheetOpen = (step === 'negative-form' || step === 'negative-completion') && !sheetDismissed;
+
   return (
     <>
       <Head>
@@ -353,14 +372,18 @@ export default function PublicReviewPortal() {
         <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0, viewport-fit=cover" />
       </Head>
 
-      <DigitalReviewCard businessName={details.business.name} isRating={step === 'rating'}>
+      <DigitalReviewCard 
+        businessName={details.business.name} 
+        isRating={step === 'rating' || step === 'negative-form' || step === 'negative-completion'}
+        sheetOpen={isSheetOpen}
+      >
         {saveError && (
           <div className="w-full mb-4 p-3.5 bg-rose-50 border border-rose-200/50 text-rose-700 text-xs rounded-xl font-sans font-medium text-left animate-fadeIn">
             {saveError}
           </div>
         )}
 
-        {step === 'rating' && (
+        {(step === 'rating' || step === 'negative-form' || step === 'negative-completion') && (
           <RatingCard 
             rating={rating} 
             onChange={handleStarSelect} 
@@ -375,25 +398,130 @@ export default function PublicReviewPortal() {
             onContinue={() => handleRedirectClick()}
           />
         )}
-
-        {step === 'negative-form' && (
-          <RecoveryForm 
-            loading={submitting}
-            onSubmit={(data) => {
-              handleRecoverySubmit({
-                customerName: data.customerName || '',
-                customerPhone: data.phone || '',
-                comment: data.feedback || '',
-                callbackRequested: data.requestCallback,
-              });
-            }}
-          />
-        )}
-
-        {step === 'negative-completion' && (
-          <SuccessScreen positive={false} />
-        )}
       </DigitalReviewCard>
+
+      <FeedbackSheet
+        isOpen={isSheetOpen}
+        isSuccess={step === 'negative-completion'}
+        loading={submitting}
+        onClose={() => {
+          if (step === 'negative-completion') {
+            setSheetDismissed(true);
+          } else {
+            setStep('rating');
+          }
+        }}
+        onSubmit={(data) => {
+          handleRecoverySubmit({
+            customerName: data.customerName || '',
+            customerPhone: data.phone || '',
+            comment: data.feedback || '',
+            callbackRequested: data.requestCallback,
+          });
+        }}
+      />
     </>
   );
 }
+
+export const getServerSideProps = async (context: any) => {
+  const { slug } = context.params;
+  
+  if (!slug || typeof slug !== 'string') {
+    return {
+      props: {
+        initialError: 'Identifier is required.',
+        initialQrStatus: 'NOT_FOUND'
+      }
+    };
+  }
+
+  try {
+    const result = await resolveBusinessByIdentifier(slug);
+    if (!result) {
+      return {
+        props: {
+          initialError: 'Business or review portal not found.',
+          initialQrStatus: 'NOT_FOUND'
+        }
+      };
+    }
+
+    const { business, qrCode, qrStatus } = result;
+
+    if (qrStatus === 'Not Generated' || qrCode === 'NO_QR') {
+      return {
+        props: {
+          initialError: 'This business does not have an active QR code generated.',
+          initialQrStatus: 'NOT_GENERATED'
+        }
+      };
+    }
+
+    if (qrStatus === QRAssetStatus.FREE) {
+      return {
+        props: {
+          initialError: 'This QR Code is currently inactive.',
+          initialQrStatus: 'INACTIVE'
+        }
+      };
+    }
+
+    if (!business || !business.isActive || business.status === BusinessStatus.INACTIVE) {
+      return {
+        props: {
+          initialError: 'This review portal is temporarily inactive.',
+          initialQrStatus: 'INACTIVE'
+        }
+      };
+    }
+
+    if (business.status === BusinessStatus.PENDING) {
+      return {
+        props: {
+          initialError: 'This review portal setup is incomplete.',
+          initialQrStatus: 'PENDING'
+        }
+      };
+    }
+
+    // Record QR scan on server side
+    const userAgent = context.req.headers['user-agent'] || null;
+    try {
+      await recordQrScan({
+        businessId: business.id,
+        qrCode,
+        userAgent: userAgent ? String(userAgent) : null
+      });
+    } catch (e) {
+      console.error('Error recording QR scan in getServerSideProps:', e);
+    }
+
+    return {
+      props: {
+        initialDetails: {
+          qrCode,
+          status: qrStatus,
+          business: {
+            id: business.id,
+            name: business.name,
+            slug: business.slug,
+            industry: business.industry,
+            logoUrl: business.logoUrl,
+            googleReviewUrl: business.googleReviewUrl,
+            enableGoogleReviewRedirect: business.enableGoogleReviewRedirect,
+            enableManagerCallback: business.enableManagerCallback
+          }
+        }
+      }
+    };
+  } catch (err) {
+    console.error('getServerSideProps error in review portal page:', err);
+    return {
+      props: {
+        initialError: 'Internal server error processing review portal.',
+        initialQrStatus: 'SERVER_ERROR'
+      }
+    };
+  }
+};
