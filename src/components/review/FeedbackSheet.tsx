@@ -16,13 +16,12 @@ interface FeedbackSheetProps {
 }
 
 const FEEDBACK_TAGS = [
+  "Staff Behaviour",
   "Service Quality",
-  "Wait Time",
+  "Value for Money",
   "Cleanliness",
-  "Staff Attitude",
-  "Pricing/Value",
-  "Food/Product Quality",
-  "Other"
+  "Pricing",
+  "Facilities"
 ];
 
 export default function FeedbackSheet({
