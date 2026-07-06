@@ -1,7 +1,9 @@
 {
   "functions": {
     "src/pages/api/r/[qrCode].ts": {
-      "regions": ["hnd1"]
+      "regions": [
+        "hnd1"
+      ]
     }
   }
 }

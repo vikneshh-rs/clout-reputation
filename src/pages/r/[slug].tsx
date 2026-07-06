@@ -57,10 +57,6 @@ export default function PublicReviewPortal({
   // Tap Safety Net Timer State
   const [selectionTimer, setSelectionTimer] = useState<NodeJS.Timeout | null>(null);
 
-  // Redirect Countdown State
-  const [countdown, setCountdown] = useState(2.0);
-  const [redirectInterval, setRedirectInterval] = useState<NodeJS.Timeout | null>(null);
-
   // Check and initialize session storage on mount / details resolution
   useEffect(() => {
     if (!slug) return;
@@ -147,26 +143,10 @@ export default function PublicReviewPortal({
 
   // Trigger redirect when step becomes positive-redirect (handles both submission and session restore)
   useEffect(() => {
-    if (step === 'positive-redirect' && details && details.business.googleReviewUrl && !redirectInterval) {
-      let timeRemaining = 2.0;
-      const interval = setInterval(() => {
-        timeRemaining -= 0.1;
-        setCountdown(Math.max(0, timeRemaining));
-        
-        if (timeRemaining <= 0) {
-          clearInterval(interval);
-          window.location.href = details.business.googleReviewUrl!;
-        }
-      }, 100);
-
-      Promise.resolve().then(() => {
-        setRedirectInterval(interval);
-      });
-      return () => {
-        clearInterval(interval);
-      };
+    if (step === 'positive-redirect' && details?.business?.googleReviewUrl) {
+      window.location.href = details.business.googleReviewUrl;
     }
-  }, [step, details, redirectInterval]);
+  }, [step, details]);
 
   // Log START stage when a user clicks a star for the first time
   const triggerFunnelStart = () => {
@@ -254,6 +234,9 @@ export default function PublicReviewPortal({
 
       setStep('positive-redirect');
       setSubmitting(false);
+      if (details.business.googleReviewUrl) {
+        window.location.href = details.business.googleReviewUrl;
+      }
 
     } catch (err) {
       const errObj = err as Error;
@@ -263,17 +246,7 @@ export default function PublicReviewPortal({
     }
   };
 
-  const handleRedirectClick = (e?: React.MouseEvent) => {
-    if (e) {
-      e.preventDefault();
-    }
-    if (redirectInterval) {
-      clearInterval(redirectInterval);
-    }
-    if (details?.business?.googleReviewUrl) {
-      window.location.href = details.business.googleReviewUrl;
-    }
-  };
+
 
   const handleRecoverySubmit = async (formData: { customerName: string; customerPhone: string; comment: string; callbackRequested: boolean }) => {
     if (!details) return;
@@ -320,9 +293,8 @@ export default function PublicReviewPortal({
   useEffect(() => {
     return () => {
       if (selectionTimer) clearTimeout(selectionTimer);
-      if (redirectInterval) clearInterval(redirectInterval);
     };
-  }, [selectionTimer, redirectInterval]);
+  }, [selectionTimer]);
 
   if (loading) {
     return (
@@ -392,11 +364,10 @@ export default function PublicReviewPortal({
         )}
 
         {step === 'positive-redirect' && (
-          <SuccessScreen 
-            positive={true} 
-            countdown={countdown}
-            onContinue={() => handleRedirectClick()}
-          />
+          <div className="flex flex-col items-center justify-center py-12 animate-fadeIn">
+            <Loader2 className="animate-spin h-8 w-8 text-[#073afe]" />
+            <p className="text-xs text-slate-500 mt-4 font-semibold">Redirecting to Google Reviews...</p>
+          </div>
         )}
       </DigitalReviewCard>
 
