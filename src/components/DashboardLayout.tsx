@@ -17,7 +17,8 @@ import {
   Clock,
   ArrowLeft,
   Shield,
-  ChevronRight
+  ChevronRight,
+  Bell
 } from 'lucide-react';
 
 interface DashboardLayoutProps {
@@ -83,6 +84,7 @@ export default function DashboardLayout({ children, title }: DashboardLayoutProp
         { name: 'User Accounts', href: '/dashboard/admin/users', icon: Shield },
         { name: 'Businesses', href: '/dashboard/admin/businesses', icon: Store },
         { name: 'Customer Recovery', href: '/dashboard/admin/recovery', icon: PhoneCall },
+        { name: 'Notifications', href: '/dashboard/admin/notifications', icon: Bell },
         { name: 'Subscriptions', href: '/dashboard/admin/subscriptions', icon: Clock },
         { name: 'Platform Analytics', href: '/dashboard/admin/analytics', icon: BarChart3 },
         { name: 'Activity Logs', href: '/dashboard/admin/activity', icon: Clock },

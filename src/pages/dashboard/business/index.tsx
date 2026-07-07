@@ -79,9 +79,10 @@ export default function BusinessDashboard(props: any) {
   const { user, loading: authLoading } = useAuth();
   const router = useRouter();
   
-  const [data, setData] = useState<AnalyticsData | null>(null);
+  const [data, setData] = useState<any | null>(null);
   const [reviews, setReviews] = useState<Review[]>([]);
   const [recoveryQueue, setRecoveryQueue] = useState<RecoveryRequest[]>([]);
+  const [businessDetails, setBusinessDetails] = useState<any | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [period, setPeriod] = useState('30d'); // '7d' | '30d' | '90d' | '180d' | '365d'
@@ -110,10 +111,11 @@ export default function BusinessDashboard(props: any) {
         queryParams.append('businessId', businessId);
       }
 
-      const [analyticsRes, reviewsRes, recoveryRes] = await Promise.all([
+      const [analyticsRes, reviewsRes, recoveryRes, detailsRes] = await Promise.all([
         fetch(`/api/business/analytics?${queryParams.toString()}`),
         fetch(`/api/business/reviews?${queryParams.toString()}`),
-        fetch(`/api/business/recovery?${queryParams.toString()}`)
+        fetch(`/api/business/recovery?${queryParams.toString()}`),
+        fetch(`/api/business/details?${queryParams.toString()}`)
       ]);
 
       if (analyticsRes.ok && reviewsRes.ok && recoveryRes.ok) {
@@ -126,6 +128,11 @@ export default function BusinessDashboard(props: any) {
         setRecoveryQueue(recoveryPayload.list || []);
       } else {
         setError('Failed to compile business dashboard statistics.');
+      }
+
+      if (detailsRes.ok) {
+        const detailsPayload = await detailsRes.json();
+        setBusinessDetails(detailsPayload.business);
       }
     } catch (err) {
       setError('Network error retrieving business intelligence.');
@@ -353,6 +360,30 @@ export default function BusinessDashboard(props: any) {
         </div>
       )}
 
+      {/* Warning Banner for incomplete notification config */}
+      {!loading && businessDetails && !businessDetails.whatsappNumber && (
+        <div className="mb-6 p-5 rounded-[24px] bg-amber-50 border border-amber-200/60 text-amber-900 animate-fadeIn flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="flex items-start gap-3">
+            <div className="p-2 bg-amber-100/80 rounded-xl text-amber-750 mt-0.5">
+              <AlertCircle size={20} />
+            </div>
+            <div>
+              <strong className="block text-sm font-bold font-sans">Notification Setup Incomplete</strong>
+              <p className="text-xs text-amber-750/90 mt-1 leading-relaxed">
+                Add your WhatsApp number to receive instant notifications whenever customers leave negative reviews.
+              </p>
+            </div>
+          </div>
+          <Link
+            href={getLink('/dashboard/business/settings') + '#notification-settings'}
+            className="bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold px-4 py-2.5 rounded-xl transition-all shadow-sm active:scale-[0.98] self-start sm:self-auto flex items-center gap-1.5 border-none"
+          >
+            <span>Configure Now</span>
+            <ArrowRight size={13} />
+          </Link>
+        </div>
+      )}
+
       {loading ? (
         <div className="py-32 flex flex-col justify-center items-center gap-3">
           <Loader2 className="animate-spin h-8 w-8 text-[#073afe] stroke-[2.25]" />
@@ -361,8 +392,8 @@ export default function BusinessDashboard(props: any) {
       ) : data ? (
         <div className="space-y-8 animate-fadeIn">
           
-          {/* Redesigned 5 Premium KPI Cards Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
+          {/* Redesigned 6 Premium KPI Cards Grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-6">
             
             {/* 1. Average Score */}
             <div className="bg-white border border-slate-100 rounded-[24px] shadow-[0_8px_30px_rgb(0,0,0,0.015)] p-6 hover:-translate-y-1 hover:shadow-[0_12px_30px_rgba(15,23,42,0.04)] transition-all duration-300 flex flex-col justify-between">
@@ -466,6 +497,57 @@ export default function BusinessDashboard(props: any) {
               <div className="mt-5 text-[10px] text-slate-500 font-semibold border-t border-slate-100 pt-3.5 flex items-center gap-1.5">
                 <span className="inline-flex h-1.5 w-1.5 rounded-full bg-emerald-500" />
                 <span className="font-mono text-[9px] uppercase">{user.slug || 'active-portal'}</span>
+              </div>
+            </div>
+
+            {/* 6. Notification Status */}
+            <div className="bg-white border border-slate-100 rounded-[24px] shadow-[0_8px_30px_rgb(0,0,0,0.015)] p-6 hover:-translate-y-1 hover:shadow-[0_12px_30px_rgba(15,23,42,0.04)] transition-all duration-300 flex flex-col justify-between">
+              <div className="flex justify-between items-start">
+                <div className="space-y-1">
+                  <span className="block text-[10px] font-bold text-slate-400 tracking-wider uppercase">
+                    WhatsApp Alerts
+                  </span>
+                  {businessDetails?.whatsappNumber ? (
+                    <div>
+                      <h3 className="text-xs font-extrabold text-slate-900 truncate tracking-tight">{businessDetails.whatsappNumber}</h3>
+                      <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-md mt-1 inline-block ${
+                        businessDetails.notificationSettings?.whatsappEnabled 
+                          ? 'text-emerald-600 bg-emerald-50' 
+                          : 'text-slate-550 bg-slate-100'
+                      }`}>
+                        {businessDetails.notificationSettings?.whatsappEnabled ? 'ENABLED' : 'DISABLED'}
+                      </span>
+                    </div>
+                  ) : (
+                    <div>
+                      <h3 className="text-[11px] font-bold text-rose-500 tracking-tight leading-tight">Setup Required</h3>
+                      <span className="text-[9px] text-rose-600 font-bold bg-rose-50 px-1.5 py-0.5 rounded-md mt-1 inline-block">
+                        INCOMPLETE
+                      </span>
+                    </div>
+                  )}
+                </div>
+                <div className={`p-2.5 rounded-xl border ${businessDetails?.whatsappNumber ? 'bg-blue-50 text-[#073afe] border-blue-100/30' : 'bg-rose-50 text-rose-500 border-rose-100/30 animate-pulse'}`}>
+                  <Smartphone size={16} />
+                </div>
+              </div>
+              <div className="mt-5 text-[10px] text-slate-500 font-semibold border-t border-slate-100 pt-3.5 space-y-1">
+                {businessDetails?.whatsappNumber ? (
+                  <>
+                    <div className="flex justify-between">
+                      <span className="text-slate-400">Total Sent:</span>
+                      <strong className="text-slate-800">{data.notificationStats?.totalNotifications ?? 0}</strong>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-slate-400">Success:</span>
+                      <strong className="text-slate-800">{data.notificationStats?.successRate ?? 100}%</strong>
+                    </div>
+                  </>
+                ) : (
+                  <Link href={getLink('/dashboard/business/settings') + '#notification-settings'} className="text-[#073afe] hover:underline font-bold block text-center">
+                    Configure Settings
+                  </Link>
+                )}
               </div>
             </div>
 

@@ -15,7 +15,8 @@ import {
   ArrowRight,
   TrendingUp,
   Activity,
-  Loader2
+  Loader2,
+  Bell
 } from 'lucide-react';
 
 interface ActivityLog {
@@ -42,7 +43,74 @@ interface Stats {
   businessesThisMonth: number;
   callbacksThisMonth: number;
   googleRedirectClicksThisMonth: number;
-  recentLogs?: ActivityLog[];
+}
+
+function NotificationSummaryWidget() {
+  const [data, setData] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch('/api/super-admin/notifications/stats?period=7d')
+      .then(res => res.ok ? res.json() : null)
+      .then(payload => {
+        if (payload) {
+          setData(payload);
+        }
+      })
+      .catch(err => console.error('Error fetching dashboard summary:', err))
+      .finally(() => setLoading(false));
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="bg-white border border-slate-100 p-6 rounded-3xl mb-8 flex items-center justify-center">
+        <Loader2 className="animate-spin h-5 w-5 text-[#073afe]" />
+      </div>
+    );
+  }
+
+  if (!data) return null;
+
+  const { summary } = data;
+
+  return (
+    <div className="bg-white border border-slate-100 rounded-3xl p-6 mb-8 shadow-[0_8px_30px_rgba(0,0,0,0.01)] flex flex-col md:flex-row justify-between items-start md:items-center gap-6 animate-fadeIn">
+      <div className="flex items-center space-x-4">
+        <div className="p-3 bg-blue-50 text-[#073afe] border border-blue-100/30 rounded-2xl">
+          <Bell size={22} className="text-[#073afe] animate-pulse" />
+        </div>
+        <div>
+          <h4 className="text-sm font-extrabold text-slate-900 font-sans">Notification Dispatcher Engine</h4>
+          <p className="text-xs text-slate-500 mt-0.5">
+            Queue: <strong className="text-slate-800 font-bold">{summary.queueLength} pending/processing</strong> | 
+            Success Rate: <strong className="text-emerald-600 font-bold">{summary.successRate}%</strong>
+          </p>
+        </div>
+      </div>
+
+      <div className="flex flex-wrap gap-4 text-xs font-semibold text-slate-500">
+        <div className="flex flex-col">
+          <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Hourly Throughput</span>
+          <strong className="text-slate-900 mt-0.5">{summary.throughput?.messagesPerHour ?? 0} dispatches</strong>
+        </div>
+        <div className="flex flex-col">
+          <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Avg Latency</span>
+          <strong className="text-slate-900 mt-0.5">{summary.avgProcessingTime}ms</strong>
+        </div>
+        <div className="flex flex-col">
+          <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Cron Job</span>
+          <span className="inline-flex items-center gap-1 text-emerald-600 mt-0.5 font-bold">
+            <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" /> Active
+          </span>
+        </div>
+      </div>
+
+      <Link href="/dashboard/admin/notifications" className="px-4.5 py-2.5 bg-[#073afe] hover:bg-[#0630d3] text-white text-xs font-bold rounded-2xl shadow-sm flex items-center gap-1.5 transition-all self-stretch md:self-auto justify-center border-none text-center">
+        <span>Control Center</span>
+        <ArrowRight size={13} />
+      </Link>
+    </div>
+  );
 }
 
 export default function AdminDashboard(props: any) {
@@ -172,6 +240,8 @@ export default function AdminDashboard(props: any) {
               </div>
             </div>
           </div>
+
+          <NotificationSummaryWidget />
 
           {/* Activity Section */}
           <div className="bg-white/80 backdrop-blur-md border border-slate-100 rounded-2xl overflow-hidden shadow-[0_4px_20px_rgba(0,0,0,0.02)]">

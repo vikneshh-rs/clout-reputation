@@ -40,11 +40,32 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         contactPerson,
         category,
         website,
-        googleMapsUrl
+        googleMapsUrl,
+        whatsappNumber,
+        negativeReviewEnabled,
+        positiveReviewEnabled,
+        dailySummaryEnabled,
+        weeklySummaryEnabled,
+        whatsappEnabled,
+        emailEnabled,
+        smsEnabled,
+        timezone
       } = req.body;
 
       if (!name) {
         return res.status(400).json({ error: 'Business name is required.' });
+      }
+
+      // Validation for WhatsApp configuration
+      let validatedWhatsappNumber = whatsappNumber ? whatsappNumber.trim() : null;
+      if (whatsappEnabled && !validatedWhatsappNumber) {
+        return res.status(400).json({ error: 'WhatsApp Number is required when WhatsApp notifications are enabled.' });
+      }
+      if (validatedWhatsappNumber) {
+        const e164Regex = /^\+[1-9]\d{9,14}$/;
+        if (!e164Regex.test(validatedWhatsappNumber)) {
+          return res.status(400).json({ error: 'Invalid WhatsApp Number. Must start with "+" followed by 10-15 digits (e.g. +919876543210).' });
+        }
       }
 
       const currentBusiness = await getBusinessById(businessId);
@@ -64,7 +85,18 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         contactPerson: contactPerson || null,
         category: category || null,
         website: website || null,
-        googleMapsUrl: googleMapsUrl || null
+        googleMapsUrl: googleMapsUrl || null,
+        whatsappNumber: validatedWhatsappNumber,
+        notificationSettings: {
+          negativeReviewEnabled: negativeReviewEnabled !== undefined ? !!negativeReviewEnabled : undefined,
+          positiveReviewEnabled: positiveReviewEnabled !== undefined ? !!positiveReviewEnabled : undefined,
+          dailySummaryEnabled: dailySummaryEnabled !== undefined ? !!dailySummaryEnabled : undefined,
+          weeklySummaryEnabled: weeklySummaryEnabled !== undefined ? !!weeklySummaryEnabled : undefined,
+          whatsappEnabled: whatsappEnabled !== undefined ? !!whatsappEnabled : undefined,
+          emailEnabled: emailEnabled !== undefined ? !!emailEnabled : undefined,
+          smsEnabled: smsEnabled !== undefined ? !!smsEnabled : undefined,
+          timezone: timezone || "UTC"
+        }
       });
 
       // Capture changes for activity log metadata

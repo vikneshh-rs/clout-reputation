@@ -35,6 +35,17 @@ export default function BusinessSettings(props: any) {
   const [enableGoogleReviewRedirect, setEnableGoogleReviewRedirect] = useState(true);
   const [enableManagerCallback, setEnableManagerCallback] = useState(true);
   
+  // Notification State
+  const [whatsappNumber, setWhatsappNumber] = useState('');
+  const [negativeReviewEnabled, setNegativeReviewEnabled] = useState(true);
+  const [positiveReviewEnabled, setPositiveReviewEnabled] = useState(false);
+  const [dailySummaryEnabled, setDailySummaryEnabled] = useState(false);
+  const [weeklySummaryEnabled, setWeeklySummaryEnabled] = useState(false);
+  const [whatsappEnabled, setWhatsappEnabled] = useState(true);
+  const [emailEnabled, setEmailEnabled] = useState(false);
+  const [smsEnabled, setSmsEnabled] = useState(false);
+  const [timezone, setTimezone] = useState('UTC');
+  
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
@@ -63,6 +74,17 @@ export default function BusinessSettings(props: any) {
         setGoogleReviewUrl(biz.googleReviewUrl || '');
         setEnableGoogleReviewRedirect(biz.enableGoogleReviewRedirect ?? true);
         setEnableManagerCallback(biz.enableManagerCallback ?? true);
+        
+        // Populate notification settings
+        setWhatsappNumber(biz.whatsappNumber || '');
+        setNegativeReviewEnabled(biz.notificationSettings?.negativeReviewEnabled ?? true);
+        setPositiveReviewEnabled(biz.notificationSettings?.positiveReviewEnabled ?? false);
+        setDailySummaryEnabled(biz.notificationSettings?.dailySummaryEnabled ?? false);
+        setWeeklySummaryEnabled(biz.notificationSettings?.weeklySummaryEnabled ?? false);
+        setWhatsappEnabled(biz.notificationSettings?.whatsappEnabled ?? true);
+        setEmailEnabled(biz.notificationSettings?.emailEnabled ?? false);
+        setSmsEnabled(biz.notificationSettings?.smsEnabled ?? false);
+        setTimezone(biz.notificationSettings?.timezone ?? 'UTC');
       } else {
         const errData = await res.json();
         setError(errData.error || 'Failed to fetch business details.');
@@ -93,6 +115,21 @@ export default function BusinessSettings(props: any) {
       return;
     }
 
+    if (whatsappEnabled) {
+      if (!whatsappNumber.trim()) {
+        setError('WhatsApp number is required when WhatsApp notifications are enabled.');
+        setSaving(false);
+        return;
+      }
+      const cleanNum = whatsappNumber.trim();
+      const e164Regex = /^\+[1-9]\d{9,14}$/;
+      if (!e164Regex.test(cleanNum)) {
+        setError('Invalid WhatsApp number format. Must start with "+" followed by 10-15 digits (e.g. +919876543210).');
+        setSaving(false);
+        return;
+      }
+    }
+
     try {
       const res = await fetch('/api/business/details', {
         method: 'PUT',
@@ -103,7 +140,16 @@ export default function BusinessSettings(props: any) {
           address: address.trim() || null,
           googleReviewUrl: googleReviewUrl.trim() || null,
           enableGoogleReviewRedirect,
-          enableManagerCallback
+          enableManagerCallback,
+          whatsappNumber: whatsappNumber.trim() || null,
+          negativeReviewEnabled,
+          positiveReviewEnabled,
+          dailySummaryEnabled,
+          weeklySummaryEnabled,
+          whatsappEnabled,
+          emailEnabled,
+          smsEnabled,
+          timezone
         })
       });
 
@@ -352,6 +398,173 @@ export default function BusinessSettings(props: any) {
                       <span
                         className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow-sm ring-0 transition duration-200 ease-in-out ${
                           enableManagerCallback ? 'translate-x-4' : 'translate-x-0'
+                        }`}
+                      />
+                    </button>
+                  </div>
+                </div>
+
+                {/* Notification Settings */}
+                <div id="notification-settings" className="border-t border-slate-100 pt-6 space-y-5">
+                  <h4 className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                    Notification Settings
+                  </h4>
+
+                  {/* Enable WhatsApp Notifications */}
+                  <div className="flex items-start justify-between gap-6">
+                    <div className="flex-grow pr-4">
+                      <label htmlFor="toggle-whatsapp" className="text-xs font-bold text-slate-800 cursor-pointer block">
+                        Enable WhatsApp Notifications
+                      </label>
+                      <p className="text-[10px] text-slate-400 mt-1 leading-normal">
+                        Receive instant alerts on WhatsApp when customers leave reviews or submit callbacks.
+                      </p>
+                    </div>
+                    <button
+                      id="toggle-whatsapp"
+                      type="button"
+                      disabled={isReadOnly}
+                      onClick={() => setWhatsappEnabled(!whatsappEnabled)}
+                      className={`relative inline-flex h-5 w-9 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
+                        whatsappEnabled ? 'bg-[#073afe]' : 'bg-slate-250'
+                      } disabled:opacity-50 disabled:cursor-not-allowed mt-0.5`}
+                    >
+                      <span
+                        className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow-sm ring-0 transition duration-200 ease-in-out ${
+                          whatsappEnabled ? 'translate-x-4' : 'translate-x-0'
+                        }`}
+                      />
+                    </button>
+                  </div>
+
+                  {/* WhatsApp Number Input */}
+                  {whatsappEnabled && (
+                    <div className="space-y-1.5 animate-fadeIn">
+                      <label htmlFor="whatsapp-number" className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                        WhatsApp Number (E.164 Format)
+                      </label>
+                      <div className="relative">
+                        <Phone className="absolute left-3.5 top-3.5 h-4 w-4 text-slate-400" />
+                        <input
+                          id="whatsapp-number"
+                          type="tel"
+                          value={whatsappNumber}
+                          onChange={(e) => setWhatsappNumber(e.target.value)}
+                          disabled={isReadOnly}
+                          placeholder="+919876543210"
+                          className="w-full text-xs border border-slate-200 rounded-2xl bg-white pl-10 pr-4 py-3 focus:border-[#073afe] focus:outline-none focus:ring-4 focus:ring-[#073afe]/5 transition-all font-medium disabled:bg-slate-50 disabled:text-slate-400 h-[46px]"
+                          required={whatsappEnabled}
+                        />
+                      </div>
+                      <p className="text-[9px] text-slate-400 leading-normal pl-0.5">
+                        Must start with country code (e.g. +91 for India, +1 for US) followed by the digits.
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Enable Negative Review Notifications */}
+                  <div className="flex items-start justify-between gap-6">
+                    <div className="flex-grow pr-4">
+                      <label htmlFor="toggle-neg-notifications" className="text-xs font-bold text-slate-800 cursor-pointer block">
+                        Negative Review Notifications
+                      </label>
+                      <p className="text-[10px] text-slate-400 mt-1 leading-normal">
+                        Get notified immediately on WhatsApp when a customer submits a rating under 4 stars.
+                      </p>
+                    </div>
+                    <button
+                      id="toggle-neg-notifications"
+                      type="button"
+                      disabled={isReadOnly}
+                      onClick={() => setNegativeReviewEnabled(!negativeReviewEnabled)}
+                      className={`relative inline-flex h-5 w-9 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
+                        negativeReviewEnabled ? 'bg-[#073afe]' : 'bg-slate-250'
+                      } disabled:opacity-50 disabled:cursor-not-allowed mt-0.5`}
+                    >
+                      <span
+                        className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow-sm ring-0 transition duration-200 ease-in-out ${
+                          negativeReviewEnabled ? 'translate-x-4' : 'translate-x-0'
+                        }`}
+                      />
+                    </button>
+                  </div>
+
+                  {/* Enable Positive Review Notifications */}
+                  <div className="flex items-start justify-between gap-6">
+                    <div className="flex-grow pr-4">
+                      <label htmlFor="toggle-pos-notifications" className="text-xs font-bold text-slate-800 cursor-pointer block">
+                        Positive Review Notifications <span className="text-[9px] text-slate-400 font-normal ml-1">(Future-Ready)</span>
+                      </label>
+                      <p className="text-[10px] text-slate-400 mt-1 leading-normal">
+                        Receive messages when customers leave a positive 4 or 5 star review.
+                      </p>
+                    </div>
+                    <button
+                      id="toggle-pos-notifications"
+                      type="button"
+                      disabled={isReadOnly}
+                      onClick={() => setPositiveReviewEnabled(!positiveReviewEnabled)}
+                      className={`relative inline-flex h-5 w-9 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
+                        positiveReviewEnabled ? 'bg-[#073afe]' : 'bg-slate-250'
+                      } disabled:opacity-50 disabled:cursor-not-allowed mt-0.5`}
+                    >
+                      <span
+                        className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow-sm ring-0 transition duration-200 ease-in-out ${
+                          positiveReviewEnabled ? 'translate-x-4' : 'translate-x-0'
+                        }`}
+                      />
+                    </button>
+                  </div>
+
+                  {/* Daily Summary */}
+                  <div className="flex items-start justify-between gap-6">
+                    <div className="flex-grow pr-4">
+                      <label htmlFor="toggle-daily" className="text-xs font-bold text-slate-800 cursor-pointer block">
+                        Daily Summary Report <span className="text-[9px] text-slate-400 font-normal ml-1">(Future-Ready)</span>
+                      </label>
+                      <p className="text-[10px] text-slate-400 mt-1 leading-normal">
+                        Receive a daily consolidated digest of all feedback received.
+                      </p>
+                    </div>
+                    <button
+                      id="toggle-daily"
+                      type="button"
+                      disabled={isReadOnly}
+                      onClick={() => setDailySummaryEnabled(!dailySummaryEnabled)}
+                      className={`relative inline-flex h-5 w-9 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
+                        dailySummaryEnabled ? 'bg-[#073afe]' : 'bg-slate-250'
+                      } disabled:opacity-50 disabled:cursor-not-allowed mt-0.5`}
+                    >
+                      <span
+                        className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow-sm ring-0 transition duration-200 ease-in-out ${
+                          dailySummaryEnabled ? 'translate-x-4' : 'translate-x-0'
+                        }`}
+                      />
+                    </button>
+                  </div>
+
+                  {/* Weekly Summary */}
+                  <div className="flex items-start justify-between gap-6">
+                    <div className="flex-grow pr-4">
+                      <label htmlFor="toggle-weekly" className="text-xs font-bold text-slate-800 cursor-pointer block">
+                        Weekly Summary Report <span className="text-[9px] text-slate-400 font-normal ml-1">(Future-Ready)</span>
+                      </label>
+                      <p className="text-[10px] text-slate-400 mt-1 leading-normal">
+                        Receive a weekly analytics performance digest for your business.
+                      </p>
+                    </div>
+                    <button
+                      id="toggle-weekly"
+                      type="button"
+                      disabled={isReadOnly}
+                      onClick={() => setWeeklySummaryEnabled(!weeklySummaryEnabled)}
+                      className={`relative inline-flex h-5 w-9 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
+                        weeklySummaryEnabled ? 'bg-[#073afe]' : 'bg-slate-250'
+                      } disabled:opacity-50 disabled:cursor-not-allowed mt-0.5`}
+                    >
+                      <span
+                        className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow-sm ring-0 transition duration-200 ease-in-out ${
+                          weeklySummaryEnabled ? 'translate-x-4' : 'translate-x-0'
                         }`}
                       />
                     </button>

@@ -101,6 +101,11 @@ h6 {
   border-radius: 4px;
 }
 
+input:focus-visible,
+textarea:focus-visible {
+  outline: none !important;
+}
+
 /* =============================================================
    CUSTOM UI/UX PREMIUM ANIMATIONS (WHITE / GLASS THEME)
    ============================================================= */

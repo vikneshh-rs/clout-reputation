@@ -22,8 +22,10 @@ serve(async (req) => {
     // 1. Fetch pending/failed jobs due for dispatch
     const jobs = await sql`
       SELECT * FROM "NotificationJob"
-      WHERE "status" IN ('PENDING', 'FAILED')
-        AND "retryCount" < 3
+      WHERE (
+        "status" = 'PENDING'
+        OR ("status" = 'FAILED' AND "retryCount" < 3)
+      )
         AND ("scheduledFor" IS NULL OR "scheduledFor" <= NOW())
       ORDER BY "createdAt" ASC
       LIMIT 20;

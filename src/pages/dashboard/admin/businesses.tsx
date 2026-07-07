@@ -106,9 +106,38 @@ export default function BusinessesManagementPage(props: any) {
     contactPerson: '',
     category: '',
     website: '',
-    googleMapsUrl: ''
+    googleMapsUrl: '',
+    whatsappNumber: '',
+    negativeReviewEnabled: true,
+    positiveReviewEnabled: false,
+    dailySummaryEnabled: false,
+    weeklySummaryEnabled: false,
+    whatsappEnabled: true,
+    emailEnabled: false,
+    smsEnabled: false,
+    quietHoursStart: '',
+    quietHoursEnd: '',
+    timezone: 'UTC'
   });
   
+  const [recentJobs, setRecentJobs] = useState<any[]>([]);
+  const [loadingRecentJobs, setLoadingRecentJobs] = useState(false);
+
+  useEffect(() => {
+    if (!viewingBusiness?.id) {
+      setRecentJobs([]);
+      return;
+    }
+    setLoadingRecentJobs(true);
+    fetch(`/api/super-admin/notifications/jobs?businessId=${viewingBusiness.id}&limit=5`)
+      .then(res => res.ok ? res.json() : null)
+      .then(data => {
+        if (data) setRecentJobs(data.jobs || []);
+      })
+      .catch(err => console.error(err))
+      .finally(() => setLoadingRecentJobs(false));
+  }, [viewingBusiness?.id]);
+
   const [logoUploading, setLogoUploading] = useState(false);
   const [logoPreview, setLogoPreview] = useState('');
   const [submitting, setSubmitting] = useState(false);
@@ -251,7 +280,18 @@ export default function BusinessesManagementPage(props: any) {
       contactPerson: '',
       category: 'Restaurant',
       website: '',
-      googleMapsUrl: ''
+      googleMapsUrl: '',
+      whatsappNumber: '',
+      negativeReviewEnabled: true,
+      positiveReviewEnabled: false,
+      dailySummaryEnabled: false,
+      weeklySummaryEnabled: false,
+      whatsappEnabled: true,
+      emailEnabled: false,
+      smsEnabled: false,
+      quietHoursStart: '',
+      quietHoursEnd: '',
+      timezone: 'UTC'
     });
     setLogoPreview('');
     setFormError('');
@@ -277,7 +317,18 @@ export default function BusinessesManagementPage(props: any) {
       contactPerson: biz.contactPerson || '',
       category: biz.category || '',
       website: biz.website || '',
-      googleMapsUrl: biz.googleMapsUrl || ''
+      googleMapsUrl: biz.googleMapsUrl || '',
+      whatsappNumber: biz.whatsappNumber || '',
+      negativeReviewEnabled: (biz as any).notificationSettings?.negativeReviewEnabled ?? true,
+      positiveReviewEnabled: (biz as any).notificationSettings?.positiveReviewEnabled ?? false,
+      dailySummaryEnabled: (biz as any).notificationSettings?.dailySummaryEnabled ?? false,
+      weeklySummaryEnabled: (biz as any).notificationSettings?.weeklySummaryEnabled ?? false,
+      whatsappEnabled: (biz as any).notificationSettings?.whatsappEnabled ?? true,
+      emailEnabled: (biz as any).notificationSettings?.emailEnabled ?? false,
+      smsEnabled: (biz as any).notificationSettings?.smsEnabled ?? false,
+      quietHoursStart: (biz as any).notificationSettings?.quietHoursStart || '',
+      quietHoursEnd: (biz as any).notificationSettings?.quietHoursEnd || '',
+      timezone: (biz as any).notificationSettings?.timezone || 'UTC'
     });
     setLogoPreview(biz.logoUrl || '');
     setFormError('');
@@ -994,6 +1045,89 @@ export default function BusinessesManagementPage(props: any) {
                   )}
                 </div>
 
+                {/* Notification Settings section */}
+                <div className="border-t border-slate-100 pt-5 space-y-4">
+                  <h4 className="font-bold text-[10px] text-slate-400 uppercase tracking-widest pb-1 border-b border-slate-100 font-sans">Notification Settings</h4>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">WhatsApp Number</label>
+                      <input
+                        type="text"
+                        value={formData.whatsappNumber}
+                        onChange={(e) => setFormData({ ...formData, whatsappNumber: e.target.value })}
+                        placeholder="e.g. +1234567890"
+                        className="w-full text-xs p-3 border border-slate-200 rounded-2xl focus:border-[#073afe] focus:outline-none focus:ring-4 focus:ring-blue-500/5 bg-white/60"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">Timezone</label>
+                      <select
+                        value={formData.timezone}
+                        onChange={(e) => setFormData({ ...formData, timezone: e.target.value })}
+                        className="w-full text-xs p-3 border border-slate-200 rounded-2xl focus:border-[#073afe] focus:outline-none focus:ring-4 focus:ring-blue-500/5 bg-white"
+                      >
+                        <option value="UTC">UTC</option>
+                        <option value="America/New_York">EST (America/New_York)</option>
+                        <option value="Europe/London">GMT/BST (Europe/London)</option>
+                        <option value="Asia/Kolkata">IST (Asia/Kolkata)</option>
+                        <option value="Asia/Singapore">SGT (Asia/Singapore)</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">Quiet Hours Start</label>
+                      <input
+                        type="time"
+                        value={formData.quietHoursStart}
+                        onChange={(e) => setFormData({ ...formData, quietHoursStart: e.target.value })}
+                        className="w-full text-xs p-3 border border-slate-200 rounded-2xl focus:border-[#073afe] focus:outline-none focus:ring-4 focus:ring-blue-500/5 bg-white/60"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">Quiet Hours End</label>
+                      <input
+                        type="time"
+                        value={formData.quietHoursEnd}
+                        onChange={(e) => setFormData({ ...formData, quietHoursEnd: e.target.value })}
+                        className="w-full text-xs p-3 border border-slate-200 rounded-2xl focus:border-[#073afe] focus:outline-none focus:ring-4 focus:ring-blue-500/5 bg-white/60"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-3 pt-1">
+                    <div className="flex items-center justify-between p-3.5 bg-slate-50/50 border border-slate-100 rounded-2xl">
+                      <div className="space-y-0.5">
+                        <strong className="text-slate-800 font-bold block">WhatsApp Notifications</strong>
+                        <span className="text-[10px] text-slate-400">Dispatch alerts to target WhatsApp number.</span>
+                      </div>
+                      <input
+                        type="checkbox"
+                        checked={formData.whatsappEnabled}
+                        onChange={(e) => setFormData({ ...formData, whatsappEnabled: e.target.checked })}
+                        className="h-4 w-4 text-[#073afe] border-slate-300 rounded focus:ring-[#073afe] cursor-pointer"
+                      />
+                    </div>
+
+                    <div className="flex items-center justify-between p-3.5 bg-slate-50/50 border border-slate-100 rounded-2xl">
+                      <div className="space-y-0.5">
+                        <strong className="text-slate-800 font-bold block">Negative Reviews</strong>
+                        <span className="text-[10px] text-slate-400">Trigger alerts when rating is below 4 stars.</span>
+                      </div>
+                      <input
+                        type="checkbox"
+                        checked={formData.negativeReviewEnabled}
+                        onChange={(e) => setFormData({ ...formData, negativeReviewEnabled: e.target.checked })}
+                        className="h-4 w-4 text-[#073afe] border-slate-300 rounded focus:ring-[#073afe] cursor-pointer"
+                      />
+                    </div>
+                  </div>
+                </div>
+
                 <div>
                   <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">Subscription Plan</label>
                   <select
@@ -1236,7 +1370,129 @@ export default function BusinessesManagementPage(props: any) {
                       </a>
                     </div>
                   )}
+                  </div>
                 </div>
+
+              {/* Notification Configuration */}
+              <div className="space-y-4">
+                <div className="flex justify-between items-center pb-1 border-b border-slate-100">
+                  <h4 className="font-bold text-[10px] text-slate-400 uppercase tracking-widest font-sans">Notification Configuration</h4>
+                  {viewingBusiness && (
+                    <button
+                      onClick={() => { setViewingBusiness(null); openEditModal(viewingBusiness); }}
+                      className="text-[10px] font-bold text-[#073afe] hover:underline bg-transparent border-none cursor-pointer"
+                    >
+                      Edit Config
+                    </button>
+                  )}
+                </div>
+                
+                {viewingBusiness.whatsappNumber ? (
+                  <div className="space-y-3.5 bg-slate-50/40 p-4.5 border border-slate-100 rounded-2xl">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <span className="text-[10px] text-slate-400 font-medium block">WhatsApp Number</span>
+                        <strong className="text-slate-800 mt-0.5 block">{viewingBusiness.whatsappNumber}</strong>
+                      </div>
+                      <div>
+                        <span className="text-[10px] text-slate-400 font-medium block">WhatsApp Alerts</span>
+                        <span className={`inline-block text-[9px] font-bold px-1.5 py-0.5 rounded-md mt-1 ${
+                          viewingBusiness.notificationSettings?.whatsappEnabled 
+                            ? 'text-emerald-600 bg-emerald-50' 
+                            : 'text-slate-500 bg-slate-100'
+                        }`}>
+                          {viewingBusiness.notificationSettings?.whatsappEnabled ? 'ENABLED' : 'DISABLED'}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div>
+                      <span className="text-[10px] text-slate-400 font-medium block">Notification Preferences</span>
+                      <div className="flex flex-wrap gap-1.5 mt-1.5">
+                        <span className={`px-2 py-0.5 rounded-md text-[9px] font-bold ${viewingBusiness.notificationSettings?.negativeReviewEnabled ? 'bg-rose-50 text-rose-600' : 'bg-slate-50 text-slate-400'}`}>
+                          Negative: {viewingBusiness.notificationSettings?.negativeReviewEnabled ? 'ON' : 'OFF'}
+                        </span>
+                        <span className={`px-2 py-0.5 rounded-md text-[9px] font-bold ${viewingBusiness.notificationSettings?.positiveReviewEnabled ? 'bg-emerald-50 text-emerald-600' : 'bg-slate-50 text-slate-400'}`}>
+                          Positive: {viewingBusiness.notificationSettings?.positiveReviewEnabled ? 'ON' : 'OFF'}
+                        </span>
+                        <span className={`px-2 py-0.5 rounded-md text-[9px] font-bold ${viewingBusiness.notificationSettings?.dailySummaryEnabled ? 'bg-blue-50 text-blue-600' : 'bg-slate-50 text-slate-400'}`}>
+                          Daily Report: {viewingBusiness.notificationSettings?.dailySummaryEnabled ? 'ON' : 'OFF'}
+                        </span>
+                        <span className={`px-2 py-0.5 rounded-md text-[9px] font-bold ${viewingBusiness.notificationSettings?.weeklySummaryEnabled ? 'bg-indigo-50 text-indigo-600' : 'bg-slate-50 text-slate-400'}`}>
+                          Weekly Report: {viewingBusiness.notificationSettings?.weeklySummaryEnabled ? 'ON' : 'OFF'}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4 border-t border-slate-100 pt-3">
+                      <div>
+                        <span className="text-[10px] text-slate-400 font-medium block">Quiet Hours</span>
+                        <strong className="text-slate-800 mt-0.5 block">
+                          {viewingBusiness.notificationSettings?.quietHoursStart && viewingBusiness.notificationSettings?.quietHoursEnd
+                            ? `${viewingBusiness.notificationSettings.quietHoursStart} to ${viewingBusiness.notificationSettings.quietHoursEnd}`
+                            : 'None'
+                          }
+                        </strong>
+                      </div>
+                      <div>
+                        <span className="text-[10px] text-slate-400 font-medium block">Timezone</span>
+                        <strong className="text-slate-800 mt-0.5 block">{viewingBusiness.notificationSettings?.timezone || 'UTC'}</strong>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4 border-t border-slate-100 pt-3">
+                      <div>
+                        <span className="text-[10px] text-slate-400 font-medium block">Total Alerts Sent</span>
+                        <strong className="text-slate-800 mt-0.5 block">{(viewingBusiness as any).notificationStats?.totalNotifications ?? 0}</strong>
+                      </div>
+                      <div>
+                        <span className="text-[10px] text-slate-400 font-medium block">Success Rate</span>
+                        <strong className="text-slate-850 mt-0.5 block">{(viewingBusiness as any).notificationStats?.successRate ?? 100}%</strong>
+                      </div>
+                    </div>
+
+                    {((viewingBusiness as any).notificationStats?.lastNotificationSent) && (
+                      <div className="text-[9px] text-slate-400 font-medium pt-0.5">
+                        Last Sent: {new Date((viewingBusiness as any).notificationStats.lastNotificationSent).toLocaleString()}
+                      </div>
+                    )}
+
+                    <div className="border-t border-slate-100 pt-3 space-y-2">
+                      <span className="text-[10px] text-slate-400 font-medium block">Recent Notifications</span>
+                      {loadingRecentJobs ? (
+                        <div className="py-2 flex items-center justify-center gap-1.5">
+                          <Loader2 className="animate-spin h-3.5 w-3.5 text-[#073afe]" />
+                          <span className="text-[10px] text-slate-400">Loading alerts...</span>
+                        </div>
+                      ) : recentJobs.length === 0 ? (
+                        <span className="text-[10px] text-slate-400 italic block mt-0.5">No notifications dispatched yet.</span>
+                      ) : (
+                        <div className="space-y-1.5 pt-1">
+                          {recentJobs.map(job => (
+                            <div key={job.id} className="flex justify-between items-center bg-slate-50/50 p-2 border border-slate-100 rounded-xl text-[10px]">
+                              <div className="space-y-0.5">
+                                <span className="font-semibold text-slate-700">{job.recipient}</span>
+                                <span className="block text-[9px] text-slate-450 font-semibold">{new Date(job.createdAt).toLocaleString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</span>
+                              </div>
+                              <span className={`px-1.5 py-0.2 rounded-md font-bold text-[8px] border ${
+                                job.status === 'SENT' ? 'bg-emerald-50 text-emerald-600 border-emerald-100' :
+                                job.status === 'PENDING' ? 'bg-amber-50 text-amber-600 border-amber-100' :
+                                'bg-rose-50 text-rose-600 border-rose-100'
+                              }`}>
+                                {job.status}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ) : (
+                  <div className="p-4 bg-rose-50/50 border border-rose-100 rounded-2xl text-center">
+                    <strong className="text-rose-600 font-bold block text-xs">Setup Incomplete</strong>
+                    <p className="text-[10px] text-slate-500 mt-1">This business has not completed their notification settings setup yet.</p>
+                  </div>
+                )}
               </div>
 
               {/* QR Code and Reputation Portal Asset */}

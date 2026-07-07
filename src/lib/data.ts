@@ -444,7 +444,8 @@ export async function getBusinessById(id: string) {
           qrAssets: {
             where: { status: 'ASSIGNED' },
             take: 1
-          }
+          },
+          notificationSettings: true
         }
       });
     },
@@ -453,7 +454,22 @@ export async function getBusinessById(id: string) {
       if (!biz) return null;
       const subscriptions = mockSubscriptions.filter(s => s.businessId === id);
       const qrAssets = mockQrAssets.filter(q => q.assignedBusinessId === id && q.status === 'ASSIGNED');
-      return { ...biz, subscriptions, qrAssets };
+      // For mock settings fallback
+      const notificationSettings = {
+        id: `ns-${id}`,
+        businessId: id,
+        negativeReviewEnabled: true,
+        positiveReviewEnabled: false,
+        dailySummaryEnabled: false,
+        weeklySummaryEnabled: false,
+        whatsappEnabled: true,
+        emailEnabled: false,
+        smsEnabled: false,
+        quietHoursStart: null,
+        quietHoursEnd: null,
+        timezone: "UTC"
+      };
+      return { ...biz, subscriptions, qrAssets, notificationSettings };
     }
   );
   if (result) {
@@ -633,7 +649,8 @@ export async function getAllBusinesses(includeDeleted = false) {
           },
           qrAssets: {
             orderBy: { createdAt: 'desc' }
-          }
+          },
+          notificationSettings: true
         }
       });
 
@@ -643,10 +660,26 @@ export async function getAllBusinesses(includeDeleted = false) {
           where: { action: 'QR_DOWNLOAD', entityType: 'BUSINESS', entityId: biz.id },
           orderBy: { createdAt: 'desc' }
         });
+        
+        // Count NotificationJobs for businessId
+        const notificationJobs = await db.notificationJob.findMany({
+          where: { businessId: biz.id }
+        });
+        const completedJobs = notificationJobs.filter(j => j.status === 'COMPLETED');
+        const failedJobs = notificationJobs.filter(j => j.status === 'FAILED');
+        const totalProcessed = completedJobs.length + failedJobs.length;
+        const successRate = totalProcessed > 0 ? Math.round((completedJobs.length / totalProcessed) * 100) : 100;
+        const lastJob = completedJobs.sort((a, b) => b.completedAt!.getTime() - a.completedAt!.getTime())[0];
+
         return {
           ...biz,
           totalDownloads: logs.length,
-          lastDownloadDate: logs.length > 0 ? logs[0].createdAt.toISOString() : null
+          lastDownloadDate: logs.length > 0 ? logs[0].createdAt.toISOString() : null,
+          notificationStats: {
+            totalNotifications: notificationJobs.length,
+            lastNotificationSent: lastJob ? lastJob.completedAt.toISOString() : null,
+            successRate
+          }
         };
       }));
 
@@ -668,7 +701,26 @@ export async function getAllBusinesses(includeDeleted = false) {
             subscriptions,
             qrAssets,
             totalDownloads: logs.length,
-            lastDownloadDate: logs.length > 0 ? logs[0].createdAt.toISOString() : null
+            lastDownloadDate: logs.length > 0 ? logs[0].createdAt.toISOString() : null,
+            notificationSettings: {
+              id: `ns-${b.id}`,
+              businessId: b.id,
+              negativeReviewEnabled: true,
+              positiveReviewEnabled: false,
+              dailySummaryEnabled: false,
+              weeklySummaryEnabled: false,
+              whatsappEnabled: true,
+              emailEnabled: false,
+              smsEnabled: false,
+              quietHoursStart: null,
+              quietHoursEnd: null,
+              timezone: "UTC"
+            },
+            notificationStats: {
+              totalNotifications: 15,
+              lastNotificationSent: new Date(Date.now() - 3600000).toISOString(),
+              successRate: 93
+            }
           };
         }).sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
     }
@@ -1017,13 +1069,45 @@ export async function updateBusinessDetails(
     googleMapsUrl?: string | null;
     status?: BusinessStatus;
     passwordHash?: string;
+    whatsappNumber?: string | null;
+    notificationSettings?: {
+      negativeReviewEnabled?: boolean;
+      positiveReviewEnabled?: boolean;
+      dailySummaryEnabled?: boolean;
+      weeklySummaryEnabled?: boolean;
+      whatsappEnabled?: boolean;
+      emailEnabled?: boolean;
+      smsEnabled?: boolean;
+      timezone?: string;
+    };
   }
 ) {
   return runQuery(
     async () => {
+      const { notificationSettings, ...primitiveData } = data;
       return await db.business.update({
         where: { id },
-        data
+        data: {
+          ...primitiveData,
+          notificationSettings: notificationSettings ? {
+            upsert: {
+              create: {
+                negativeReviewEnabled: notificationSettings.negativeReviewEnabled ?? true,
+                positiveReviewEnabled: notificationSettings.positiveReviewEnabled ?? false,
+                dailySummaryEnabled: notificationSettings.dailySummaryEnabled ?? false,
+                weeklySummaryEnabled: notificationSettings.weeklySummaryEnabled ?? false,
+                whatsappEnabled: notificationSettings.whatsappEnabled ?? true,
+                emailEnabled: notificationSettings.emailEnabled ?? false,
+                smsEnabled: notificationSettings.smsEnabled ?? false,
+                timezone: notificationSettings.timezone ?? "UTC"
+              },
+              update: notificationSettings
+            }
+          } : undefined
+        },
+        include: {
+          notificationSettings: true
+        }
       });
     },
     async () => {
@@ -1043,6 +1127,14 @@ export async function updateBusinessDetails(
         if (data.googleMapsUrl !== undefined) biz.googleMapsUrl = data.googleMapsUrl;
         if (data.status !== undefined) biz.status = data.status;
         if (data.passwordHash !== undefined) biz.passwordHash = data.passwordHash;
+        if (data.whatsappNumber !== undefined) biz.whatsappNumber = data.whatsappNumber;
+        
+        if (data.notificationSettings) {
+          (biz as any).notificationSettings = {
+            ...(biz as any).notificationSettings,
+            ...data.notificationSettings
+          };
+        }
         biz.updatedAt = new Date();
       }
       return biz || null;
@@ -3728,7 +3820,18 @@ export async function getRecoveryRequestDetails(id: string) {
     async () => {
       return await db.recoveryRequest.findUnique({
         where: { id },
-        include: { business: true, review: true, resolvedBy: true }
+        include: {
+          business: true,
+          resolvedBy: true,
+          review: {
+            include: {
+              notificationJobs: {
+                orderBy: { createdAt: 'desc' },
+                take: 1
+              }
+            }
+          }
+        }
       });
     },
     async () => {
@@ -3742,7 +3845,18 @@ export async function getRecoveryRequestDetails(id: string) {
       return {
         ...rr,
         business: biz || null,
-        review: rev || null,
+        review: rev ? {
+          ...rev,
+          notificationJobs: [
+            {
+              id: "ns-mock-1",
+              status: "SENT",
+              provider: "TWILIO",
+              notificationType: "WHATSAPP",
+              createdAt: new Date().toISOString()
+            }
+          ]
+        } : null,
         resolvedBy: resolver ? { id: resolver.id, name: resolver.name, email: resolver.email } : null
       };
     }
@@ -3863,15 +3977,30 @@ export async function getBusinessAnalytics(businessId: string | null | undefined
         whereFunnel.business = { createdByRepId };
       }
 
-      const [scans, reviews, callbacks, recoveryRequests, funnelEvents] = await Promise.all([
+      const [scans, reviews, callbacks, recoveryRequests, funnelEvents, totalNotifications, lastJob, completedJobs, failedJobs] = await Promise.all([
         db.qRScan.findMany({ where: whereScan }),
         db.review.findMany({ where: whereReview }),
         db.callbackRequest.findMany({ where: whereCallback }),
         db.recoveryRequest.findMany({ where: whereRecovery }),
-        db.funnelEvent.findMany({ where: whereFunnel })
+        db.funnelEvent.findMany({ where: whereFunnel }),
+        businessId && businessId !== 'ALL' ? db.notificationJob.count({ where: { businessId } }) : Promise.resolve(0),
+        businessId && businessId !== 'ALL' ? db.notificationJob.findFirst({ where: { businessId, status: 'COMPLETED' }, orderBy: { completedAt: 'desc' } }) : Promise.resolve(null),
+        businessId && businessId !== 'ALL' ? db.notificationJob.count({ where: { businessId, status: 'COMPLETED' } }) : Promise.resolve(0),
+        businessId && businessId !== 'ALL' ? db.notificationJob.count({ where: { businessId, status: 'FAILED' } }) : Promise.resolve(0)
       ]);
 
-      return computeAnalytics(scans, reviews, callbacks, recoveryRequests, funnelEvents, start, end);
+      const baseAnalytics = computeAnalytics(scans, reviews, callbacks, recoveryRequests, funnelEvents, start, end);
+      const totalProcessed = completedJobs + failedJobs;
+      const successRate = totalProcessed > 0 ? Math.round((completedJobs / totalProcessed) * 100) : 100;
+      
+      return {
+        ...baseAnalytics,
+        notificationStats: {
+          totalNotifications,
+          lastNotificationSent: lastJob ? lastJob.completedAt : null,
+          successRate
+        }
+      };
     },
     async () => {
       const start = getPeriodStartDate(period);
@@ -3919,7 +4048,15 @@ export async function getBusinessAnalytics(businessId: string | null | undefined
         return fe.timestamp >= start && fe.timestamp <= end;
       });
 
-      return computeAnalytics(scans, reviews, callbacks, recoveryRequests, funnelEvents, start, end);
+      const baseAnalytics = computeAnalytics(scans, reviews, callbacks, recoveryRequests, funnelEvents, start, end);
+      return {
+        ...baseAnalytics,
+        notificationStats: {
+          totalNotifications: 12,
+          lastNotificationSent: new Date(Date.now() - 3600000).toISOString(),
+          successRate: 92
+        }
+      };
     }
   );
 }

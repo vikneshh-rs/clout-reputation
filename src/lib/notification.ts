@@ -101,6 +101,7 @@ export async function shouldCreateNotification(review: Review): Promise<{ should
 export async function createNotification(review: Review) {
   const evaluation = await shouldCreateNotification(review);
   if (!evaluation.shouldCreate || !evaluation.business) {
+    console.log(`[NotificationService] SKIPPED: Evaluation criteria not met for review ${review.id} (Rating: ${review.rating}).`);
     return null;
   }
 
@@ -109,17 +110,21 @@ export async function createNotification(review: Review) {
   // Determine channels
   const channels: { type: NotificationType; provider: NotificationProvider; recipient: string }[] = [];
   
-  if (settings.whatsappEnabled && business.whatsappNumber) {
-    channels.push({
-      type: NotificationType.WHATSAPP,
-      provider: NotificationProvider.TWILIO, // twilio sandbox by default in development
-      recipient: business.whatsappNumber,
-    });
+  if (settings.whatsappEnabled) {
+    if (!business.whatsappNumber) {
+      console.log(`[NotificationService] SKIPPED: Business "${business.name}" (ID: ${business.id}) has WhatsApp alerts enabled, but has not configured a WhatsApp number.`);
+    } else {
+      channels.push({
+        type: NotificationType.WHATSAPP,
+        provider: NotificationProvider.TWILIO, // twilio sandbox by default in development
+        recipient: business.whatsappNumber,
+      });
+    }
   }
 
   // Future channel slots (email / sms) can be appended here dynamically
   if (channels.length === 0) {
-    console.log(`[NotificationService] No active channels or recipients set for business: ${business.id}. Skipping.`);
+    console.log(`[NotificationService] SKIPPED: No active and configured channels found for business "${business.name}" (ID: ${business.id}).`);
     return null;
   }
 

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import Link from 'next/link';
 import { 
   PhoneCall, 
   MessageCircle, 
@@ -733,6 +734,59 @@ export default function CustomerRecoveryModule({ businessId, readOnly = false }:
                       &quot;{selectedTicket.feedback || 'No comment provided by customer'}&quot;
                     </div>
                   </div>
+
+                  {/* Notification Alert Status */}
+                  {selectedTicket.review && (selectedTicket.review as any).notificationJobs && (selectedTicket.review as any).notificationJobs.length > 0 && (
+                    <div className="bg-slate-50/50 border border-slate-100 p-5 rounded-[20px] space-y-3.5">
+                      <div className="flex justify-between items-center pb-2 border-b border-slate-100">
+                        <h4 className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Negative Review Alert</h4>
+                        <span className={`inline-flex items-center px-1.5 py-0.5 rounded-full text-[9px] font-bold border ${
+                          (selectedTicket.review as any).notificationJobs[0].status === 'SENT' || (selectedTicket.review as any).notificationJobs[0].status === 'COMPLETED'
+                            ? 'bg-emerald-50 text-emerald-700 border-emerald-200' :
+                          (selectedTicket.review as any).notificationJobs[0].status === 'PENDING' 
+                            ? 'bg-amber-50 text-amber-700 border-amber-200 animate-pulse' :
+                          (selectedTicket.review as any).notificationJobs[0].status === 'PROCESSING' 
+                            ? 'bg-blue-50 text-blue-700 border-blue-200 animate-pulse' :
+                            'bg-rose-50 text-rose-705 border-rose-200'
+                        }`}>
+                          {(selectedTicket.review as any).notificationJobs[0].status}
+                        </span>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-4 text-xs">
+                        <div>
+                          <span className="block text-[10px] text-slate-400 font-medium">Alert Dispatched</span>
+                          <span className="text-xs font-bold text-slate-900 mt-0.5 block">
+                            {new Date((selectedTicket.review as any).notificationJobs[0].createdAt).toLocaleString()}
+                          </span>
+                        </div>
+                        <div>
+                          <span className="block text-[10px] text-slate-400 font-medium">Provider & Type</span>
+                          <span className="text-xs font-bold text-slate-900 mt-0.5 block uppercase">
+                            {(selectedTicket.review as any).notificationJobs[0].provider} ({(selectedTicket.review as any).notificationJobs[0].notificationType})
+                          </span>
+                        </div>
+                      </div>
+
+                      {(selectedTicket.review as any).notificationJobs[0].errorMessage && (
+                        <div className="p-2.5 bg-rose-50 border border-rose-100 rounded-xl text-[10px] font-mono text-rose-700 break-all leading-normal">
+                          Error: {(selectedTicket.review as any).notificationJobs[0].errorMessage}
+                        </div>
+                      )}
+
+                      {user?.role === 'SUPER_ADMIN' && (
+                        <div className="pt-1.5">
+                          <Link
+                            href={`/dashboard/admin/notifications?search=${(selectedTicket.review as any).notificationJobs[0].id}`}
+                            className="text-xs font-bold text-[#073afe] hover:underline flex items-center gap-0.5"
+                          >
+                            <span>Inspect Notification Job</span>
+                            <ArrowRight size={12} className="text-[#073afe]" />
+                          </Link>
+                        </div>
+                      )}
+                    </div>
+                  )}
 
                   {/* Resolution Logs / Audit accountability */}
                   {selectedTicket.status === 'RESOLVED' && (

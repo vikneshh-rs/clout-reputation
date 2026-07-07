@@ -117,12 +117,32 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         contactPerson, 
         category, 
         website, 
-        googleMapsUrl 
+        googleMapsUrl,
+        whatsappNumber,
+        negativeReviewEnabled,
+        positiveReviewEnabled,
+        dailySummaryEnabled,
+        weeklySummaryEnabled,
+        whatsappEnabled,
+        emailEnabled,
+        smsEnabled,
+        quietHoursStart,
+        quietHoursEnd,
+        timezone
       } = req.body;
 
       if (action === 'edit') {
         if (!id) {
           return res.status(400).json({ error: 'Business ID is required.' });
+        }
+
+        // Validate WhatsApp number if provided
+        let validatedWhatsappNumber = whatsappNumber ? whatsappNumber.trim() : null;
+        if (validatedWhatsappNumber) {
+          const e164Regex = /^\+[1-9]\d{9,14}$/;
+          if (!e164Regex.test(validatedWhatsappNumber)) {
+            return res.status(400).json({ error: 'WhatsApp number must be in E.164 format (e.g., +1234567890).' });
+          }
         }
 
         const updateData: any = {
@@ -136,7 +156,20 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           contactPerson: contactPerson || null,
           category: category || null,
           website: website || null,
-          googleMapsUrl: googleMapsUrl || null
+          googleMapsUrl: googleMapsUrl || null,
+          whatsappNumber: validatedWhatsappNumber,
+          notificationSettings: {
+            negativeReviewEnabled: negativeReviewEnabled !== undefined ? Boolean(negativeReviewEnabled) : undefined,
+            positiveReviewEnabled: positiveReviewEnabled !== undefined ? Boolean(positiveReviewEnabled) : undefined,
+            dailySummaryEnabled: dailySummaryEnabled !== undefined ? Boolean(dailySummaryEnabled) : undefined,
+            weeklySummaryEnabled: weeklySummaryEnabled !== undefined ? Boolean(weeklySummaryEnabled) : undefined,
+            whatsappEnabled: whatsappEnabled !== undefined ? Boolean(whatsappEnabled) : undefined,
+            emailEnabled: emailEnabled !== undefined ? Boolean(emailEnabled) : undefined,
+            smsEnabled: smsEnabled !== undefined ? Boolean(smsEnabled) : undefined,
+            timezone: timezone || undefined,
+            quietHoursStart: quietHoursStart !== undefined ? quietHoursStart : undefined,
+            quietHoursEnd: quietHoursEnd !== undefined ? quietHoursEnd : undefined
+          }
         };
 
         if (password) {

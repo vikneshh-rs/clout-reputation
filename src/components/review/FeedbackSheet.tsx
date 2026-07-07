@@ -126,8 +126,8 @@ export default function FeedbackSheet({
     setSelectedChips(newChips);
 
     // Update textarea content intuitively without wiping user comments
-    const chipsPrefix = newChips.length > 0 ? `[${newChips.join(", ")}] ` : "";
-    const cleanFeedback = feedback.replace(/^\[.*?\]\s*/, "");
+    const chipsPrefix = newChips.length > 0 ? `${newChips.join(", ")} - ` : "";
+    const cleanFeedback = feedback.replace(/^[^-]+ - /, "");
     setFeedback(`${chipsPrefix}${cleanFeedback}`);
   };
 
