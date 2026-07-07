@@ -327,9 +327,10 @@ export default function FeedbackSheet({
                         onChange={(e) => setFeedback(e.target.value)}
                         placeholder="Tell us what happened..."
                         required
-                        className="w-full resize-none rounded-2xl border border-slate-200 bg-white px-4 py-3 text-[14.5px] leading-relaxed text-slate-800 outline-none transition-all duration-250 focus:border-[#073AFE] focus:ring-[4.5px] focus:ring-[#073AFE]/10 placeholder:text-slate-400"
+                        className="w-full resize-none rounded-2xl border border-slate-200 bg-white px-4 py-3 text-[14.5px] leading-relaxed text-slate-800 outline-none transition-all duration-250 focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0 placeholder:text-slate-400"
                       />
                     </motion.div>
+
 
                     {/* Callback Consent Checkbox */}
                     <motion.label
@@ -367,7 +368,7 @@ export default function FeedbackSheet({
                             onChange={(e) => setCustomerName(e.target.value)}
                             placeholder="Your Name"
                             required={callback}
-                            className="h-11.5 w-full rounded-xl border border-slate-200 px-4 text-sm text-slate-800 outline-none transition-all focus:border-[#073AFE] focus:ring-[4.5px] focus:ring-[#073AFE]/10 placeholder:text-slate-400"
+                            className="h-11.5 w-full rounded-xl border border-slate-200 px-4 text-sm text-slate-800 outline-none transition-all focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0 placeholder:text-slate-400"
                           />
                           <div className="relative">
                             <Phone
@@ -379,7 +380,7 @@ export default function FeedbackSheet({
                               onChange={(e) => setPhone(e.target.value)}
                               placeholder="WhatsApp Number"
                               required={callback}
-                              className="h-11.5 w-full rounded-xl border border-slate-200 pl-11 pr-4 text-sm text-slate-800 outline-none transition-all focus:border-[#073AFE] focus:ring-[4.5px] focus:ring-[#073AFE]/10 placeholder:text-slate-400"
+                              className="h-11.5 w-full rounded-xl border border-slate-200 pl-11 pr-4 text-sm text-slate-800 outline-none transition-all focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0 placeholder:text-slate-400"
                             />
                           </div>
                         </motion.div>

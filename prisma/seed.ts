@@ -7,6 +7,9 @@ async function main() {
   console.log('🧹 Clearing existing database records...');
 
   // Delete in order to satisfy foreign keys
+  await prisma.notificationLog.deleteMany({});
+  await prisma.notificationJob.deleteMany({});
+  await prisma.businessNotificationSettings.deleteMany({});
   await prisma.activityLog.deleteMany({});
   await prisma.callbackRequest.deleteMany({});
   await prisma.recoveryRequest.deleteMany({});
@@ -67,6 +70,9 @@ async function main() {
       isActive: true,
       status: BusinessStatus.ACTIVE,
       createdByRepId: repAdmin.id,
+      notificationSettings: {
+        create: {}
+      }
     },
   });
 
@@ -84,6 +90,9 @@ async function main() {
       isActive: true,
       status: BusinessStatus.ACTIVE,
       createdByRepId: repAdmin.id,
+      notificationSettings: {
+        create: {}
+      }
     },
   });
 
@@ -101,6 +110,9 @@ async function main() {
       isActive: true,
       status: BusinessStatus.ACTIVE,
       createdByRepId: repAdmin.id,
+      notificationSettings: {
+        create: {}
+      }
     },
   });
   console.log('✅ Created Businesses (Bella Italia, Luxe Salon, Cafe Paris) linked to REP Dan');
@@ -265,6 +277,8 @@ async function main() {
     { bId: b3.id, scans: 60, starts: 45, submits: 25, redirects: 15 }
   ];
 
+  const funnelEventsToCreate: any[] = [];
+
   for (const data of funnelData) {
     for (let day = 0; day < 12; day++) {
       const date = new Date(Date.now() - day * 24 * 3600 * 1000);
@@ -278,47 +292,43 @@ async function main() {
       const sessionIdBase = `sess-${data.bId.substring(0, 4)}-d${day}`;
 
       for (let i = 0; i < scansCount; i++) {
-        await prisma.funnelEvent.create({
-          data: {
-            businessId: data.bId,
-            stage: 'SCAN',
-            timestamp: date,
-            reviewSessionId: `${sessionIdBase}-s${i}`
-          }
+        funnelEventsToCreate.push({
+          businessId: data.bId,
+          stage: 'SCAN',
+          timestamp: date,
+          reviewSessionId: `${sessionIdBase}-s${i}`
         });
       }
       for (let i = 0; i < startsCount; i++) {
-        await prisma.funnelEvent.create({
-          data: {
-            businessId: data.bId,
-            stage: 'START',
-            timestamp: date,
-            reviewSessionId: `${sessionIdBase}-st${i}`
-          }
+        funnelEventsToCreate.push({
+          businessId: data.bId,
+          stage: 'START',
+          timestamp: date,
+          reviewSessionId: `${sessionIdBase}-st${i}`
         });
       }
       for (let i = 0; i < submitsCount; i++) {
-        await prisma.funnelEvent.create({
-          data: {
-            businessId: data.bId,
-            stage: 'SUBMIT',
-            timestamp: date,
-            reviewSessionId: `${sessionIdBase}-sub${i}`
-          }
+        funnelEventsToCreate.push({
+          businessId: data.bId,
+          stage: 'SUBMIT',
+          timestamp: date,
+          reviewSessionId: `${sessionIdBase}-sub${i}`
         });
       }
       for (let i = 0; i < redirectsCount; i++) {
-        await prisma.funnelEvent.create({
-          data: {
-            businessId: data.bId,
-            stage: 'REDIRECT',
-            timestamp: date,
-            reviewSessionId: `${sessionIdBase}-r${i}`
-          }
+        funnelEventsToCreate.push({
+          businessId: data.bId,
+          stage: 'REDIRECT',
+          timestamp: date,
+          reviewSessionId: `${sessionIdBase}-r${i}`
         });
       }
     }
   }
+
+  await prisma.funnelEvent.createMany({
+    data: funnelEventsToCreate
+  });
   console.log('✅ Seeded FunnelEvents successfully!');
 
   // 6. Seed Activity Logs

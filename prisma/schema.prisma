@@ -109,6 +109,7 @@ model Business {
   deletedAt       DateTime?
   enableGoogleReviewRedirect Boolean @default(true)
   enableManagerCallback      Boolean @default(true)
+  whatsappNumber             String?
   
   // REP Onboarding Tracking
   createdByRepId  String?
@@ -121,6 +122,8 @@ model Business {
   reviews         Review[]
   subscriptions   Subscription[]
   qrScans         QRScan[]
+  notificationJobs NotificationJob[]
+  notificationSettings BusinessNotificationSettings?
   
   assignedQrAssetId String?  @unique @map("assigned_qr_asset_id")
   assignedQrAsset   QRAsset? @relation("ActiveQrAsset", fields: [assignedQrAssetId], references: [id], onDelete: SetNull)
@@ -154,6 +157,7 @@ model Review {
   business           Business         @relation(fields: [businessId], references: [id], onDelete: Cascade)
   callbackRequest    CallbackRequest?
   recoveryRequest    RecoveryRequest?
+  notificationJobs   NotificationJob[]
 
   @@index([businessId])
   @@index([createdAt])
@@ -339,3 +343,106 @@ model FunnelEvent {
   @@index([stage])
   @@index([timestamp])
 }
+
+enum NotificationStatus {
+  PENDING
+  PROCESSING
+  SENT
+  FAILED
+  PERMANENTLY_FAILED
+}
+
+enum NotificationProvider {
+  TWILIO
+  META
+  RESEND
+  SMTP
+}
+
+enum NotificationType {
+  WHATSAPP
+  EMAIL
+  SMS
+}
+
+enum NotificationEvent {
+  NEGATIVE_REVIEW
+  POSITIVE_REVIEW
+  DAILY_SUMMARY
+  WEEKLY_REPORT
+}
+
+model NotificationJob {
+  id                String               @id @default(uuid())
+  status            NotificationStatus   @default(PENDING)
+  retryCount        Int                  @default(0)
+  notificationType  NotificationType
+  eventType         NotificationEvent
+  provider          NotificationProvider
+  recipient         String
+  payload           Json                 // Holds serializable JSON with review/business details
+  scheduledFor      DateTime?
+  processedAt       DateTime?
+  providerMessageId String?
+  errorMessage      String?
+  
+  // Operational Timestamps & Metrics
+  queuedAt          DateTime             @default(now())
+  startedAt         DateTime?
+  completedAt       DateTime?
+  processingTimeMs  Int?
+  
+  // Provider Response Details
+  providerStatus    String?
+  providerResponse  Json?
+  
+  createdAt         DateTime             @default(now())
+  updatedAt         DateTime             @updatedAt
+  
+  // Relations
+  reviewId          String?
+  review            Review?              @relation(fields: [reviewId], references: [id], onDelete: SetNull)
+  businessId        String
+  business          Business             @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  logs              NotificationLog[]
+
+  @@unique([reviewId, eventType, notificationType])
+  @@index([status])
+  @@index([businessId])
+  @@index([reviewId])
+}
+
+model NotificationLog {
+  id                 String               @id @default(uuid())
+  jobId              String
+  job                NotificationJob      @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  provider           NotificationProvider
+  attemptNumber      Int
+  previousStatus     NotificationStatus
+  newStatus          NotificationStatus
+  providerResponse   Json?
+  errorMessage       String?
+  timestamp          DateTime             @default(now())
+  
+  // Dispatch Audit Trail Details
+  eventType          NotificationEvent
+  notificationType   NotificationType
+  processingDuration Int?
+}
+
+model BusinessNotificationSettings {
+  id                    String   @id @default(uuid())
+  businessId            String   @unique
+  business              Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  negativeReviewEnabled Boolean  @default(true)
+  positiveReviewEnabled Boolean  @default(false)
+  dailySummaryEnabled   Boolean  @default(false)
+  weeklySummaryEnabled  Boolean  @default(false)
+  whatsappEnabled       Boolean  @default(true)
+  emailEnabled          Boolean  @default(false)
+  smsEnabled            Boolean  @default(false)
+  quietHoursStart       String?  // format: "HH:MM" e.g. "22:00"
+  quietHoursEnd         String?  // format: "HH:MM" e.g. "08:00"
+  timezone              String   @default("UTC")
+}
+

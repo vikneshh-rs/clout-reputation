@@ -1,4 +1,5 @@
 import { db } from './db';
+import { createNotification } from './notification';
 import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
 import {
@@ -44,9 +45,9 @@ export function generateUniqueCode(length = 8): string {
 
 // In-Memory Mock Data Store (seeded with the same data as prisma/seed.ts)
 export let mockBusinesses: Business[] = [
-  { id: 'b1', name: 'Bella Italia', slug: 'bella-italia', businessCode: 'CR-000001', passwordHash: '', industry: Industry.RESTAURANT, logoUrl: 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=100&auto=format&fit=crop', googleReviewUrl: 'https://search.google.com/local/writereview?placeid=ChIJ313_placeholder1', phone: '+15550212', address: '123 Pizza Way, Rome', isActive: true, status: BusinessStatus.ACTIVE, deletedAt: null, enableGoogleReviewRedirect: true, enableManagerCallback: true, createdByRepId: 'u-rep1', createdAt: new Date(), updatedAt: new Date(), description: 'Authentic Italian cuisine in the heart of Rome.', contactPerson: 'Giovanni Rossi', category: 'Restaurant', website: 'https://bellaitalia.com', googleMapsUrl: 'https://maps.google.com/?cid=bella-italia', assignedQrAssetId: 'inv-b1' },
-  { id: 'b2', name: 'Luxe Salon', slug: 'luxe-salon', businessCode: 'CR-000002', passwordHash: '', industry: Industry.SALON, logoUrl: 'https://images.unsplash.com/photo-1560066984-138dadb4c035?w=100&auto=format&fit=crop', googleReviewUrl: 'https://search.google.com/local/writereview?placeid=ChIJ313_placeholder2', phone: '+15550213', address: '456 Beauty Blvd, New York', isActive: true, status: BusinessStatus.ACTIVE, deletedAt: null, enableGoogleReviewRedirect: true, enableManagerCallback: true, createdByRepId: 'u-rep1', createdAt: new Date(), updatedAt: new Date(), description: 'Premium hair and beauty treatments.', contactPerson: 'Sarah Jenkins', category: 'Salon', website: 'https://luxesalon.com', googleMapsUrl: 'https://maps.google.com/?cid=luxe-salon', assignedQrAssetId: 'inv-b2' },
-  { id: 'b3', name: 'Cafe Paris', slug: 'cafe-paris', businessCode: 'CR-000003', passwordHash: '', industry: Industry.CAFE, logoUrl: 'https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?w=100&auto=format&fit=crop', googleReviewUrl: 'https://search.google.com/local/writereview?placeid=ChIJ313_placeholder3', phone: '+15550214', address: '789 Croissant St, Paris', isActive: true, status: BusinessStatus.ACTIVE, deletedAt: null, enableGoogleReviewRedirect: true, enableManagerCallback: true, createdByRepId: 'u-rep2', createdAt: new Date(), updatedAt: new Date(), description: 'Fresh croissants and specialty coffee.', contactPerson: 'Jean-Luc Picard', category: 'Cafe', website: 'https://cafeparis.com', googleMapsUrl: 'https://maps.google.com/?cid=cafe-paris', assignedQrAssetId: 'inv-b3' },
+  { id: 'b1', name: 'Bella Italia', slug: 'bella-italia', businessCode: 'CR-000001', passwordHash: '', industry: Industry.RESTAURANT, logoUrl: 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=100&auto=format&fit=crop', googleReviewUrl: 'https://search.google.com/local/writereview?placeid=ChIJ313_placeholder1', phone: '+15550212', address: '123 Pizza Way, Rome', isActive: true, status: BusinessStatus.ACTIVE, deletedAt: null, enableGoogleReviewRedirect: true, enableManagerCallback: true, createdByRepId: 'u-rep1', createdAt: new Date(), updatedAt: new Date(), description: 'Authentic Italian cuisine in the heart of Rome.', contactPerson: 'Giovanni Rossi', category: 'Restaurant', website: 'https://bellaitalia.com', googleMapsUrl: 'https://maps.google.com/?cid=bella-italia', assignedQrAssetId: 'inv-b1', whatsappNumber: null },
+  { id: 'b2', name: 'Luxe Salon', slug: 'luxe-salon', businessCode: 'CR-000002', passwordHash: '', industry: Industry.SALON, logoUrl: 'https://images.unsplash.com/photo-1560066984-138dadb4c035?w=100&auto=format&fit=crop', googleReviewUrl: 'https://search.google.com/local/writereview?placeid=ChIJ313_placeholder2', phone: '+15550213', address: '456 Beauty Blvd, New York', isActive: true, status: BusinessStatus.ACTIVE, deletedAt: null, enableGoogleReviewRedirect: true, enableManagerCallback: true, createdByRepId: 'u-rep1', createdAt: new Date(), updatedAt: new Date(), description: 'Premium hair and beauty treatments.', contactPerson: 'Sarah Jenkins', category: 'Salon', website: 'https://luxesalon.com', googleMapsUrl: 'https://maps.google.com/?cid=luxe-salon', assignedQrAssetId: 'inv-b2', whatsappNumber: null },
+  { id: 'b3', name: 'Cafe Paris', slug: 'cafe-paris', businessCode: 'CR-000003', passwordHash: '', industry: Industry.CAFE, logoUrl: 'https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?w=100&auto=format&fit=crop', googleReviewUrl: 'https://search.google.com/local/writereview?placeid=ChIJ313_placeholder3', phone: '+15550214', address: '789 Croissant St, Paris', isActive: true, status: BusinessStatus.ACTIVE, deletedAt: null, enableGoogleReviewRedirect: true, enableManagerCallback: true, createdByRepId: 'u-rep2', createdAt: new Date(), updatedAt: new Date(), description: 'Fresh croissants and specialty coffee.', contactPerson: 'Jean-Luc Picard', category: 'Cafe', website: 'https://cafeparis.com', googleMapsUrl: 'https://maps.google.com/?cid=cafe-paris', assignedQrAssetId: 'inv-b3', whatsappNumber: null },
 ];
 
 export let mockUsers: User[] = [
@@ -945,7 +946,8 @@ export async function onboardBusiness(data: {
         createdByRepId: data.createdByRepId,
         createdAt: new Date(),
         updatedAt: new Date(),
-        assignedQrAssetId: qrAsset.id
+        assignedQrAssetId: qrAsset.id,
+        whatsappNumber: null
       };
 
       mockQrHistory.push({
@@ -1494,6 +1496,9 @@ export async function createReview(data: {
           }
         }).catch(err => console.error('Failed to log SUBMIT event in DB:', err));
       }
+
+      // 4. Create Notification Job asynchronously
+      createNotification(review).catch(err => console.error('Failed to create notification job:', err));
 
       return review;
     },
