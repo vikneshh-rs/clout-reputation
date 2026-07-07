@@ -43,6 +43,7 @@ interface Stats {
   businessesThisMonth: number;
   callbacksThisMonth: number;
   googleRedirectClicksThisMonth: number;
+  recentLogs?: ActivityLog[];
 }
 
 function NotificationSummaryWidget() {

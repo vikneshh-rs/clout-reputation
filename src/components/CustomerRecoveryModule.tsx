@@ -741,7 +741,7 @@ export default function CustomerRecoveryModule({ businessId, readOnly = false }:
                       <div className="flex justify-between items-center pb-2 border-b border-slate-100">
                         <h4 className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Negative Review Alert</h4>
                         <span className={`inline-flex items-center px-1.5 py-0.5 rounded-full text-[9px] font-bold border ${
-                          (selectedTicket.review as any).notificationJobs[0].status === 'SENT' || (selectedTicket.review as any).notificationJobs[0].status === 'COMPLETED'
+                          (selectedTicket.review as any).notificationJobs[0].status === 'SENT'
                             ? 'bg-emerald-50 text-emerald-700 border-emerald-200' :
                           (selectedTicket.review as any).notificationJobs[0].status === 'PENDING' 
                             ? 'bg-amber-50 text-amber-700 border-amber-200 animate-pulse' :

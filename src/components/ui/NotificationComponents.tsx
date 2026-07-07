@@ -68,7 +68,7 @@ export function NotificationTimeline({ logs }: TimelineProps) {
   return (
     <div className="relative border-l border-slate-100 ml-3.5 pl-5 space-y-6">
       {logs.map((log) => {
-        const isSuccess = log.newStatus === 'SENT' || log.newStatus === 'COMPLETED';
+        const isSuccess = log.newStatus === 'SENT';
         return (
           <div key={log.id} className="relative group">
             {/* Timeline node icon */}

@@ -665,7 +665,7 @@ export async function getAllBusinesses(includeDeleted = false) {
         const notificationJobs = await db.notificationJob.findMany({
           where: { businessId: biz.id }
         });
-        const completedJobs = notificationJobs.filter(j => j.status === 'COMPLETED');
+        const completedJobs = notificationJobs.filter(j => j.status === 'SENT');
         const failedJobs = notificationJobs.filter(j => j.status === 'FAILED');
         const totalProcessed = completedJobs.length + failedJobs.length;
         const successRate = totalProcessed > 0 ? Math.round((completedJobs.length / totalProcessed) * 100) : 100;
@@ -677,7 +677,7 @@ export async function getAllBusinesses(includeDeleted = false) {
           lastDownloadDate: logs.length > 0 ? logs[0].createdAt.toISOString() : null,
           notificationStats: {
             totalNotifications: notificationJobs.length,
-            lastNotificationSent: lastJob ? lastJob.completedAt.toISOString() : null,
+            lastNotificationSent: lastJob && lastJob.completedAt ? lastJob.completedAt.toISOString() : null,
             successRate
           }
         };
@@ -3818,7 +3818,7 @@ export async function getRecoveryRequests(filters: { businessId?: string, status
 export async function getRecoveryRequestDetails(id: string) {
   return runQuery(
     async () => {
-      return await db.recoveryRequest.findUnique({
+      return (await db.recoveryRequest.findUnique({
         where: { id },
         include: {
           business: true,
@@ -3832,7 +3832,7 @@ export async function getRecoveryRequestDetails(id: string) {
             }
           }
         }
-      });
+      })) as any;
     },
     async () => {
       const rr = mockRecoveryRequests.find(item => item.id === id);
@@ -3858,7 +3858,7 @@ export async function getRecoveryRequestDetails(id: string) {
           ]
         } : null,
         resolvedBy: resolver ? { id: resolver.id, name: resolver.name, email: resolver.email } : null
-      };
+      } as any;
     }
   );
 }
@@ -3984,8 +3984,8 @@ export async function getBusinessAnalytics(businessId: string | null | undefined
         db.recoveryRequest.findMany({ where: whereRecovery }),
         db.funnelEvent.findMany({ where: whereFunnel }),
         businessId && businessId !== 'ALL' ? db.notificationJob.count({ where: { businessId } }) : Promise.resolve(0),
-        businessId && businessId !== 'ALL' ? db.notificationJob.findFirst({ where: { businessId, status: 'COMPLETED' }, orderBy: { completedAt: 'desc' } }) : Promise.resolve(null),
-        businessId && businessId !== 'ALL' ? db.notificationJob.count({ where: { businessId, status: 'COMPLETED' } }) : Promise.resolve(0),
+        businessId && businessId !== 'ALL' ? db.notificationJob.findFirst({ where: { businessId, status: 'SENT' }, orderBy: { completedAt: 'desc' } }) : Promise.resolve(null),
+        businessId && businessId !== 'ALL' ? db.notificationJob.count({ where: { businessId, status: 'SENT' } }) : Promise.resolve(0),
         businessId && businessId !== 'ALL' ? db.notificationJob.count({ where: { businessId, status: 'FAILED' } }) : Promise.resolve(0)
       ]);
 
@@ -4053,7 +4053,7 @@ export async function getBusinessAnalytics(businessId: string | null | undefined
         ...baseAnalytics,
         notificationStats: {
           totalNotifications: 12,
-          lastNotificationSent: new Date(Date.now() - 3600000).toISOString(),
+          lastNotificationSent: new Date(Date.now() - 3600000),
           successRate: 92
         }
       };

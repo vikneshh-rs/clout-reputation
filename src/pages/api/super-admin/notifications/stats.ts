@@ -86,7 +86,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       where: { provider: 'TWILIO', timestamp: { gte: sevenDaysAgo } }
     });
     
-    const twilioSent = twilioLogs.filter(l => l.newStatus === 'SENT' || l.newStatus === 'COMPLETED').length;
+    const twilioSent = twilioLogs.filter(l => l.newStatus === 'SENT').length;
     const twilioFailed = twilioLogs.filter(l => l.newStatus === 'FAILED' || l.newStatus === 'PERMANENTLY_FAILED').length;
     const twilioTotal = twilioSent + twilioFailed;
     const twilioSuccessRate = twilioTotal > 0 ? Math.round((twilioSent / twilioTotal) * 100) : 100;

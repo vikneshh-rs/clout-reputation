@@ -69,6 +69,8 @@ interface Business {
   qrAssets?: QRRecord[];
   totalDownloads?: number;
   lastDownloadDate?: string | null;
+  whatsappNumber?: string | null;
+  notificationSettings?: any;
 }
 
 export default function BusinessesManagementPage(props: any) {

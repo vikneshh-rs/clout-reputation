@@ -21,7 +21,8 @@ import {
   Layers,
   Check,
   Building,
-  ChevronDown
+  ChevronDown,
+  Loader2
 } from 'lucide-react';
 import { 
   NotificationBadge, 
