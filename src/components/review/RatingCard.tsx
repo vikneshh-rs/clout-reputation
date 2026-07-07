@@ -23,7 +23,7 @@ export default function RatingCard({
       "
     >
       {/* Stars */}
-      <div className="mt-6 md:mt-8 max-w-[340px] mx-auto w-full">
+      <div className="mt-3 md:mt-4 max-w-[340px] mx-auto w-full">
         <StarRating
           rating={rating}
           onChange={onChange}

@@ -3,32 +3,39 @@ import React from "react";
 interface BusinessHeaderProps {
   name: string;
   subtitle?: string;
+  dark?: boolean;
 }
 
 export default function BusinessHeader({
   name,
   subtitle = "How was your experience?",
+  dark = false,
 }: BusinessHeaderProps) {
+  const nameLength = name ? name.length : 0;
+  let fontSizeClass = "text-[32px] md:text-[34px]";
+  if (nameLength > 20) {
+    fontSizeClass = "text-[18px] md:text-[20px]";
+  } else if (nameLength > 12) {
+    fontSizeClass = "text-[22px] md:text-[24px]";
+  }
+
   return (
-    <div className="flex flex-col items-center text-center w-full z-20">
+    <div className={`flex flex-col w-full z-20 ${dark ? 'items-center text-center mt-6 mb-4' : 'items-start text-left ml-2'}`}>
       {/* Business Name */}
       <h1
-        className="
-          mt-[6px]
-          md:mt-[8px]
-          text-white
+        className={`
+          mt-0
           font-extrabold
           tracking-[-0.02em]
           leading-[1.1]
           drop-shadow-sm
           animate-headerSlide
-          text-[24px]
-          md:text-[28px]
-        "
+          ${fontSizeClass}
+        `}
         style={{
           fontFamily: "'Google Sans Flex', 'Inter', sans-serif",
-          maxWidth: "340px",
-          color: "#FFFFFF",
+          maxWidth: "240px",
+          color: dark ? "#111827" : "#FFFFFF",
         }}
       >
         {name}
@@ -37,19 +44,17 @@ export default function BusinessHeader({
       {/* Subtitle */}
       <p
         className="
-          mt-[2px]
-          md:mt-[4px]
-          text-white
+          mt-[4px]
           font-normal
           tracking-normal
           leading-[1.4]
           animate-headerSlide
-          text-[13px]
+          text-[14px]
           md:text-[15px]
         "
         style={{
           fontFamily: "'Google Sans Flex', 'Inter', sans-serif",
-          color: "#FFFFFF",
+          color: dark ? "#4B5563" : "#FFFFFF",
         }}
       >
         {subtitle}

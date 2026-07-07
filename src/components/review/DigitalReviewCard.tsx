@@ -24,14 +24,15 @@ export default function DigitalReviewCard({
       <div
         className={`
           relative
-          w-[calc(100vw-32px)]
-          md:w-[400px]
-          max-w-[400px]
-          ${isRating ? 'aspect-square h-[calc(100vw-32px)] md:h-[400px]' : 'min-h-[450px] md:min-h-[470px]'}
+          w-full
+          max-w-[420px]
+          h-[370px]
           bg-white
           rounded-[32px]
           overflow-hidden
-          shadow-[0_24px_80px_rgba(15,23,42,0.10)]
+          shadow-[0_12px_40px_rgba(0,0,0,0.08)]
+          border
+          border-[rgba(0,0,0,0.08)]
           flex
           flex-col
           animate-cardFadeIn
@@ -47,34 +48,23 @@ export default function DigitalReviewCard({
         <div
           className="
             relative
-            h-[155px]
-            md:h-[180px]
+            h-[190px]
             bg-[#073AFE]
-            rounded-t-[32px]
+            rounded-t-[31px]
             overflow-hidden
             flex
-            flex-col
             items-center
+            px-6
+            pb-8
           "
         >
           {/* Header Content */}
-          <div
-            className="
-              relative
-              z-20
-              flex
-              flex-col
-              items-center
-              w-full
-              pt-[12px]
-              md:pt-[18px]
-            "
-          >
+          <div className="flex items-center gap-6 z-20">
             <GoogleBadge />
-
             <BusinessHeader
               name={businessName}
               subtitle={subtitle}
+              dark={false}
             />
           </div>
 
@@ -95,19 +85,12 @@ export default function DigitalReviewCard({
           "
         >
           {/* Rating / Success / Recovery */}
-          <div
-            className="
-              flex-1
-              flex
-              flex-col
-              justify-start
-            "
-          >
+          <div className="flex-1 flex flex-col justify-start">
             {children}
           </div>
 
           {/* Footer */}
-          <PoweredByFooter isRating={isRating} />
+          <PoweredByFooter />
         </div>
       </div>
     </div>
