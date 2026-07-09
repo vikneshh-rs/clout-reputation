@@ -80,12 +80,6 @@ export default function LandingPage() {
     setFeedbackSubmitted(true);
   };
 
-  const resetFeedbackWidget = () => {
-    setSelectedRating(null);
-    setFeedbackName('');
-    setFeedbackComment('');
-    setFeedbackSubmitted(false);
-  };
 
   return (
     <div className="min-h-screen bg-[#F8FAFC] text-[#0F172A] font-sans selection:bg-[#073afe] selection:text-white relative overflow-hidden flex flex-col justify-between">
@@ -649,7 +643,7 @@ export default function LandingPage() {
               { num: '01', title: 'Deploy QR Codes', desc: 'Representatives print and assign custom serial QR badges to tables or point of sale checkout stands.' },
               { num: '02', title: 'Customers Scan', desc: 'Customers scan stickers with their camera, loading the platform in under 2 seconds without app downloads.' },
               { num: '03', title: 'Booster Routing', desc: 'Positive ratings route directly to Google, while critical feedback goes privately to your internal team.' }
-            ].map((step, idx) => (
+            ].map((step) => (
               <div key={step.num} className="space-y-2 relative pl-12">
                 <span className="absolute left-0 top-0 text-2xl font-extrabold text-[#073afe]/20 font-display">
                   {step.num}

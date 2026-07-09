@@ -55,6 +55,10 @@ export function getSessionToken(req: NextApiRequest): string | null {
 }
 
 export async function getSessionUser(req: NextApiRequest) {
+  if (!verifyCsrf(req)) {
+    console.warn('[AUTH] CSRF validation failed');
+    return null;
+  }
   console.log('[AUTH] Checking session token...');
   const token = getSessionToken(req);
   if (!token) {
@@ -110,6 +114,46 @@ export function clearSessionCookie(res: NextApiResponse) {
   const cookieValue = `${COOKIE_NAME}=; Path=/; HttpOnly; SameSite=Lax; Max-Age=0${
     isProduction ? '; Secure' : ''}`;
   res.setHeader('Set-Cookie', cookieValue);
+}
+
+export function verifyCsrf(req: NextApiRequest): boolean {
+  const method = req.method || 'GET';
+  if (['GET', 'HEAD', 'OPTIONS'].includes(method.toUpperCase())) {
+    return true;
+  }
+
+  const cookieString = req.headers.cookie || '';
+  const cookies = parseCookies(cookieString);
+  const hasCookieToken = !!cookies[COOKIE_NAME];
+
+  if (!hasCookieToken) {
+    return true;
+  }
+
+  const origin = (req.headers.origin || req.headers.referer || '') as string;
+  if (!origin) {
+    return false;
+  }
+
+  try {
+    const originUrl = new URL(origin);
+    const host = req.headers.host || '';
+    if (originUrl.host.toLowerCase() === host.toLowerCase()) {
+      return true;
+    }
+
+    const appUrlEnv = process.env.APP_URL;
+    if (appUrlEnv) {
+      const appUrl = new URL(appUrlEnv);
+      if (originUrl.host.toLowerCase() === appUrl.host.toLowerCase()) {
+        return true;
+      }
+    }
+  } catch (e) {
+    return false;
+  }
+
+  return false;
 }
 
 // Helper to parse cookies from headers

@@ -128,7 +128,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       } else {
         return { success: false, error: data.error || 'Login failed' };
       }
-    } catch (error: any) {
+    } catch (error) {
       return { success: false, error: 'Network error. Please try again.' };
     }
   };

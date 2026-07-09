@@ -49,7 +49,7 @@ export default function RecoveryForm({
 
       {/* Title */}
       <h2 className="text-center text-[20px] md:text-[24px] font-bold tracking-tight text-slate-900">
-        We're sorry we didn't meet your expectations.
+        {"We're sorry we didn't meet your expectations."}
       </h2>
 
       <p className="mt-1 text-center text-[13px] md:text-[14px] leading-normal text-slate-500">
@@ -99,7 +99,7 @@ export default function RecoveryForm({
         />
 
         <span className="text-[13px] md:text-[14.5px] leading-tight text-slate-600">
-          I'd like to request a callback from the management.
+          {"I'd like to request a callback from the management."}
         </span>
       </label>
 

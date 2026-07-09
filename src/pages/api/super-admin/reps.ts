@@ -67,8 +67,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             const logs = mockLogs.filter((l) => l.userId === rep.id);
             logs.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
             const lastActivity = logs.length > 0 ? logs[0].createdAt : null;
+            const cleanedRep = { ...rep };
+            delete (cleanedRep as any).passwordHash;
             return {
-              ...rep,
+              ...cleanedRep,
               businessesCount: onboarded,
               assignmentsCount: assignments,
               lastActivity

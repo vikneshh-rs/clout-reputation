@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
+import { GetServerSidePropsContext } from 'next';
 import { AlertTriangle, Loader2 } from 'lucide-react';
 import DigitalReviewCard from '@/components/review/DigitalReviewCard';
 import RatingCard from '@/components/review/RatingCard';
 import FeedbackSheet from '@/components/review/FeedbackSheet';
-import SuccessScreen from '@/components/review/SuccessScreen';
 import { resolveBusinessByIdentifier, recordQrScan } from '@/lib/data';
 import { BusinessStatus, QRAssetStatus } from '@prisma/client';
 
@@ -97,7 +97,6 @@ export default function PublicReviewPortal({
   useEffect(() => {
     if (!slug) return;
     if (details && (details.business.slug === slug || details.qrCode === slug)) {
-      setLoading(false);
       return;
     }
 
@@ -395,8 +394,8 @@ export default function PublicReviewPortal({
   );
 }
 
-export const getServerSideProps = async (context: any) => {
-  const { slug } = context.params;
+export const getServerSideProps = async (context: GetServerSidePropsContext) => {
+  const slug = context.params?.slug;
   
   if (!slug || typeof slug !== 'string') {
     return {
@@ -456,17 +455,15 @@ export const getServerSideProps = async (context: any) => {
       };
     }
 
-    // Record QR scan on server side
+    // Record QR scan on server side in the background (non-blocking)
     const userAgent = context.req.headers['user-agent'] || null;
-    try {
-      await recordQrScan({
-        businessId: business.id,
-        qrCode,
-        userAgent: userAgent ? String(userAgent) : null
-      });
-    } catch (e) {
+    recordQrScan({
+      businessId: business.id,
+      qrCode,
+      userAgent: userAgent ? String(userAgent) : null
+    }).catch((e) => {
       console.error('Error recording QR scan in getServerSideProps:', e);
-    }
+    });
 
     return {
       props: {

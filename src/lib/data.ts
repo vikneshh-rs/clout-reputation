@@ -346,13 +346,22 @@ function isDbConfigured(): boolean {
 
 // Run a query with fallback
 export async function runQuery<T>(dbQuery: () => Promise<T>, mockQuery: () => Promise<T>): Promise<T> {
+  const isProduction = process.env.NODE_ENV === 'production';
+
   if (!isDbConfigured()) {
+    if (isProduction) {
+      throw new Error('Database is not configured in production mode.');
+    }
     await initializeMockPasswords();
     return mockQuery();
   }
   try {
     return await dbQuery();
   } catch (error) {
+    if (isProduction) {
+      console.error('❌ Database query failed in production:', error);
+      throw error;
+    }
     console.warn('⚠️ Database connection failed. Running in Mock Demo Mode.', error);
     await initializeMockPasswords();
     return mockQuery();
@@ -473,6 +482,9 @@ export async function getBusinessById(id: string) {
     }
   );
   if (result) {
+    if ('passwordHash' in result) {
+      delete (result as any).passwordHash;
+    }
     businessCache.set(id, { data: result, timestamp: now });
   }
   return result;
@@ -671,8 +683,11 @@ export async function getAllBusinesses(includeDeleted = false) {
         const successRate = totalProcessed > 0 ? Math.round((completedJobs.length / totalProcessed) * 100) : 100;
         const lastJob = completedJobs.sort((a, b) => b.completedAt!.getTime() - a.completedAt!.getTime())[0];
 
+        const cleanedBiz = { ...biz };
+        delete (cleanedBiz as any).passwordHash;
+
         return {
-          ...biz,
+          ...cleanedBiz,
           totalDownloads: logs.length,
           lastDownloadDate: logs.length > 0 ? logs[0].createdAt.toISOString() : null,
           notificationStats: {
@@ -695,8 +710,10 @@ export async function getAllBusinesses(includeDeleted = false) {
           const logs = mockLogs.filter(log => log.action === 'QR_DOWNLOAD' && log.entityType === 'BUSINESS' && log.entityId === b.id)
             .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
           
+          const cleanedB = { ...b };
+          delete (cleanedB as any).passwordHash;
           return {
-            ...b,
+            ...cleanedB,
             createdByRep: rep ? { id: rep.id, name: rep.name } : null,
             subscriptions,
             qrAssets,

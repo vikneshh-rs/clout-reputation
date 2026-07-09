@@ -107,10 +107,14 @@ export default function FeedbackSheet({
   // Handles auto-closing after success animation
   useEffect(() => {
     if (isSuccess && !hasStartedSuccessDelay) {
-      setHasStartedSuccessDelay(true);
       const timer = setTimeout(() => {
         onClose();
       }, 1500); // 1.5s delay for success presentation
+      
+      Promise.resolve().then(() => {
+        setHasStartedSuccessDelay(true);
+      });
+      
       return () => clearTimeout(timer);
     }
   }, [isSuccess, hasStartedSuccessDelay, onClose]);
@@ -277,7 +281,7 @@ export default function FeedbackSheet({
                     {/* Header Group */}
                     <motion.div variants={itemVariants} className="text-center space-y-1.5">
                       <h2 className="text-xl md:text-2xl font-bold tracking-tight text-slate-900 leading-snug">
-                        We're sorry we didn't meet your expectations.
+                        {"We're sorry we didn't meet your expectations."}
                       </h2>
                       <p className="text-[13.5px] leading-relaxed text-slate-500 max-w-[360px] mx-auto">
                         Your feedback is highly valuable. Let us know how we can make things right.
@@ -376,8 +380,16 @@ export default function FeedbackSheet({
                               className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
                             />
                             <input
+                              type="tel"
+                              pattern="[0-9]{10}"
+                              maxLength={10}
                               value={phone}
-                              onChange={(e) => setPhone(e.target.value)}
+                              onChange={(e) => {
+                                const numericVal = e.target.value.replace(/\D/g, "");
+                                if (numericVal.length <= 10) {
+                                  setPhone(numericVal);
+                                }
+                              }}
                               placeholder="WhatsApp Number"
                               required={callback}
                               className="h-11.5 w-full rounded-xl border border-slate-200 pl-11 pr-4 text-sm text-slate-800 outline-none transition-all focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0 placeholder:text-slate-400"
