@@ -12,11 +12,11 @@ export default function BusinessHeader({
   dark = false,
 }: BusinessHeaderProps) {
   const nameLength = name ? name.length : 0;
-  let fontSizeClass = "text-[40px]";
+  let fontSizeClass = "text-[32px] md:text-[40px]";
   if (nameLength > 20) {
-    fontSizeClass = "text-[20px]";
+    fontSizeClass = "text-[18px] md:text-[20px]";
   } else if (nameLength > 12) {
-    fontSizeClass = "text-[40px]";
+    fontSizeClass = "text-[26px] md:text-[40px]";
   }
 
   return (

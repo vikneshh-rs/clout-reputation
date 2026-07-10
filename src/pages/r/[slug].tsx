@@ -341,6 +341,8 @@ export default function PublicReviewPortal({
       <Head>
         <title>{details.business.name} - Review Portal</title>
         <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0, viewport-fit=cover" />
+        <meta name="color-scheme" content="light" />
+        <meta name="supported-color-schemes" content="light" />
       </Head>
 
       <DigitalReviewCard 
