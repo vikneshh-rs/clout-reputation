@@ -3541,14 +3541,22 @@ export async function getQrDownloadStats(businessId: string) {
   );
 }
 
+const resolveCache = new Map<string, { data: any; expiry: number }>();
+const RESOLVE_CACHE_TTL = 5 * 60 * 1000; // 5-minute memory cache
+
 export async function resolveBusinessByIdentifier(identifier: string) {
   const normalizedIdentifier = identifier.toLowerCase().trim();
+  
+  const cached = resolveCache.get(normalizedIdentifier);
+  if (cached && cached.expiry > Date.now()) {
+    return cached.data;
+  }
   
   const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(normalizedIdentifier);
   const isQrCode = /^cqr-/i.test(normalizedIdentifier);
   const isBusinessCode = /^CR-\d+$/i.test(identifier.trim());
 
-  return runQuery<any>(
+  const result = await runQuery<any>(
     async () => {
       const selectFields = {
         id: true,
@@ -3695,6 +3703,12 @@ export async function resolveBusinessByIdentifier(identifier: string) {
 
     }
   ) as any;
+
+  if (result) {
+    resolveCache.set(normalizedIdentifier, { data: result, expiry: Date.now() + RESOLVE_CACHE_TTL });
+  }
+
+  return result;
 }
 
 // ==========================================

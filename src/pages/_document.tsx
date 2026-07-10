@@ -7,9 +7,6 @@ export default function Document() {
         <meta name="color-scheme" content="light" />
         <meta name="supported-color-schemes" content="light" />
         <link rel="icon" type="image/png" href="/favicon.svg" />
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Source+Sans+Pro:wght@300;400;600;700;900&display=swap" rel="stylesheet" />
       </Head>
       <body className="antialiased font-sans">
         <Main />

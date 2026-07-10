@@ -712,7 +712,6 @@ export default function BusinessesManagementPage(props: any) {
                 <tr>
                   <th className="px-6 py-3">Business</th>
                   <th className="px-6 py-3">Code & Category</th>
-                  <th className="px-6 py-3">Setup Progress</th>
                   <th className="px-6 py-3">Onboarded By</th>
                   <th className="px-6 py-3">Status</th>
                   <th className="px-6 py-3 text-right">Actions</th>
@@ -753,23 +752,6 @@ export default function BusinessesManagementPage(props: any) {
                         </span>
                       </td>
 
-                      {/* Setup Progress */}
-                      <td className="px-6 py-4">
-                        <div className="space-y-1 max-w-[120px]">
-                          <div className="flex justify-between text-[9px] font-bold">
-                            <span className="text-slate-500">{setupState.label}</span>
-                            <span className="text-[#073afe]">{completionPct}%</span>
-                          </div>
-                          <div className="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden">
-                            <div 
-                              className={`h-full rounded-full transition-all duration-500 ${
-                                completionPct < 50 ? 'bg-rose-500' : completionPct < 85 ? 'bg-amber-500' : 'bg-emerald-500'
-                              }`}
-                              style={{ width: `${completionPct}%` }}
-                            />
-                          </div>
-                        </div>
-                      </td>
 
                       {/* Onboarded Rep */}
                       <td className="px-6 py-4 text-slate-550 font-medium">
