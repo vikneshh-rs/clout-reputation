@@ -33,7 +33,7 @@ export default function SuccessScreen({
       <p className="mt-2 max-w-[300px] text-[14px] leading-relaxed text-slate-500">
         {positive
           ? "We appreciate your support. You'll be redirected to Google Reviews shortly."
-          : "Your feedback has been shared with the management. Thank you for helping us improve."}
+          : "Your feedback has been submitted successfully. Our management team will review it and use it to improve your future experience."}
       </p>
 
       {/* Positive Flow */}
@@ -88,9 +88,8 @@ export default function SuccessScreen({
       {/* Negative Flow */}
       {!positive && (
         <div className="mt-6 rounded-xl bg-slate-50 px-4 py-3">
-          <p className="text-xs leading-relaxed text-slate-500">
-            Our management team will review your feedback and work to improve
-            your future experience.
+          <p className="text-xs leading-relaxed text-slate-500 font-medium">
+            ❤️ Every feedback matters.
           </p>
         </div>
       )}

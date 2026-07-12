@@ -61,7 +61,7 @@ export default function PublicReviewPortal({
   useEffect(() => {
     if (!slug) return;
     
-    const sessionKey = `clout_session_${slug}`;
+    const sessionKey = `clout_session_${String(slug).toLowerCase().trim()}`;
     const savedSession = sessionStorage.getItem(sessionKey);
     
     if (savedSession) {
@@ -96,7 +96,11 @@ export default function PublicReviewPortal({
   // Fetch Portal details
   useEffect(() => {
     if (!slug) return;
-    if (details && (details.business.slug === slug || details.qrCode === slug)) {
+    const slugStr = String(slug).toLowerCase().trim();
+    if (details && (
+      details.business.slug.toLowerCase() === slugStr || 
+      details.qrCode.toLowerCase() === slugStr
+    )) {
       return;
     }
 
@@ -223,7 +227,7 @@ export default function PublicReviewPortal({
         })
       }).catch(err => console.error('Failed to log redirect cta click:', err));
 
-      const sessionKey = `clout_session_${slug}`;
+      const sessionKey = `clout_session_${String(slug).toLowerCase().trim()}`;
       sessionStorage.setItem(sessionKey, JSON.stringify({
         reviewSessionId,
         hasSubmitted: true,
@@ -271,7 +275,7 @@ export default function PublicReviewPortal({
         throw new Error('Failed to submit feedback.');
       }
 
-      const sessionKey = `clout_session_${slug}`;
+      const sessionKey = `clout_session_${String(slug).toLowerCase().trim()}`;
       sessionStorage.setItem(sessionKey, JSON.stringify({
         reviewSessionId,
         hasSubmitted: true,

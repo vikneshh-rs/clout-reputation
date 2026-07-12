@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence, useMotionValue, useTransform, useDragControls, Variants } from "framer-motion";
-import { MessageSquareText, Phone, CheckCircle2, X } from "lucide-react";
+import { MessageSquareText, Phone, CheckCircle2, X, User } from "lucide-react";
 
 interface FeedbackSheetProps {
   isOpen: boolean;
@@ -281,17 +281,17 @@ export default function FeedbackSheet({
                     {/* Header Group */}
                     <motion.div variants={itemVariants} className="text-center space-y-1.5">
                       <h2 className="text-xl md:text-2xl font-bold tracking-tight text-slate-900 leading-snug">
-                        {"We're sorry we didn't meet your expectations."}
+                        {"We'd like to make things right."}
                       </h2>
                       <p className="text-[13.5px] leading-relaxed text-slate-500 max-w-[360px] mx-auto">
-                        Your feedback is highly valuable. Let us know how we can make things right.
+                        Your feedback helps us improve. Please tell us what happened.
                       </p>
                     </motion.div>
 
                     {/* Tag Chips */}
                     <motion.div variants={itemVariants} className="space-y-2">
                       <span className="text-[11.5px] font-bold text-slate-400 uppercase tracking-widest block">
-                        Select tags to detail your experience
+                        What could we improve?
                       </span>
                       <div className="flex flex-wrap gap-2">
                         {FEEDBACK_TAGS.map((tag) => {
@@ -322,7 +322,7 @@ export default function FeedbackSheet({
                     <motion.div variants={itemVariants} className="space-y-1.5">
                       <label className="flex items-center gap-2 text-xs font-bold text-slate-650 uppercase tracking-wider">
                         <MessageSquareText size={13} className="text-[#073AFE]" />
-                        Your Feedback
+                        Tell us more
                       </label>
                       <textarea
                         ref={textareaRef}
@@ -330,7 +330,6 @@ export default function FeedbackSheet({
                         value={feedback}
                         onChange={(e) => setFeedback(e.target.value)}
                         placeholder="Tell us what happened..."
-                        required
                         className="w-full resize-none rounded-2xl border border-slate-200 bg-white px-4 py-3 text-[14.5px] leading-relaxed text-slate-800 outline-none transition-all duration-250 focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0 placeholder:text-slate-400"
                       />
                     </motion.div>
@@ -349,10 +348,10 @@ export default function FeedbackSheet({
                       />
                       <div className="flex flex-col gap-0.5">
                         <span className="text-[13.5px] font-semibold leading-tight text-slate-700">
-                          Request a callback from management
+                          Request a callback from the management
                         </span>
                         <span className="text-xs text-slate-400">
-                          We will reach out to resolve your experience personally.
+                          Enter your details, and our management team will contact you soon.
                         </span>
                       </div>
                     </motion.label>
@@ -367,13 +366,21 @@ export default function FeedbackSheet({
                           transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
                           className="space-y-3 overflow-hidden animate-fadeIn"
                         >
-                          <input
-                            value={customerName}
-                            onChange={(e) => setCustomerName(e.target.value)}
-                            placeholder="Your Name"
-                            required={callback}
-                            className="h-11.5 w-full rounded-xl border border-slate-200 px-4 text-sm text-slate-800 outline-none transition-all focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0 placeholder:text-slate-400"
-                          />
+                          <div className="relative">
+                            <User
+                              size={16}
+                              className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
+                            />
+                            <input
+                              value={customerName}
+                              onChange={(e) => setCustomerName(e.target.value)}
+                              onInvalid={(e) => (e.target as HTMLInputElement).setCustomValidity('Please enter your name.')}
+                              onInput={(e) => (e.target as HTMLInputElement).setCustomValidity('')}
+                              placeholder="Your Name"
+                              required={callback}
+                              className="h-11.5 w-full rounded-xl border border-slate-200 pl-11 pr-4 text-sm text-slate-800 outline-none transition-all focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0 placeholder:text-slate-400"
+                            />
+                          </div>
                           <div className="relative">
                             <Phone
                               size={16}
@@ -390,6 +397,8 @@ export default function FeedbackSheet({
                                   setPhone(numericVal);
                                 }
                               }}
+                              onInvalid={(e) => (e.target as HTMLInputElement).setCustomValidity('Please enter a valid number.')}
+                              onInput={(e) => (e.target as HTMLInputElement).setCustomValidity('')}
                               placeholder="WhatsApp Number"
                               required={callback}
                               className="h-11.5 w-full rounded-xl border border-slate-200 pl-11 pr-4 text-sm text-slate-800 outline-none transition-all focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0 placeholder:text-slate-400"
@@ -424,7 +433,7 @@ export default function FeedbackSheet({
 
                     {/* Privacy Note */}
                     <motion.p variants={itemVariants} className="text-center text-[11px] text-slate-400 leading-normal px-6">
-                      Your feedback will be delivered directly and privately to our management team.
+                      Private. Secure. Sent directly to management.
                     </motion.p>
                   </motion.form>
                 ) : (
@@ -455,12 +464,12 @@ export default function FeedbackSheet({
                       Thank You!
                     </h2>
                     <p className="text-[14.5px] leading-relaxed text-slate-500 max-w-[320px]">
-                      Your feedback has been shared with the management. Thank you for helping us improve.
+                      Your feedback has been submitted successfully. Our management team will review it and use it to improve your future experience.
                     </p>
 
                     <div className="mt-6 w-full max-w-[280px] rounded-2xl bg-slate-50 px-4 py-3.5 border border-slate-100 animate-fadeIn">
                       <p className="text-xs leading-relaxed text-slate-500 font-medium">
-                        Our management team will review your comments and work to improve your future experience.
+                        ❤️ Every feedback matters.
                       </p>
                     </div>
                   </motion.div>

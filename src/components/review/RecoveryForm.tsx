@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { MessageSquareText, Phone } from "lucide-react";
+import { MessageSquareText, Phone, User } from "lucide-react";
 
 interface RecoveryFormProps {
   loading?: boolean;
@@ -49,18 +49,18 @@ export default function RecoveryForm({
 
       {/* Title */}
       <h2 className="text-center text-[20px] md:text-[24px] font-bold tracking-tight text-slate-900">
-        {"We're sorry we didn't meet your expectations."}
+        {"We'd like to make things right."}
       </h2>
 
       <p className="mt-1 text-center text-[13px] md:text-[14px] leading-normal text-slate-500">
-        Your feedback helps us improve. Please tell us about your experience.
+        Your feedback helps us improve. Please tell us what happened.
       </p>
 
       {/* Feedback */}
       <div className="mt-3">
         <label className="mb-1.5 flex items-center gap-2 text-xs font-semibold text-slate-700">
           <MessageSquareText size={14} />
-          Your Feedback
+          Tell us more
         </label>
 
         <textarea
@@ -85,7 +85,6 @@ export default function RecoveryForm({
             focus:ring-4
             focus:ring-[#073AFE]/10
           "
-          required
         />
       </div>
 
@@ -106,26 +105,33 @@ export default function RecoveryForm({
       {/* Expand Fields */}
       {callback && (
         <div className="mt-3.5 space-y-3 animate-fadeIn">
-          <input
-            value={customerName}
-            onChange={(e) => setCustomerName(e.target.value)}
-            placeholder="Your Name"
-            className="
-              h-11
-              w-full
-              rounded-xl
-              border
-              border-slate-200
-              px-4
-              text-sm
-              outline-none
-              transition-all
-              focus:border-[#073AFE]
-              focus:ring-4
-              focus:ring-[#073AFE]/10
-            "
-            required
-          />
+          <div className="relative">
+            <User
+              size={16}
+              className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
+            />
+            <input
+              value={customerName}
+              onChange={(e) => setCustomerName(e.target.value)}
+              placeholder="Your Name"
+              className="
+                h-11
+                w-full
+                rounded-xl
+                border
+                border-slate-200
+                pl-11
+                pr-4
+                text-sm
+                outline-none
+                transition-all
+                focus:border-[#073AFE]
+                focus:ring-4
+                focus:ring-[#073AFE]/10
+              "
+              required
+            />
+          </div>
 
           <div className="relative">
             <Phone

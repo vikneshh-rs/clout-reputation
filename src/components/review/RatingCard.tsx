@@ -45,7 +45,7 @@ export default function RatingCard({
           select-none
         "
       >
-        Choose a rating from 1 to 5 stars.
+        Tap a star to rate your experience.
       </p>
     </div>
   );

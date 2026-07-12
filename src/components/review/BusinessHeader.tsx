@@ -8,7 +8,7 @@ interface BusinessHeaderProps {
 
 export default function BusinessHeader({
   name,
-  subtitle = "How was your experience?",
+  subtitle = "How was your experience today",
   dark = false,
 }: BusinessHeaderProps) {
   const nameLength = name ? name.length : 0;
