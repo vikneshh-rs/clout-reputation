@@ -1219,74 +1219,7 @@ export default function BusinessesManagementPage(props: any) {
                 </div>
               )}
 
-              {/* Progress & Setup State */}
-              <div className="bg-slate-50/50 border border-slate-100 p-5 rounded-2xl space-y-4">
-                <div className="flex justify-between items-center">
-                  <span className="font-bold text-[10px] text-slate-400 uppercase tracking-wider">Setup Progress</span>
-                  <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[9px] font-bold border ${getSetupState(computeProfileCompletion(viewingBusiness)).color}`}>
-                    {getSetupState(computeProfileCompletion(viewingBusiness)).label}
-                  </span>
-                </div>
 
-                <div className="space-y-1.5">
-                  <div className="flex justify-between font-bold">
-                    <span>Profile Completion</span>
-                    <span className="text-[#073afe]">{computeProfileCompletion(viewingBusiness)}%</span>
-                  </div>
-                  <div className="w-full bg-slate-200 h-2 rounded-full overflow-hidden">
-                    <div 
-                      className={`h-full rounded-full transition-all duration-500 ${
-                        computeProfileCompletion(viewingBusiness) < 50 ? 'bg-rose-500' : computeProfileCompletion(viewingBusiness) < 85 ? 'bg-amber-500' : 'bg-emerald-500'
-                      }`}
-                      style={{ width: `${computeProfileCompletion(viewingBusiness)}%` }}
-                    />
-                  </div>
-                </div>
-
-                {/* Completion breakdown list */}
-                <div className="grid grid-cols-2 gap-2 text-[10px] font-semibold text-slate-450 border-t border-slate-100 pt-3">
-                  <div className="flex items-center gap-1">
-                    {viewingBusiness.name ? <Check size={11} className="text-emerald-500" /> : <X size={11} className="text-rose-500" />}
-                    <span>Name (10%)</span>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    {viewingBusiness.logoUrl ? <Check size={11} className="text-emerald-500" /> : <X size={11} className="text-rose-500" />}
-                    <span>Logo (15%)</span>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    {viewingBusiness.description ? <Check size={11} className="text-emerald-500" /> : <X size={11} className="text-rose-500" />}
-                    <span>Description (15%)</span>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    {viewingBusiness.contactPerson ? <Check size={11} className="text-emerald-500" /> : <X size={11} className="text-rose-500" />}
-                    <span>Contact Person (10%)</span>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    {viewingBusiness.phone ? <Check size={11} className="text-emerald-500" /> : <X size={11} className="text-rose-500" />}
-                    <span>Phone (10%)</span>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    {viewingBusiness.address ? <Check size={11} className="text-emerald-500" /> : <X size={11} className="text-rose-500" />}
-                    <span>Address (10%)</span>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    {viewingBusiness.googleReviewUrl ? <Check size={11} className="text-emerald-500" /> : <X size={11} className="text-rose-500" />}
-                    <span>Google Link (10%)</span>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    {viewingBusiness.category ? <Check size={11} className="text-emerald-500" /> : <X size={11} className="text-rose-500" />}
-                    <span>Category (10%)</span>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    {viewingBusiness.website ? <Check size={11} className="text-emerald-500" /> : <X size={11} className="text-rose-500" />}
-                    <span>Website (5%)</span>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    {viewingBusiness.googleMapsUrl ? <Check size={11} className="text-emerald-500" /> : <X size={11} className="text-rose-500" />}
-                    <span>Google Maps (5%)</span>
-                  </div>
-                </div>
-              </div>
 
               {/* Core Profile */}
               <div className="space-y-4">

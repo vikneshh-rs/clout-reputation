@@ -32,6 +32,14 @@ const userCache = new Map<string, { data: any; timestamp: number }>();
 const businessCache = new Map<string, { data: any; timestamp: number }>();
 const CACHE_TTL = 30000; // 30 seconds
 
+// Cache for resolved review portal pages
+export const resolveCache = new Map<string, { data: any; expiry: number }>();
+const RESOLVE_CACHE_TTL = 5 * 60 * 1000; // 5-minute memory cache
+
+export function clearResolveCache() {
+  resolveCache.clear();
+}
+
 
 // Helper to generate a unique 8-character uppercase alphanumeric QR Code (e.g. QRYX7P2R)
 export function generateUniqueCode(length = 8): string {
@@ -1099,6 +1107,7 @@ export async function updateBusinessDetails(
     };
   }
 ) {
+  resolveCache.clear();
   return runQuery(
     async () => {
       const { notificationSettings, ...primitiveData } = data;
@@ -1160,6 +1169,7 @@ export async function updateBusinessDetails(
 }
 
 export async function updateBusinessStatus(id: string, status: BusinessStatus, adminId: string) {
+  resolveCache.clear();
   return runQuery(
     async () => {
       const updated = await db.business.update({
@@ -3541,8 +3551,7 @@ export async function getQrDownloadStats(businessId: string) {
   );
 }
 
-const resolveCache = new Map<string, { data: any; expiry: number }>();
-const RESOLVE_CACHE_TTL = 5 * 60 * 1000; // 5-minute memory cache
+
 
 export async function resolveBusinessByIdentifier(identifier: string) {
   const normalizedIdentifier = identifier.toLowerCase().trim();
@@ -3612,34 +3621,68 @@ export async function resolveBusinessByIdentifier(identifier: string) {
           standardCasingCode = `cqr-${match[1].toUpperCase()}${match[2]}`;
         }
 
-        // Try exact match first (uses unique index, extremely fast)
-        let qrRecord = await db.qRAsset.findUnique({
-          where: { qrCode: standardCasingCode },
-          select: {
-            qrCode: true,
-            status: true,
-            business: {
-              select: selectFields
-            }
-          }
-        });
+        // Use raw query with INNER JOIN (first exact lookup utilizing index scan)
+        let rows = await db.$queryRawUnsafe<any[]>(`
+          SELECT 
+            q."qr_code" as "qrCode", 
+            q."status" as "qrStatus",
+            b."id", 
+            b."name", 
+            b."slug", 
+            b."industry"::text as "industry", 
+            b."logoUrl", 
+            b."googleReviewUrl", 
+            b."enableGoogleReviewRedirect" as "enableGoogleReviewRedirect", 
+            b."enableManagerCallback" as "enableManagerCallback",
+            b."isActive" as "isActive", 
+            b."status"::text as "businessStatus"
+          FROM "qr_assets" q
+          INNER JOIN "Business" b ON q."assigned_business_id" = b."id"
+          WHERE q."qr_code" = $1
+          LIMIT 1
+        `, standardCasingCode);
 
-        // Fallback to case-insensitive findFirst if exact match didn't find it
-        if (!qrRecord) {
-          qrRecord = await db.qRAsset.findFirst({
-            where: { qrCode: { equals: identifier.trim(), mode: 'insensitive' } },
-            select: {
-              qrCode: true,
-              status: true,
-              business: {
-                select: selectFields
-              }
-            }
-          });
+        // Fall back to case-insensitive query only if exact lookup returned no rows
+        if (!rows || rows.length === 0) {
+          rows = await db.$queryRawUnsafe<any[]>(`
+            SELECT 
+              q."qr_code" as "qrCode", 
+              q."status" as "qrStatus",
+              b."id", 
+              b."name", 
+              b."slug", 
+              b."industry"::text as "industry", 
+              b."logoUrl", 
+              b."googleReviewUrl", 
+              b."enableGoogleReviewRedirect" as "enableGoogleReviewRedirect", 
+              b."enableManagerCallback" as "enableManagerCallback",
+              b."isActive" as "isActive", 
+              b."status"::text as "businessStatus"
+            FROM "qr_assets" q
+            INNER JOIN "Business" b ON q."assigned_business_id" = b."id"
+            WHERE LOWER(q."qr_code") = LOWER($1)
+            LIMIT 1
+          `, standardCasingCode);
         }
 
-        if (qrRecord) {
-          return { business: qrRecord.business, qrCode: qrRecord.qrCode, qrStatus: qrRecord.status };
+        if (rows && rows.length > 0) {
+          const row = rows[0];
+          return {
+            business: {
+              id: row.id,
+              name: row.name,
+              slug: row.slug,
+              industry: row.industry,
+              logoUrl: row.logoUrl,
+              googleReviewUrl: row.googleReviewUrl,
+              enableGoogleReviewRedirect: row.enableGoogleReviewRedirect,
+              enableManagerCallback: row.enableManagerCallback,
+              isActive: row.isActive,
+              status: row.businessStatus
+            },
+            qrCode: row.qrCode,
+            qrStatus: row.qrStatus
+          };
         }
       }
 

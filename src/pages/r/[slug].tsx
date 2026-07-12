@@ -401,6 +401,7 @@ export default function PublicReviewPortal({
 }
 
 export const getServerSideProps = async (context: GetServerSidePropsContext) => {
+  const reqStart = performance.now();
   const slug = context.params?.slug;
   
   if (!slug || typeof slug !== 'string') {
@@ -413,7 +414,11 @@ export const getServerSideProps = async (context: GetServerSidePropsContext) => 
   }
 
   try {
+    const resolveStart = performance.now();
     const result = await resolveBusinessByIdentifier(slug);
+    const resolveEnd = performance.now();
+    console.log(`[PERF] resolveBusinessByIdentifier for "${slug}" took ${(resolveEnd - resolveStart).toFixed(2)}ms`);
+
     if (!result) {
       return {
         props: {
@@ -462,6 +467,7 @@ export const getServerSideProps = async (context: GetServerSidePropsContext) => 
     }
 
     // Record QR scan on server side in the background (non-blocking)
+    const scanStart = performance.now();
     const userAgent = context.req.headers['user-agent'] || null;
     recordQrScan({
       businessId: business.id,
@@ -470,6 +476,11 @@ export const getServerSideProps = async (context: GetServerSidePropsContext) => 
     }).catch((e) => {
       console.error('Error recording QR scan in getServerSideProps:', e);
     });
+    const scanEnd = performance.now();
+    console.log(`[PERF] recordQrScan initiation took ${(scanEnd - scanStart).toFixed(2)}ms`);
+
+    const reqEnd = performance.now();
+    console.log(`[PERF] Total getServerSideProps execution took ${(reqEnd - reqStart).toFixed(2)}ms`);
 
     return {
       props: {

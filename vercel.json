@@ -4,6 +4,11 @@
       "regions": [
         "hnd1"
       ]
+    },
+    "src/pages/r/[slug].tsx": {
+      "regions": [
+        "hnd1"
+      ]
     }
   }
 }
