@@ -72,13 +72,13 @@ async function testProd(urlStr: string) {
 }
 
 async function runTests() {
-  console.log("=== MEASURING PRODUCTION URL: https://cloutation.com/r/cqr-S001 ===");
+  console.log("=== MEASURING PRODUCTION URL: https://www.cloutation.com/r/cqr-S001 ===");
   
   // Run 5 requests to check cold/warm performance and headers
   for (let i = 1; i <= 5; i++) {
     console.log(`\n--- Request #${i} ---`);
     try {
-      const res = await testProd('https://cloutation.com/r/cqr-S001');
+      const res = await testProd('https://www.cloutation.com/r/cqr-S001');
       console.log(`DNS Lookup: ${res.dns.toFixed(2)}ms`);
       console.log(`TCP Connect: ${res.tcp.toFixed(2)}ms`);
       console.log(`TLS Handshake: ${res.tls.toFixed(2)}ms`);

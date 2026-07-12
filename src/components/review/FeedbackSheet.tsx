@@ -13,6 +13,11 @@ interface FeedbackSheetProps {
     customerName?: string;
     phone?: string;
   }) => void;
+  business: {
+    name: string;
+    googleReviewUrl: string | null;
+    googleMapsUrl: string | null;
+  };
 }
 
 const FEEDBACK_TAGS = [
@@ -30,6 +35,7 @@ export default function FeedbackSheet({
   loading,
   onClose,
   onSubmit,
+  business,
 }: FeedbackSheetProps) {
   const [feedback, setFeedback] = useState("");
   const [callback, setCallback] = useState(false);
@@ -37,6 +43,17 @@ export default function FeedbackSheet({
   const [phone, setPhone] = useState("");
   const [selectedChips, setSelectedChips] = useState<string[]>([]);
   const [hasStartedSuccessDelay, setHasStartedSuccessDelay] = useState(false);
+  const [showRedirectButtons, setShowRedirectButtons] = useState(false);
+  const [showThankYou, setShowThankYou] = useState(false);
+
+  useEffect(() => {
+    if (isSuccess) {
+      setShowRedirectButtons(true);
+    } else {
+      setShowRedirectButtons(false);
+      setShowThankYou(false);
+    }
+  }, [isSuccess]);
 
   // References for accessibility and focus trap
   const sheetRef = useRef<HTMLDivElement>(null);
@@ -268,7 +285,7 @@ export default function FeedbackSheet({
             {/* Scrollable Container */}
             <div className="flex-1 overflow-y-auto px-6 pb-8 pt-1 scrollbar-none touch-pan-y">
               <AnimatePresence mode="wait">
-                {!isSuccess ? (
+                {!showThankYou ? (
                   <motion.form
                     key="form-content"
                     variants={listVariants}
@@ -410,25 +427,51 @@ export default function FeedbackSheet({
 
                     {/* Submit Button */}
                     <motion.div variants={itemVariants} className="pt-2">
-                      <motion.button
-                        disabled={loading}
-                        type="submit"
-                        whileHover={{ scale: 1.008 }}
-                        whileTap={{ scale: 0.985 }}
-                        className="w-full h-12 rounded-2xl bg-[#073AFE] text-white text-[15px] font-bold flex items-center justify-center gap-2.5 transition-all duration-200 hover:bg-[#0632d8] shadow-[0_4px_16px_rgba(7,58,254,0.22)] disabled:cursor-not-allowed disabled:bg-slate-200 disabled:shadow-none cursor-pointer"
-                      >
-                        {loading ? (
-                          <>
-                            <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" fill="none" viewBox="0 0 24 24">
-                              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                            </svg>
-                            Submitting...
-                          </>
-                        ) : (
-                          "Submit Feedback"
-                        )}
-                      </motion.button>
+                      {!showRedirectButtons ? (
+                        <motion.button
+                          disabled={loading}
+                          type="submit"
+                          whileHover={{ scale: 1.008 }}
+                          whileTap={{ scale: 0.985 }}
+                          className="w-full h-12 rounded-2xl bg-[#073AFE] text-white text-[15px] font-bold flex items-center justify-center gap-2.5 transition-all duration-200 hover:bg-[#0632d8] shadow-[0_4px_16px_rgba(7,58,254,0.22)] disabled:cursor-not-allowed disabled:bg-slate-200 disabled:shadow-none cursor-pointer"
+                        >
+                          {loading ? (
+                            <>
+                              <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" fill="none" viewBox="0 0 24 24">
+                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                              </svg>
+                              Submitting...
+                            </>
+                          ) : (
+                            "Submit Feedback"
+                          )}
+                        </motion.button>
+                      ) : (
+                        <div className="flex flex-row gap-3 w-full animate-fadeIn">
+                          {/* Button 1: Redirect to Google (Lighter in color) */}
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const targetUrl = business.googleMapsUrl || business.googleReviewUrl || `https://www.google.com/search?q=${encodeURIComponent(business.name)}`;
+                              window.open(targetUrl, '_blank', 'noopener,noreferrer');
+                              setShowThankYou(true);
+                            }}
+                            className="flex-1 h-12 rounded-2xl bg-blue-50 text-[#073AFE] hover:bg-blue-100 border border-blue-100 text-xs font-bold transition-all duration-200 cursor-pointer flex items-center justify-center gap-1.5"
+                          >
+                            Redirect to Google
+                          </button>
+
+                          {/* Button 2: May be Later (Darker/solid color) */}
+                          <button
+                            type="button"
+                            onClick={() => setShowThankYou(true)}
+                            className="flex-1 h-12 rounded-2xl bg-[#073AFE] text-white hover:bg-[#0632d8] text-xs font-bold transition-all duration-200 cursor-pointer flex items-center justify-center"
+                          >
+                            May be Later
+                          </button>
+                        </div>
+                      )}
                     </motion.div>
 
                     {/* Privacy Note */}

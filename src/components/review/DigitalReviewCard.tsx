@@ -14,7 +14,7 @@ interface DigitalReviewCardProps {
 
 export default function DigitalReviewCard({
   businessName,
-  subtitle = "How was your experience today",
+  subtitle = "How was your experience?",
   isRating = false,
   sheetOpen = false,
   children,

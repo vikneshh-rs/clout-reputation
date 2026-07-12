@@ -8,7 +8,7 @@ interface BusinessHeaderProps {
 
 export default function BusinessHeader({
   name,
-  subtitle = "How was your experience today",
+  subtitle = "How was your experience?",
   dark = false,
 }: BusinessHeaderProps) {
   const nameLength = name ? name.length : 0;
@@ -27,7 +27,7 @@ export default function BusinessHeader({
           mt-0
           font-extrabold
           tracking-[-0.02em]
-          leading-[1.1]
+          leading-[1.2]
           drop-shadow-sm
           animate-headerSlide
           ${fontSizeClass}
@@ -44,7 +44,7 @@ export default function BusinessHeader({
       {/* Subtitle */}
       <p
         className="
-          mt-[4px]
+          mt-[8px]
           font-normal
           tracking-normal
           leading-[1.4]

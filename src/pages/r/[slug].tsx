@@ -19,6 +19,7 @@ interface BusinessDetails {
     industry: string;
     logoUrl: string | null;
     googleReviewUrl: string | null;
+    googleMapsUrl: string | null;
     enableGoogleReviewRedirect: boolean;
     enableManagerCallback: boolean;
   };
@@ -380,6 +381,7 @@ export default function PublicReviewPortal({
         isOpen={isSheetOpen}
         isSuccess={step === 'negative-completion'}
         loading={submitting}
+        business={initialDetails?.business || { name: '', googleReviewUrl: null, googleMapsUrl: null }}
         onClose={() => {
           if (step === 'negative-completion') {
             setSheetDismissed(true);
@@ -494,6 +496,7 @@ export const getServerSideProps = async (context: GetServerSidePropsContext) => 
             industry: business.industry,
             logoUrl: business.logoUrl,
             googleReviewUrl: business.googleReviewUrl,
+            googleMapsUrl: (business as any).googleMapsUrl || null,
             enableGoogleReviewRedirect: business.enableGoogleReviewRedirect,
             enableManagerCallback: business.enableManagerCallback
           }
