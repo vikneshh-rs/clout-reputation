@@ -344,69 +344,56 @@ model FunnelEvent {
   @@index([timestamp])
 }
 
+enum NotificationChannel {
+  WHATSAPP
+  EMAIL
+  SMS
+  PUSH
+}
+
+enum NotificationProvider {
+  META
+}
+
 enum NotificationStatus {
   PENDING
   PROCESSING
   SENT
+  DELIVERED
+  READ
   FAILED
-  PERMANENTLY_FAILED
-}
-
-enum NotificationProvider {
-  TWILIO
-  META
-  RESEND
-  SMTP
 }
 
 enum NotificationType {
-  WHATSAPP
-  EMAIL
-  SMS
-}
-
-enum NotificationEvent {
-  NEGATIVE_REVIEW
-  POSITIVE_REVIEW
+  NEGATIVE_FEEDBACK
+  CALLBACK_REQUEST
   DAILY_SUMMARY
-  WEEKLY_REPORT
+  WEEKLY_SUMMARY
+  MONTHLY_SUMMARY
 }
 
 model NotificationJob {
   id                String               @id @default(uuid())
-  status            NotificationStatus   @default(PENDING)
-  retryCount        Int                  @default(0)
-  notificationType  NotificationType
-  eventType         NotificationEvent
-  provider          NotificationProvider
-  recipient         String
-  payload           Json                 // Holds serializable JSON with review/business details
-  scheduledFor      DateTime?
-  processedAt       DateTime?
-  providerMessageId String?
-  errorMessage      String?
-  
-  // Operational Timestamps & Metrics
-  queuedAt          DateTime             @default(now())
-  startedAt         DateTime?
-  completedAt       DateTime?
-  processingTimeMs  Int?
-  
-  // Provider Response Details
-  providerStatus    String?
-  providerResponse  Json?
-  
-  createdAt         DateTime             @default(now())
-  updatedAt         DateTime             @updatedAt
-  
-  // Relations
-  reviewId          String?
-  review            Review?              @relation(fields: [reviewId], references: [id], onDelete: SetNull)
   businessId        String
+  reviewId          String?
+  channel           NotificationChannel
+  provider          NotificationProvider
+  notificationType  NotificationType
+  recipient         String
+  payload           Json
+  metadata          Json?
+  status            NotificationStatus   @default(PENDING)
+  providerMessageId String?
+  retryCount        Int                  @default(0)
+  error             String?
+  createdAt         DateTime             @default(now())
+  processedAt       DateTime?
+  updatedAt         DateTime             @updatedAt
+
   business          Business             @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  review            Review?              @relation(fields: [reviewId], references: [id], onDelete: SetNull)
   logs              NotificationLog[]
 
-  @@unique([reviewId, eventType, notificationType])
   @@index([status])
   @@index([businessId])
   @@index([reviewId])
@@ -424,8 +411,7 @@ model NotificationLog {
   errorMessage       String?
   timestamp          DateTime             @default(now())
   
-  // Dispatch Audit Trail Details
-  eventType          NotificationEvent
+  channel            NotificationChannel
   notificationType   NotificationType
   processingDuration Int?
 }

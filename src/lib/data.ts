@@ -1,5 +1,5 @@
 import { db } from './db';
-import { createNotification } from './notification';
+import { ReviewNotificationHandler } from './reviews/events/ReviewNotificationHandler';
 import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
 import {
@@ -689,7 +689,7 @@ export async function getAllBusinesses(includeDeleted = false) {
         const failedJobs = notificationJobs.filter(j => j.status === 'FAILED');
         const totalProcessed = completedJobs.length + failedJobs.length;
         const successRate = totalProcessed > 0 ? Math.round((completedJobs.length / totalProcessed) * 100) : 100;
-        const lastJob = completedJobs.sort((a, b) => b.completedAt!.getTime() - a.completedAt!.getTime())[0];
+        const lastJob = completedJobs.sort((a, b) => (b.processedAt?.getTime() || 0) - (a.processedAt?.getTime() || 0))[0];
 
         const cleanedBiz = { ...biz };
         delete (cleanedBiz as any).passwordHash;
@@ -700,7 +700,7 @@ export async function getAllBusinesses(includeDeleted = false) {
           lastDownloadDate: logs.length > 0 ? logs[0].createdAt.toISOString() : null,
           notificationStats: {
             totalNotifications: notificationJobs.length,
-            lastNotificationSent: lastJob && lastJob.completedAt ? lastJob.completedAt.toISOString() : null,
+            lastNotificationSent: lastJob && lastJob.processedAt ? lastJob.processedAt.toISOString() : null,
             successRate
           }
         };
@@ -1617,7 +1617,7 @@ export async function createReview(data: {
       }
 
       // 4. Create Notification Job asynchronously
-      createNotification(review).catch(err => console.error('Failed to create notification job:', err));
+      ReviewNotificationHandler.handleReviewSubmitted(review).catch(err => console.error('Failed to handle review notification event:', err));
 
       return review;
     },
@@ -4062,7 +4062,7 @@ export async function getBusinessAnalytics(businessId: string | null | undefined
         db.recoveryRequest.findMany({ where: whereRecovery }),
         db.funnelEvent.findMany({ where: whereFunnel }),
         businessId && businessId !== 'ALL' ? db.notificationJob.count({ where: { businessId } }) : Promise.resolve(0),
-        businessId && businessId !== 'ALL' ? db.notificationJob.findFirst({ where: { businessId, status: 'SENT' }, orderBy: { completedAt: 'desc' } }) : Promise.resolve(null),
+        businessId && businessId !== 'ALL' ? db.notificationJob.findFirst({ where: { businessId, status: 'SENT' }, orderBy: { processedAt: 'desc' } }) : Promise.resolve(null),
         businessId && businessId !== 'ALL' ? db.notificationJob.count({ where: { businessId, status: 'SENT' } }) : Promise.resolve(0),
         businessId && businessId !== 'ALL' ? db.notificationJob.count({ where: { businessId, status: 'FAILED' } }) : Promise.resolve(0)
       ]);
@@ -4075,7 +4075,7 @@ export async function getBusinessAnalytics(businessId: string | null | undefined
         ...baseAnalytics,
         notificationStats: {
           totalNotifications,
-          lastNotificationSent: lastJob ? lastJob.completedAt : null,
+          lastNotificationSent: lastJob ? lastJob.processedAt : null,
           successRate
         }
       };

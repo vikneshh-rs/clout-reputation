@@ -33,3 +33,9 @@ export function resolveTemplate(eventType: string, payload: any): string {
   }
   return formatter(payload);
 }
+
+export class NotificationProviderFactory {
+  static getProvider(providerName: string): NotificationProviderInstance {
+    return resolveProvider(providerName);
+  }
+}

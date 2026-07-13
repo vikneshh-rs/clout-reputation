@@ -33,8 +33,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       where: { id: jobId },
       data: {
         status: 'PENDING',
-        errorMessage: null,
-        scheduledFor: null, // deliver immediately on next cron cycle
+        error: null,
         updatedAt: new Date()
       }
     });

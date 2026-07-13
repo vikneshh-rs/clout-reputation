@@ -31,44 +31,43 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       processing,
       sent,
       failed,
-      permanentlyFailed,
-      avgProcTimeRes,
       longestPendingJob,
       lastErrorJob,
-      recentCompletedJobsCount
+      recentCompletedJobsCount,
+      successfulJobs
     ] = await Promise.all([
       db.notificationJob.count({ where: { createdAt: { gte: startDate } } }),
       db.notificationJob.count({ where: { status: 'PENDING' } }),
       db.notificationJob.count({ where: { status: 'PROCESSING' } }),
       db.notificationJob.count({ where: { status: 'SENT', createdAt: { gte: startDate } } }),
       db.notificationJob.count({ where: { status: 'FAILED', createdAt: { gte: startDate } } }),
-      db.notificationJob.count({ where: { status: 'PERMANENTLY_FAILED', createdAt: { gte: startDate } } }),
-      db.notificationJob.aggregate({
-        _avg: { processingTimeMs: true },
-        where: { status: 'SENT', createdAt: { gte: startDate } }
-      }),
       db.notificationJob.findFirst({
         where: { status: 'PENDING' },
         orderBy: { createdAt: 'asc' }
       }),
       db.notificationJob.findFirst({
-        where: { errorMessage: { not: null } },
+        where: { error: { not: null } },
         orderBy: { updatedAt: 'desc' }
       }),
       // For throughput calculation: number of completed jobs in the last 24 hours
       db.notificationJob.count({
         where: {
           status: 'SENT',
-          completedAt: { gte: new Date(now.getTime() - 24 * 60 * 60 * 1000) }
+          processedAt: { gte: new Date(now.getTime() - 24 * 60 * 60 * 1000) }
         }
+      }),
+      db.notificationJob.findMany({
+        where: { status: 'SENT', processedAt: { not: null }, createdAt: { gte: startDate } },
+        select: { createdAt: true, processedAt: true }
       })
     ]);
 
-    const totalProcessed = sent + failed + permanentlyFailed;
+    const permanentlyFailed = 0;
+    const totalProcessed = sent + failed;
     const successRate = totalProcessed > 0 ? Math.round((sent / totalProcessed) * 100) : 100;
     const failureRate = totalProcessed > 0 ? 100 - successRate : 0;
-    const avgProcessingTime = avgProcTimeRes._avg.processingTimeMs 
-      ? Math.round(avgProcTimeRes._avg.processingTimeMs) 
+    const avgProcessingTime = successfulJobs.length > 0
+      ? Math.round(successfulJobs.reduce((acc, j) => acc + (j.processedAt!.getTime() - j.createdAt.getTime()), 0) / successfulJobs.length)
       : 0;
 
     // Queue wait time metrics
@@ -82,35 +81,27 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     // 2. Dynamic Provider Health Calculation (from NotificationLog attempts in the last 7 days)
     const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-    const twilioLogs = await db.notificationLog.findMany({
-      where: { provider: 'TWILIO', timestamp: { gte: sevenDaysAgo } }
+    const metaLogs = await db.notificationLog.findMany({
+      where: { provider: 'META', timestamp: { gte: sevenDaysAgo } }
     });
     
-    const twilioSent = twilioLogs.filter(l => l.newStatus === 'SENT').length;
-    const twilioFailed = twilioLogs.filter(l => l.newStatus === 'FAILED' || l.newStatus === 'PERMANENTLY_FAILED').length;
-    const twilioTotal = twilioSent + twilioFailed;
-    const twilioSuccessRate = twilioTotal > 0 ? Math.round((twilioSent / twilioTotal) * 100) : 100;
+    const metaSent = metaLogs.filter(l => l.newStatus === 'SENT').length;
+    const metaFailed = metaLogs.filter(l => l.newStatus === 'FAILED').length;
+    const metaTotal = metaSent + metaFailed;
+    const metaSuccessRate = metaTotal > 0 ? Math.round((metaSent / metaTotal) * 100) : 100;
     
-    const lastTwilioLog = twilioLogs.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime())[0];
-    const twilioErrors = twilioLogs.filter(l => l.errorMessage).sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
+    const lastMetaLog = metaLogs.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime())[0];
+    const metaErrors = metaLogs.filter(l => l.errorMessage).sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
     
     // Dynamic provider stats
     const providers = [
       {
-        name: 'Twilio (WhatsApp)',
-        status: twilioSuccessRate < 80 ? 'degraded' : twilioTotal === 0 ? 'online' : 'online',
-        successRate: twilioSuccessRate,
-        avgLatencyMs: twilioLogs.length > 0 ? Math.round(twilioLogs.reduce((acc, l) => acc + (l.processingDuration || 0), 0) / twilioLogs.length) : 0,
-        lastCallTime: lastTwilioLog ? lastTwilioLog.timestamp.toISOString() : null,
-        lastError: twilioErrors.length > 0 ? twilioErrors[0].errorMessage : null
-      },
-      {
         name: 'Meta Cloud API (WhatsApp)',
-        status: 'online', // Prepared mock placeholder for Meta integration
-        successRate: 100,
-        avgLatencyMs: 0,
-        lastCallTime: null,
-        lastError: null
+        status: metaSuccessRate < 80 ? 'degraded' : 'online',
+        successRate: metaSuccessRate,
+        avgLatencyMs: metaLogs.length > 0 ? Math.round(metaLogs.reduce((acc, l) => acc + (l.processingDuration || 0), 0) / metaLogs.length) : 0,
+        lastCallTime: lastMetaLog ? lastMetaLog.timestamp.toISOString() : null,
+        lastError: metaErrors.length > 0 ? metaErrors[0].errorMessage : null
       }
     ];
 
@@ -184,7 +175,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         avgProcessingTime,
         queueLength: pending + processing,
         longestWaitingTimeMs,
-        lastError: lastErrorJob ? lastErrorJob.errorMessage : null,
+        lastError: lastErrorJob ? lastErrorJob.error : null,
         throughput: {
           recent24h: recentCompletedJobsCount,
           messagesPerHour

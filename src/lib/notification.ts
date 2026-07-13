@@ -1,5 +1,5 @@
 import { db } from './db';
-import { Review, Business, NotificationStatus, NotificationProvider, NotificationType, NotificationEvent } from '@prisma/client';
+import { Review, Business, NotificationStatus, NotificationProvider, NotificationType, NotificationChannel } from '@prisma/client';
 
 /**
  * Reusable notification service to manage evaluation, idempotency,
@@ -109,15 +109,15 @@ export async function createNotification(review: Review) {
     const { business, settings } = evaluation;
 
     // Determine channels
-    const channels: { type: NotificationType; provider: NotificationProvider; recipient: string }[] = [];
+    const channels: { channel: NotificationChannel; provider: NotificationProvider; recipient: string }[] = [];
     
     if (settings.whatsappEnabled) {
       if (!business.whatsappNumber) {
         console.log(`[NotificationService] SKIPPED: Business "${business.name}" (ID: ${business.id}) has WhatsApp alerts enabled, but has not configured a WhatsApp number.`);
       } else {
         channels.push({
-          type: NotificationType.WHATSAPP,
-          provider: NotificationProvider.TWILIO, // twilio sandbox by default in development
+          channel: NotificationChannel.WHATSAPP,
+          provider: NotificationProvider.META,
           recipient: business.whatsappNumber,
         });
       }
@@ -141,33 +141,29 @@ export async function createNotification(review: Review) {
       createdAt: review.createdAt.toISOString(),
     };
 
-    // Check if quiet hours apply and compute schedule time
-    const scheduledFor = getQuietHoursSchedule(settings);
-
     const createdJobs = [];
-    for (const channel of channels) {
+    for (const chan of channels) {
       try {
         const job = await db.notificationJob.create({
           data: {
             status: NotificationStatus.PENDING,
             retryCount: 0,
-            notificationType: channel.type,
-            eventType: NotificationEvent.NEGATIVE_REVIEW,
-            provider: channel.provider,
-            recipient: channel.recipient,
+            channel: chan.channel,
+            notificationType: NotificationType.NEGATIVE_FEEDBACK,
+            provider: chan.provider,
+            recipient: chan.recipient,
             payload: payload as any,
             reviewId: review.id,
             businessId: business.id,
-            scheduledFor,
           },
         });
 
-        console.log(`[NotificationService] Created pending job ${job.id} (Type: ${channel.type}) for review ${review.id}`);
+        console.log(`[NotificationService] Created pending job ${job.id} (Channel: ${chan.channel}) for review ${review.id}`);
         createdJobs.push(job);
       } catch (err: any) {
         // Catch P2002 Unique constraint violation (idempotency key protection)
         if (err.code === 'P2002') {
-          console.warn(`[NotificationService] Idempotency duplicate blocked. Job already exists for review ${review.id}, type ${channel.type}`);
+          console.warn(`[NotificationService] Idempotency duplicate blocked. Job already exists for review ${review.id}, channel ${chan.channel}`);
         } else {
           console.error(`[NotificationService] Failed to create job:`, err);
         }
