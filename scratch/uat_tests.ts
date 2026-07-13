@@ -41,7 +41,10 @@ async function runUatTests() {
   ) => {
     let statusCode = 200;
     let jsonBody: any = null;
-    let headers: Record<string, string> = {};
+    let headers: Record<string, string> = {
+      host: 'localhost:3000',
+      origin: 'http://localhost:3000'
+    };
 
     if (options.token) {
       headers['cookie'] = `${COOKIE_NAME}=${options.token}`;
@@ -99,14 +102,15 @@ async function runUatTests() {
   // -------------------------------------------------------------
   console.log('\n--- Workflow A: Super Admin QR Generation & Inventory ---');
   
-  const batchName = 'UAT Batch 2026';
-  const startSerial = 'QR-080000';
+  const prefix = 'UAT';
+  const startNumber = 100;
+  const endNumber = 104;
   const quantity = 5;
 
   const wfARes = await callApi(generateBatchHandler, {
     method: 'POST',
     token: tokens.ADMIN,
-    body: { batchName, startSerial, quantity }
+    body: { prefix, startNumber, endNumber }
   });
 
   assert(
@@ -119,7 +123,7 @@ async function runUatTests() {
   const wfAInvRes = await callApi(inventoryHandler, {
     method: 'GET',
     token: tokens.ADMIN,
-    query: { search: 'QR-08000' }
+    query: { search: 'cqr-UAT' }
   });
 
   assert(
@@ -139,7 +143,7 @@ async function runUatTests() {
     token: tokens.REP,
     body: {
       action: 'ASSIGN',
-      qrCode: 'QR-080000',
+      qrCode: 'cqr-UAT100',
       businessDetails: {
         name: uatBizName,
         industry: 'CAFE',
@@ -165,16 +169,16 @@ async function runUatTests() {
     'Business was not created'
   );
 
-  const uatQr = await db.qRInventory.findFirst({ where: { qrCode: 'QR-080000' } });
+  const uatQr = await db.qRAsset.findFirst({ where: { qrCode: 'cqr-UAT100' } });
   assert(
     'Workflow B: QR Code set to ASSIGNED',
     uatQr?.status === 'ASSIGNED' && uatQr.assignedBusinessId === uatBiz?.id,
     `Expected ASSIGNED, got status: ${uatQr?.status}`
   );
 
-  // Verify AssignmentLog
-  const assignLog = await db.assignmentLog.findFirst({
-    where: { qrInventoryId: uatQr?.id, businessId: uatBiz?.id }
+  // Verify QRHistory
+  const assignLog = await db.qRHistory.findFirst({
+    where: { qrAssetId: uatQr?.id, businessId: uatBiz?.id }
   });
   assert(
     'Workflow B: Assignment Log was created',
@@ -192,7 +196,7 @@ async function runUatTests() {
   // Customer scans
   const scanRes = await callApi(customerQrHandler, {
     method: 'GET',
-    query: { qrCode: 'QR-080000' }
+    query: { qrCode: 'cqr-UAT100' }
   });
   assert(
     'Workflow C: Customer scan resolves with 200',
@@ -203,7 +207,7 @@ async function runUatTests() {
   // Submit positive review (5 stars)
   const posReviewRes = await callApi(customerQrHandler, {
     method: 'POST',
-    query: { qrCode: 'QR-080000' },
+    query: { qrCode: 'cqr-UAT100' },
     body: { rating: 5, comment: 'Simply fantastic pastries!' }
   });
 
@@ -242,7 +246,7 @@ async function runUatTests() {
   // Submit negative review (2 stars)
   const negReviewRes = await callApi(customerQrHandler, {
     method: 'POST',
-    query: { qrCode: 'QR-080000' },
+    query: { qrCode: 'cqr-UAT100' },
     body: { rating: 2, comment: 'Burnt cookies, very disappointed.' }
   });
 
@@ -315,7 +319,7 @@ async function runUatTests() {
       body: {
         action: 'status',
         id: uatBiz.id,
-        status: BusinessStatus.SUSPENDED
+        status: BusinessStatus.INACTIVE
       }
     });
 
@@ -328,7 +332,7 @@ async function runUatTests() {
     // Customer scans QR code
     const suspendedScanRes = await callApi(customerQrHandler, {
       method: 'GET',
-      query: { qrCode: 'QR-080000' }
+      query: { qrCode: 'cqr-UAT100' }
     });
 
     assert(
@@ -337,15 +341,15 @@ async function runUatTests() {
       `Expected 403, got ${suspendedScanRes.status}`
     );
     assert(
-      'Workflow F: Scan returns error SUSPENDED',
-      suspendedScanRes.json?.status === 'SUSPENDED',
-      `Expected SUSPENDED error, got ${suspendedScanRes.json?.status}`
+      'Workflow F: Scan returns error INACTIVE',
+      suspendedScanRes.json?.status === 'INACTIVE',
+      `Expected INACTIVE error, got ${suspendedScanRes.json?.status}`
     );
 
     // Customer attempts to submit review
     const blockedReviewRes = await callApi(customerQrHandler, {
       method: 'POST',
-      query: { qrCode: 'QR-080000' },
+      query: { qrCode: 'cqr-UAT100' },
       body: { rating: 5, comment: 'Spam' }
     });
 
@@ -364,21 +368,21 @@ async function runUatTests() {
     await db.callbackRequest.deleteMany({ where: { review: { businessId: uatBiz.id } } });
     await db.review.deleteMany({ where: { businessId: uatBiz.id } });
     await db.qRScan.deleteMany({ where: { businessId: uatBiz.id } });
-    await db.assignmentLog.deleteMany({ where: { businessId: uatBiz.id } });
+    await db.qRHistory.deleteMany({ where: { businessId: uatBiz.id } });
     await db.subscription.deleteMany({ where: { businessId: uatBiz.id } });
-    await db.qRInventory.deleteMany({ where: { assignedBusinessId: uatBiz.id } });
+    await db.qRAsset.deleteMany({ where: { assignedBusinessId: uatBiz.id } });
     await db.business.delete({ where: { id: uatBiz.id } });
   }
   
   // Delete the batch and codes generated in UAT
-  await db.qRInventory.deleteMany({
+  await db.qRAsset.deleteMany({
     where: {
       qrCode: {
-        startsWith: 'QR-080'
+        startsWith: 'cqr-UAT10'
       }
     }
   });
-  await db.qRBatch.deleteMany({ where: { batchName } });
+  await db.qRBatch.deleteMany({ where: { batchName: 'Batch UAT (100-104)' } });
 
   console.log(`\n📊 UAT Summary: ${testPassed}/${testTotal} workflows passed.`);
   if (testPassed === testTotal) {

@@ -811,6 +811,20 @@ export async function onboardBusiness(data: {
 
       return await db.$transaction(async (tx) => {
         const latestBiz = await tx.business.findFirst({
+          where: {
+            OR: [
+              { businessCode: { startsWith: 'CR-0' } },
+              { businessCode: { startsWith: 'CR-1' } },
+              { businessCode: { startsWith: 'CR-2' } },
+              { businessCode: { startsWith: 'CR-3' } },
+              { businessCode: { startsWith: 'CR-4' } },
+              { businessCode: { startsWith: 'CR-5' } },
+              { businessCode: { startsWith: 'CR-6' } },
+              { businessCode: { startsWith: 'CR-7' } },
+              { businessCode: { startsWith: 'CR-8' } },
+              { businessCode: { startsWith: 'CR-9' } },
+            ]
+          },
           orderBy: { businessCode: 'desc' },
           select: { businessCode: true }
         });
@@ -950,7 +964,7 @@ export async function onboardBusiness(data: {
 
       const codes = mockBusinesses
         .map(b => b.businessCode)
-        .filter(code => code && code.startsWith('CR-'));
+        .filter(code => code && /^CR-\d+$/.test(code));
       let nextNumber = 1;
       if (codes.length > 0) {
         codes.sort();

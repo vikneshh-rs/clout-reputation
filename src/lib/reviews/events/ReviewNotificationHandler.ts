@@ -1,6 +1,7 @@
 import { db } from '../../db';
 import { Review } from '@prisma/client';
 import { NotificationService } from '../../notifications/services/NotificationService';
+import { DispatcherService } from '../../notifications/services/DispatcherService';
 import { NotificationFactory } from '../../notifications/factories/NotificationFactory';
 import {
   NotificationChannel,
@@ -127,6 +128,20 @@ export class ReviewNotificationHandler {
           elapsedMs: Date.now() - startTime,
         })
       );
+
+      // 8. Trigger dispatcher automatically in the background
+      DispatcherService.dispatch(job.id).catch((err) => {
+        console.error(
+          JSON.stringify({
+            timestamp: new Date().toISOString(),
+            level: 'error',
+            component: 'ReviewNotificationHandler',
+            message: 'Failed to trigger dispatcher automatically.',
+            jobId: job.id,
+            error: err.message || String(err),
+          })
+        );
+      });
     } catch (error: any) {
       // 8. Graceful error isolation
       console.error(

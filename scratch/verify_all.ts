@@ -90,11 +90,11 @@ async function runVerification() {
   const results: any[] = [];
   const metrics: any = {};
 
-  // Mock Provider Setup
+  // Mock Provider Setup - Generates unique messageIds
   const mockProvider = {
-    sendText: async () => ({ success: true, messageId: 'mock-wamid-id' }),
-    sendTemplate: async () => ({ success: true, messageId: 'mock-wamid-id' }),
-    sendInteractiveTemplate: async () => ({ success: true, messageId: 'mock-wamid-id' }),
+    sendText: async () => ({ success: true, messageId: `wamid.text-${Date.now()}-${Math.random().toString(36).substring(2, 7)}` }),
+    sendTemplate: async () => ({ success: true, messageId: `wamid.tmpl-${Date.now()}-${Math.random().toString(36).substring(2, 7)}` }),
+    sendInteractiveTemplate: async () => ({ success: true, messageId: `wamid.int-${Date.now()}-${Math.random().toString(36).substring(2, 7)}` }),
     health: async () => ({ status: 'healthy' as const }),
   };
 
@@ -120,15 +120,17 @@ async function runVerification() {
     const t1Jobs = await waitForJob(r1.id);
     assert(t1Jobs.length === 1, 'Notification job should be created');
     const job = t1Jobs[0];
-    assert(job.status === NotificationStatus.PENDING, 'Job should be PENDING');
 
-    // Dispatch
-    const t1DispatchStart = performance.now();
-    const d1Result = await DispatcherService.dispatch(job.id);
-    metrics.dispatcherTimeMs = Math.round(performance.now() - t1DispatchStart);
+    // Wait for automatic or manual dispatch to transition status to SENT
+    let dispatchedJob;
+    for (let i = 0; i < 25; i++) {
+      dispatchedJob = await db.notificationJob.findUnique({ where: { id: job.id } });
+      if (dispatchedJob?.status === NotificationStatus.SENT) {
+        break;
+      }
+      await new Promise((resolve) => setTimeout(resolve, 200));
+    }
 
-    assert(d1Result.success, 'Dispatcher should succeed');
-    const dispatchedJob = await db.notificationJob.findUnique({ where: { id: job.id } });
     assert(dispatchedJob?.status === NotificationStatus.SENT, 'Job status should be SENT');
     assert(dispatchedJob.providerMessageId, 'providerMessageId should be populated');
 
@@ -221,7 +223,7 @@ async function runVerification() {
     console.log('Running Test Case 4: Dispatcher Idempotency...');
     mockProvider.sendTemplate = async () => {
       await new Promise((resolve) => setTimeout(resolve, 400));
-      return { success: true, messageId: 'idem-msg-id' };
+      return { success: true, messageId: `wamid.idem-${Date.now()}-${Math.random().toString(36).substring(2, 7)}` };
     };
 
     const job = await NotificationService.createJob({
@@ -301,6 +303,7 @@ async function runVerification() {
       payload: { test: 'payload' },
     });
 
+    // Execute dispatch (background trigger is disabled since we create job directly here)
     const result = await DispatcherService.dispatch(job.id);
     assert(!result.success, 'Dispatcher should report failure');
 
@@ -331,6 +334,7 @@ async function runVerification() {
       payload: { test: 'payload' },
     });
 
+    // Execute dispatch (background trigger is disabled since we create job directly here)
     const result = await DispatcherService.dispatch(job.id);
     assert(!result.success, 'Dispatcher should fail due to timeout');
 

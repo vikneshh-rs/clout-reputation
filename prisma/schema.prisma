@@ -397,6 +397,7 @@ model NotificationJob {
   @@index([status])
   @@index([businessId])
   @@index([reviewId])
+  @@index([providerMessageId])
 }
 
 model NotificationLog {
