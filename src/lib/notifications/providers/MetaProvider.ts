@@ -133,6 +133,15 @@ export class MetaProvider implements NotificationProviderInterface {
     }
 
     this.log('info', 'Sending text message', { recipient: canonicalMsg.recipient });
+    console.log(
+      JSON.stringify({
+        timestamp: new Date().toISOString(),
+        level: 'info',
+        component: 'MetaProvider',
+        message: 'MetaProvider send text starting',
+        recipient: canonicalMsg.recipient,
+      })
+    );
 
     try {
       const to = this.validateRecipient(canonicalMsg.recipient);
@@ -198,6 +207,16 @@ export class MetaProvider implements NotificationProviderInterface {
       recipient: canonicalMsg.recipient,
       templateName: canonicalMsg.template?.name,
     });
+    console.log(
+      JSON.stringify({
+        timestamp: new Date().toISOString(),
+        level: 'info',
+        component: 'MetaProvider',
+        message: 'MetaProvider send template starting',
+        recipient: canonicalMsg.recipient,
+        templateName: canonicalMsg.template?.name,
+      })
+    );
 
     try {
       const to = this.validateRecipient(canonicalMsg.recipient);

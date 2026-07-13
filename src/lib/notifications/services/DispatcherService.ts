@@ -10,6 +10,16 @@ export class DispatcherService {
     try {
       const startTime = Date.now();
 
+      console.log(
+        JSON.stringify({
+          timestamp: new Date().toISOString(),
+          level: 'info',
+          component: 'DispatcherService',
+          message: 'DispatcherService.dispatch starting',
+          jobId: notificationJobId,
+        })
+      );
+
       // 1. Fetch check to see if the job exists (for 404 validation)
       const checkJob = await db.notificationJob.findUnique({
         where: { id: notificationJobId },
@@ -125,6 +135,18 @@ export class DispatcherService {
             },
           });
 
+          console.log(
+            JSON.stringify({
+              timestamp: new Date().toISOString(),
+              level: 'info',
+              component: 'DispatcherService',
+              message: 'DispatcherService.dispatch completed successfully',
+              jobId: job.id,
+              latency,
+              attempt
+            })
+          );
+
           return { success: true, job: finalJob };
         } else {
           // Provider error
@@ -170,6 +192,19 @@ export class DispatcherService {
             errorMessage: errorMsg,
           },
         });
+
+        console.log(
+          JSON.stringify({
+            timestamp: new Date().toISOString(),
+            level: 'error',
+            component: 'DispatcherService',
+            message: 'DispatcherService.dispatch failed',
+            jobId: job.id,
+            latency,
+            attempt,
+            error: errorMsg,
+          })
+        );
 
         return { success: false, error: errorMsg, job: finalJob };
       }

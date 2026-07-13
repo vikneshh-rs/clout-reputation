@@ -12,14 +12,18 @@ import {
 export class ReviewNotificationHandler {
   static async handleReviewSubmitted(review: Review): Promise<void> {
     try {
-      const startTime = Date.now();
+      // LOG 2
+      console.log(
+        JSON.stringify({
+          timestamp: new Date().toISOString(),
+          level: 'info',
+          component: 'ReviewNotificationHandler',
+          message: 'Entering ReviewNotificationHandler',
+          reviewId: review.id,
+        })
+      );
 
-      // 1. Positive Reviews Rule: Rating >= 4: do not create notification jobs
-      if (review.rating >= 4) {
-        return;
-      }
-
-      // 2. Look up Business along with Notification Settings
+      // Load Business and settings
       const business = await db.business.findUnique({
         where: { id: review.businessId },
         include: {
@@ -28,14 +32,66 @@ export class ReviewNotificationHandler {
       });
 
       if (!business) {
-        console.error(
+        console.log(
           JSON.stringify({
             timestamp: new Date().toISOString(),
-            level: 'error',
+            level: 'warn',
             component: 'ReviewNotificationHandler',
-            message: 'Business lookup failed. Business not found.',
+            message: 'Early exit: Business not found',
             reviewId: review.id,
             businessId: review.businessId,
+          })
+        );
+        return;
+      }
+
+      // LOG 3
+      console.log(
+        JSON.stringify({
+          timestamp: new Date().toISOString(),
+          level: 'info',
+          component: 'ReviewNotificationHandler',
+          message: 'Business loaded',
+          reviewId: review.id,
+          businessId: business.id,
+        })
+      );
+
+      // LOG 4
+      console.log(
+        JSON.stringify({
+          timestamp: new Date().toISOString(),
+          level: 'info',
+          component: 'ReviewNotificationHandler',
+          message: 'Business notification settings loaded',
+          reviewId: review.id,
+          businessId: business.id,
+          hasSettings: !!business.notificationSettings,
+        })
+      );
+
+      // LOG 5
+      console.log(
+        JSON.stringify({
+          timestamp: new Date().toISOString(),
+          level: 'info',
+          component: 'ReviewNotificationHandler',
+          message: `Review rating = ${review.rating}`,
+          reviewId: review.id,
+          rating: review.rating,
+        })
+      );
+
+      // Check rating eligibility
+      if (review.rating >= 4) {
+        console.log(
+          JSON.stringify({
+            timestamp: new Date().toISOString(),
+            level: 'info',
+            component: 'ReviewNotificationHandler',
+            message: 'Early exit: Rating not eligible',
+            reviewId: review.id,
+            rating: review.rating,
           })
         );
         return;
@@ -44,12 +100,12 @@ export class ReviewNotificationHandler {
       // Business phone check (WhatsApp recipient)
       const recipient = business.whatsappNumber;
       if (!recipient) {
-        console.warn(
+        console.log(
           JSON.stringify({
             timestamp: new Date().toISOString(),
             level: 'warn',
             component: 'ReviewNotificationHandler',
-            message: 'Skipping notification: Business has no WhatsApp number configured.',
+            message: 'Early exit: WhatsApp number missing',
             reviewId: review.id,
             businessId: business.id,
           })
@@ -57,7 +113,7 @@ export class ReviewNotificationHandler {
         return;
       }
 
-      // 3. Evaluate Business Notification Settings with Safe Defaults
+      // Evaluate Business Notification Settings
       const settings = business.notificationSettings;
       const negativeReviewEnabled = settings ? (settings.negativeReviewEnabled ?? true) : true;
       const callbackEnabled = settings ? ((settings as any).callbackEnabled ?? true) : true;
@@ -68,7 +124,7 @@ export class ReviewNotificationHandler {
             timestamp: new Date().toISOString(),
             level: 'info',
             component: 'ReviewNotificationHandler',
-            message: 'Skipping notification: negativeReviewEnabled is disabled.',
+            message: 'Early exit: Notification disabled',
             reviewId: review.id,
             businessId: business.id,
           })
@@ -82,7 +138,7 @@ export class ReviewNotificationHandler {
             timestamp: new Date().toISOString(),
             level: 'info',
             component: 'ReviewNotificationHandler',
-            message: 'Skipping notification: callbackEnabled is disabled.',
+            message: 'Early exit: Callback disabled',
             reviewId: review.id,
             businessId: business.id,
           })
@@ -90,12 +146,24 @@ export class ReviewNotificationHandler {
         return;
       }
 
-      // 4. Determine Notification Type
+      // Determine Notification Type
       const notificationType = review.requestCallback
         ? NotificationType.CALLBACK_REQUEST
         : NotificationType.NEGATIVE_FEEDBACK;
 
-      // 5. Construct generic payload using NotificationFactory
+      // LOG 6
+      console.log(
+        JSON.stringify({
+          timestamp: new Date().toISOString(),
+          level: 'info',
+          component: 'ReviewNotificationHandler',
+          message: 'Notification type selected',
+          reviewId: review.id,
+          notificationType,
+        })
+      );
+
+      // Construct payload
       const messagePayload = NotificationFactory.createMessage(
         notificationType,
         recipient,
@@ -103,7 +171,17 @@ export class ReviewNotificationHandler {
         business
       );
 
-      // 6. Create Notification Job using NotificationService
+      // LOG 7
+      console.log(
+        JSON.stringify({
+          timestamp: new Date().toISOString(),
+          level: 'info',
+          component: 'ReviewNotificationHandler',
+          message: 'Creating NotificationJob',
+          reviewId: review.id,
+        })
+      );
+
       const job = await NotificationService.createJob({
         businessId: business.id,
         reviewId: review.id,
@@ -114,42 +192,51 @@ export class ReviewNotificationHandler {
         payload: messagePayload,
       });
 
-      // 7. Structured log of successful job creation
+      // LOG 8
       console.log(
         JSON.stringify({
           timestamp: new Date().toISOString(),
           level: 'info',
           component: 'ReviewNotificationHandler',
-          message: 'Successfully created notification job for review.',
+          message: 'NotificationJob created',
           reviewId: review.id,
-          businessId: business.id,
-          notificationType,
           notificationJobId: job.id,
-          elapsedMs: Date.now() - startTime,
         })
       );
 
-      // 8. Trigger dispatcher automatically in the background
-      DispatcherService.dispatch(job.id).catch((err) => {
+      // LOG 9
+      console.log(
+        JSON.stringify({
+          timestamp: new Date().toISOString(),
+          level: 'info',
+          component: 'ReviewNotificationHandler',
+          message: 'Dispatcher started',
+          reviewId: review.id,
+          notificationJobId: job.id,
+        })
+      );
+
+      try {
+        await DispatcherService.dispatch(job.id);
+      } catch (err: any) {
         console.error(
           JSON.stringify({
             timestamp: new Date().toISOString(),
             level: 'error',
             component: 'ReviewNotificationHandler',
-            message: 'Failed to trigger dispatcher automatically.',
+            message: 'Early exit: Exception thrown',
             jobId: job.id,
             error: err.message || String(err),
           })
         );
-      });
+      }
     } catch (error: any) {
-      // 8. Graceful error isolation
       console.error(
         JSON.stringify({
           timestamp: new Date().toISOString(),
           level: 'error',
           component: 'ReviewNotificationHandler',
-          message: 'Error in ReviewNotificationHandler.',
+          message: 'Early exit: Exception thrown',
           reviewId: review.id,
           businessId: review.businessId,
           error: error.message || String(error),

@@ -34,6 +34,21 @@ export class NotificationService {
     payload: any;
     metadata?: any;
   }) {
+    console.log(
+      JSON.stringify({
+        timestamp: new Date().toISOString(),
+        level: 'info',
+        component: 'NotificationService',
+        message: 'NotificationService.createJob starting',
+        businessId: data.businessId,
+        reviewId: data.reviewId,
+        channel: data.channel,
+        provider: data.provider,
+        notificationType: data.notificationType,
+        recipient: data.recipient,
+      })
+    );
+
     const job = await db.notificationJob.create({
       data: {
         businessId: data.businessId,

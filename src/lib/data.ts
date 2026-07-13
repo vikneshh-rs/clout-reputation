@@ -1600,6 +1600,16 @@ export async function createReview(data: {
           businessId: data.businessId
         }
       });
+      
+      console.log(
+        JSON.stringify({
+          timestamp: new Date().toISOString(),
+          level: 'info',
+          component: 'createReview',
+          message: 'Review successfully saved',
+          reviewId: review.id,
+        })
+      );
 
       // 2. Create RecoveryRequest if rating < 4
       if (data.rating < 4) {
@@ -1630,8 +1640,12 @@ export async function createReview(data: {
         }).catch(err => console.error('Failed to log SUBMIT event in DB:', err));
       }
 
-      // 4. Create Notification Job asynchronously
-      ReviewNotificationHandler.handleReviewSubmitted(review).catch(err => console.error('Failed to handle review notification event:', err));
+      // 4. Create Notification Job (awaited for serverless environments)
+      try {
+        await ReviewNotificationHandler.handleReviewSubmitted(review);
+      } catch (err) {
+        console.error('Failed to handle review notification event:', err);
+      }
 
       return review;
     },
