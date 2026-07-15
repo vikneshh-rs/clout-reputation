@@ -907,6 +907,8 @@ export default function BusinessesManagementPage(props: any) {
                   </div>
                 </div>
 
+
+
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">Direct Access Password</label>
@@ -1001,7 +1003,7 @@ export default function BusinessesManagementPage(props: any) {
                   </div>
 
                   <div>
-                    <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">Google Maps URL</label>
+                    <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">Google Link</label>
                     <input
                       type="url"
                       value={formData.googleMapsUrl}
@@ -1028,6 +1030,8 @@ export default function BusinessesManagementPage(props: any) {
                     </div>
                   )}
                 </div>
+
+
 
                 {/* Notification Settings section */}
                 <div className="border-t border-slate-100 pt-5 space-y-4">
