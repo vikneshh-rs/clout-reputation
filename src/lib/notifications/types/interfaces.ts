@@ -60,3 +60,33 @@ export interface NotificationProviderInterface {
 
   health(): Promise<{ status: 'healthy' | 'unhealthy'; error?: string }>;
 }
+
+import { Review, Business } from '@prisma/client';
+
+export interface NegativeFeedbackTemplate {
+  review: Review;
+  business: Business;
+}
+
+export interface CallbackRequestTemplate {
+  review: Review;
+  business: Business;
+}
+
+export interface WeeklySummaryTemplate {
+  business: Business;
+  positiveReviews: number;
+  negativeReviews: number;
+  callbackRequests: number;
+}
+
+export interface MonthlySummaryTemplate {
+  business: Business;
+  positiveReviews: number;
+  negativeReviews: number;
+  callbackRequests: number;
+}
+
+export interface GoogleReplyReminderTemplate {
+  business: Business;
+}

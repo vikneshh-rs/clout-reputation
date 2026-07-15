@@ -1,6 +1,14 @@
 import { NotificationType } from '../types/enums';
-import { NotificationMessage } from '../types/interfaces';
+import {
+  NotificationMessage,
+  NegativeFeedbackTemplate,
+  CallbackRequestTemplate,
+  WeeklySummaryTemplate,
+  MonthlySummaryTemplate,
+  GoogleReplyReminderTemplate
+} from '../types/interfaces';
 import { Review, Business } from '@prisma/client';
+import { NotificationTemplates } from '../constants/templates';
 
 export class NotificationFactory {
   static createMessage(
@@ -11,104 +19,155 @@ export class NotificationFactory {
   ): NotificationMessage {
     switch (type) {
       case NotificationType.NEGATIVE_FEEDBACK:
-        return {
-          recipient,
-          type: 'template',
-          template: {
-            name: 'negative_feedback_alert',
-            languageCode: 'en_US',
-            components: [
-              {
-                type: 'body',
-                parameters: [
-                  { type: 'text', text: business.name },
-                  { type: 'text', text: review.customerName || 'Anonymous Guest' },
-                  { type: 'text', text: String(review.rating) },
-                  { type: 'text', text: review.comment || '' }
-                ]
-              }
-            ]
-          }
-        };
+        return this.createNegativeFeedbackAlert(recipient, { review, business });
 
       case NotificationType.CALLBACK_REQUEST:
-        return {
-          recipient,
-          type: 'template',
-          template: {
-            name: 'callback_request_alert',
-            languageCode: 'en_US',
-            components: [
-              {
-                type: 'body',
-                parameters: [
-                  { type: 'text', text: review.customerName || 'Anonymous Guest' },
-                  { type: 'text', text: review.customerPhone || '' }
-                ]
-              }
-            ]
-          }
-        };
+        return this.createCallbackRequestAlert(recipient, { review, business });
 
       case NotificationType.DAILY_SUMMARY:
-        return {
-          recipient,
-          type: 'template',
-          template: {
-            name: 'daily_summary_alert',
-            languageCode: 'en_US',
-            components: [
-              {
-                type: 'body',
-                parameters: [
-                  { type: 'text', text: business.name },
-                  { type: 'text', text: '0' }
-                ]
-              }
-            ]
-          }
-        };
+        // Fallback for daily summary to google reply reminder
+        return this.createGoogleReplyReminder(recipient, { business });
 
       case NotificationType.WEEKLY_SUMMARY:
-        return {
-          recipient,
-          type: 'template',
-          template: {
-            name: 'weekly_summary_alert',
-            languageCode: 'en_US',
-            components: [
-              {
-                type: 'body',
-                parameters: [
-                  { type: 'text', text: business.name },
-                  { type: 'text', text: '0' }
-                ]
-              }
-            ]
-          }
-        };
+        return this.createWeeklySummary(recipient, {
+          business,
+          positiveReviews: 0,
+          negativeReviews: 0,
+          callbackRequests: 0
+        });
 
       case NotificationType.MONTHLY_SUMMARY:
-        return {
-          recipient,
-          type: 'template',
-          template: {
-            name: 'monthly_summary_alert',
-            languageCode: 'en_US',
-            components: [
-              {
-                type: 'body',
-                parameters: [
-                  { type: 'text', text: business.name },
-                  { type: 'text', text: '0' }
-                ]
-              }
-            ]
-          }
-        };
+        return this.createMonthlySummary(recipient, {
+          business,
+          positiveReviews: 0,
+          negativeReviews: 0,
+          callbackRequests: 0
+        });
 
       default:
         throw new Error(`Unsupported notification type: "${type}"`);
     }
+  }
+
+  static createNegativeFeedbackAlert(
+    recipient: string,
+    data: NegativeFeedbackTemplate
+  ): NotificationMessage {
+    return {
+      recipient,
+      type: 'template',
+      template: {
+        name: NotificationTemplates.NEGATIVE_FEEDBACK,
+        languageCode: 'en_US',
+        components: [
+          {
+            type: 'body',
+            parameters: [
+              { type: 'text', text: data.business.name },
+              { type: 'text', text: String(data.review.rating) },
+              { type: 'text', text: data.review.comment || '' }
+            ]
+          }
+        ]
+      }
+    };
+  }
+
+  static createCallbackRequestAlert(
+    recipient: string,
+    data: CallbackRequestTemplate
+  ): NotificationMessage {
+    return {
+      recipient,
+      type: 'template',
+      template: {
+        name: NotificationTemplates.CALLBACK_REQUEST,
+        languageCode: 'en_US',
+        components: [
+          {
+            type: 'body',
+            parameters: [
+              { type: 'text', text: data.business.name },
+              { type: 'text', text: data.review.customerName || 'Anonymous Guest' },
+              { type: 'text', text: data.review.customerPhone || '' },
+              { type: 'text', text: String(data.review.rating) },
+              { type: 'text', text: data.review.comment || '' }
+            ]
+          }
+        ]
+      }
+    };
+  }
+
+  static createWeeklySummary(
+    recipient: string,
+    data: WeeklySummaryTemplate
+  ): NotificationMessage {
+    return {
+      recipient,
+      type: 'template',
+      template: {
+        name: NotificationTemplates.WEEKLY_SUMMARY,
+        languageCode: 'en_US',
+        components: [
+          {
+            type: 'body',
+            parameters: [
+              { type: 'text', text: data.business.name },
+              { type: 'text', text: String(data.positiveReviews) },
+              { type: 'text', text: String(data.negativeReviews) },
+              { type: 'text', text: String(data.callbackRequests) }
+            ]
+          }
+        ]
+      }
+    };
+  }
+
+  static createMonthlySummary(
+    recipient: string,
+    data: MonthlySummaryTemplate
+  ): NotificationMessage {
+    return {
+      recipient,
+      type: 'template',
+      template: {
+        name: NotificationTemplates.MONTHLY_SUMMARY,
+        languageCode: 'en_US',
+        components: [
+          {
+            type: 'body',
+            parameters: [
+              { type: 'text', text: data.business.name },
+              { type: 'text', text: String(data.positiveReviews) },
+              { type: 'text', text: String(data.negativeReviews) },
+              { type: 'text', text: String(data.callbackRequests) }
+            ]
+          }
+        ]
+      }
+    };
+  }
+
+  static createGoogleReplyReminder(
+    recipient: string,
+    data: GoogleReplyReminderTemplate
+  ): NotificationMessage {
+    return {
+      recipient,
+      type: 'template',
+      template: {
+        name: NotificationTemplates.GOOGLE_REPLY_REMINDER,
+        languageCode: 'en_US',
+        components: [
+          {
+            type: 'body',
+            parameters: [
+              { type: 'text', text: data.business.name }
+            ]
+          }
+        ]
+      }
+    };
   }
 }

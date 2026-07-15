@@ -31,62 +31,132 @@ test('Notification Unit & Integration Tests', async (t) => {
   });
 
   await t.test('NotificationFactory creates template objects cleanly', () => {
+    const mockReview = {
+      id: 'rev-1',
+      rating: 2,
+      comment: 'Too salty',
+      customerName: 'Alice',
+      customerPhone: '1234567890',
+      requestCallback: false,
+      callbackStatus: 'PENDING',
+      redirectedToGoogle: false,
+      googleCtaViewed: false,
+      googleCtaClicked: false,
+      sentiment: 'Negative',
+      themes: 'Food Quality',
+      createdAt: new Date(),
+      businessId: 'biz-1'
+    } as any;
+
+    const mockBusiness = {
+      id: 'biz-1',
+      name: 'Bella Italia',
+      slug: 'bella-italia',
+      businessCode: 'CR-000001',
+      passwordHash: '',
+      industry: 'RESTAURANT',
+      logoUrl: null,
+      googleReviewUrl: null,
+      phone: null,
+      address: null,
+      description: null,
+      contactPerson: null,
+      category: null,
+      website: null,
+      googleMapsUrl: null,
+      isActive: true,
+      status: 'ACTIVE',
+      deletedAt: null,
+      enableGoogleReviewRedirect: true,
+      enableManagerCallback: true,
+      whatsappNumber: '1234567890',
+      createdByRepId: null,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      assignedQrAssetId: null
+    } as any;
+
+    // 1. Negative Feedback Alert
     const message = NotificationFactory.createMessage(
       NotificationType.NEGATIVE_FEEDBACK,
       '1234567890',
-      {
-        id: 'rev-1',
-        rating: 2,
-        comment: 'Too salty',
-        customerName: 'Alice',
-        customerPhone: '1234567890',
-        requestCallback: false,
-        callbackStatus: 'PENDING',
-        redirectedToGoogle: false,
-        googleCtaViewed: false,
-        googleCtaClicked: false,
-        sentiment: 'Negative',
-        themes: 'Food Quality',
-        createdAt: new Date(),
-        businessId: 'biz-1'
-      } as any,
-      {
-        id: 'biz-1',
-        name: 'Bella Italia',
-        slug: 'bella-italia',
-        businessCode: 'CR-000001',
-        passwordHash: '',
-        industry: 'RESTAURANT',
-        logoUrl: null,
-        googleReviewUrl: null,
-        phone: null,
-        address: null,
-        description: null,
-        contactPerson: null,
-        category: null,
-        website: null,
-        googleMapsUrl: null,
-        isActive: true,
-        status: 'ACTIVE',
-        deletedAt: null,
-        enableGoogleReviewRedirect: true,
-        enableManagerCallback: true,
-        whatsappNumber: '1234567890',
-        createdByRepId: null,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        assignedQrAssetId: null
-      } as any
+      mockReview,
+      mockBusiness
     );
 
     assert.strictEqual(message.recipient, '1234567890');
     assert.strictEqual(message.type, 'template');
     assert.strictEqual(message.template?.name, 'negative_feedback_alert');
-    assert.strictEqual(message.template?.components?.[0].parameters[0].text, 'Bella Italia');
+    
+    const params = message.template?.components?.[0].parameters || [];
+    assert.strictEqual(params.length, 3);
+    assert.strictEqual(params[0].text, 'Bella Italia');
+    assert.strictEqual(params[1].text, '2');
+    assert.strictEqual(params[2].text, 'Too salty');
+
     // Ensure dashboardUrl is not present anywhere in the message payload
     const serialized = JSON.stringify(message);
     assert.ok(!serialized.includes('dashboardUrl'));
     assert.ok(!serialized.includes('http'));
+
+    // 2. Callback Request Alert
+    const cbMessage = NotificationFactory.createMessage(
+      NotificationType.CALLBACK_REQUEST,
+      '1234567890',
+      mockReview,
+      mockBusiness
+    );
+
+    assert.strictEqual(cbMessage.recipient, '1234567890');
+    assert.strictEqual(cbMessage.type, 'template');
+    assert.strictEqual(cbMessage.template?.name, 'callback_request_alert');
+
+    const cbParams = cbMessage.template?.components?.[0].parameters || [];
+    assert.strictEqual(cbParams.length, 5);
+    assert.strictEqual(cbParams[0].text, 'Bella Italia');
+    assert.strictEqual(cbParams[1].text, 'Alice');
+    assert.strictEqual(cbParams[2].text, '1234567890');
+    assert.strictEqual(cbParams[3].text, '2');
+    assert.strictEqual(cbParams[4].text, 'Too salty');
+
+    // 3. Weekly Summary Builder
+    const weeklyMessage = NotificationFactory.createWeeklySummary('1234567890', {
+      business: mockBusiness,
+      positiveReviews: 12,
+      negativeReviews: 3,
+      callbackRequests: 2
+    });
+    assert.strictEqual(weeklyMessage.template?.name, 'weekly_review_summary');
+    const weeklyParams = weeklyMessage.template?.components?.[0].parameters || [];
+    assert.strictEqual(weeklyParams.length, 4);
+    assert.strictEqual(weeklyParams[0].text, 'Bella Italia');
+    assert.strictEqual(weeklyParams[1].text, '12');
+    assert.strictEqual(weeklyParams[2].text, '3');
+    assert.strictEqual(weeklyParams[3].text, '2');
+
+    // 4. Monthly Summary Builder
+    const monthlyMessage = NotificationFactory.createMonthlySummary('1234567890', {
+      business: mockBusiness,
+      positiveReviews: 45,
+      negativeReviews: 8,
+      callbackRequests: 5
+    });
+    assert.strictEqual(monthlyMessage.template?.name, 'monthly_review_summary');
+    const monthlyParams = monthlyMessage.template?.components?.[0].parameters || [];
+    assert.strictEqual(monthlyParams.length, 4);
+    assert.strictEqual(monthlyParams[0].text, 'Bella Italia');
+    assert.strictEqual(monthlyParams[1].text, '45');
+    assert.strictEqual(monthlyParams[2].text, '8');
+    assert.strictEqual(monthlyParams[3].text, '5');
+
+    // 5. Google Reply Reminder Builder
+    const reminderMessage = NotificationFactory.createGoogleReplyReminder('1234567890', {
+      business: mockBusiness
+    });
+    assert.strictEqual(reminderMessage.template?.name, 'reply_google_reviews_alert');
+    const reminderParams = reminderMessage.template?.components?.[0].parameters || [];
+    assert.strictEqual(reminderParams.length, 1);
+    assert.strictEqual(reminderParams[0].text, 'Bella Italia');
   });
 
   await t.test('NotificationService Job Lifecycle Transitions', async () => {
