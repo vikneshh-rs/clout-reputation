@@ -2,7 +2,7 @@ import './env';
 import { db } from '../src/lib/db';
 
 async function run() {
-  const jobId = 'ba96a888-3ddf-4d5b-b41a-08b07a900eaa';
+  const jobId = '31a766ee-69bf-4f97-bee7-c0c64acd5ee3';
   const job = await db.notificationJob.findUnique({
     where: { id: jobId }
   });
