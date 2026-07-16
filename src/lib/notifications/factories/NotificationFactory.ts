@@ -65,7 +65,6 @@ export class NotificationFactory {
             parameters: [
               { type: 'text', text: data.business.name },
               { type: 'text', text: String(data.review.rating) },
-              { type: 'text', text: data.review.customerName || 'Anonymous Guest' },
               { type: 'text', text: data.review.comment || 'No comment provided' }
             ]
           }

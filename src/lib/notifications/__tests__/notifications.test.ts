@@ -89,11 +89,10 @@ test('Notification Unit & Integration Tests', async (t) => {
     assert.strictEqual(message.template?.name, 'negative_feedback_alert');
     
     const params = message.template?.components?.[0].parameters || [];
-    assert.strictEqual(params.length, 4);
+    assert.strictEqual(params.length, 3);
     assert.strictEqual(params[0].text, 'Bella Italia');
     assert.strictEqual(params[1].text, '2');
-    assert.strictEqual(params[2].text, 'Alice');
-    assert.strictEqual(params[3].text, 'Too salty');
+    assert.strictEqual(params[2].text, 'Too salty');
 
     // Ensure dashboardUrl is not present anywhere in the message payload
     const serialized = JSON.stringify(message);
