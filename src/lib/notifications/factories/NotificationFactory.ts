@@ -58,7 +58,7 @@ export class NotificationFactory {
       type: 'template',
       template: {
         name: NotificationTemplates.NEGATIVE_FEEDBACK,
-        languageCode: 'en_US',
+        languageCode: 'en',
         components: [
           {
             type: 'body',
@@ -83,7 +83,7 @@ export class NotificationFactory {
       type: 'template',
       template: {
         name: NotificationTemplates.CALLBACK_REQUEST,
-        languageCode: 'en_US',
+        languageCode: 'en',
         components: [
           {
             type: 'body',
@@ -109,7 +109,7 @@ export class NotificationFactory {
       type: 'template',
       template: {
         name: NotificationTemplates.WEEKLY_SUMMARY,
-        languageCode: 'en_US',
+        languageCode: 'en',
         components: [
           {
             type: 'body',
@@ -134,7 +134,7 @@ export class NotificationFactory {
       type: 'template',
       template: {
         name: NotificationTemplates.MONTHLY_SUMMARY,
-        languageCode: 'en_US',
+        languageCode: 'en',
         components: [
           {
             type: 'body',
@@ -159,7 +159,7 @@ export class NotificationFactory {
       type: 'template',
       template: {
         name: NotificationTemplates.GOOGLE_REPLY_REMINDER,
-        languageCode: 'en_US',
+        languageCode: 'en',
         components: [
           {
             type: 'body',

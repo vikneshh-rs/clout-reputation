@@ -195,7 +195,7 @@ export class MetaProvider implements NotificationProviderInterface {
         type: 'template',
         template: {
           name: templateName || '',
-          languageCode: languageCode || 'en_US',
+          languageCode: languageCode || 'en',
           components,
         },
       };
