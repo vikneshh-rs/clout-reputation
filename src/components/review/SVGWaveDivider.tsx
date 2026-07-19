@@ -10,7 +10,7 @@ export default function SVGWaveDivider() {
         className="absolute inset-0 w-full h-full"
       >
         <path
-          fill="#DCEBFF"
+          className="fill-[#DCEBFF]"
           d="M -5 5 C 156 -47 149 115 420 14 L 420 150 L -5 150 Z"
         />
       </svg>
@@ -22,7 +22,7 @@ export default function SVGWaveDivider() {
         className="absolute inset-0 w-full h-full"
       >
         <path
-          fill="#FFFFFF"
+          className="fill-white"
           d="M -5 17 C 156 -35 149 127 420 26 L 420 150 L -5 150 Z"
         />
       </svg>
