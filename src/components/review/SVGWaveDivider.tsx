@@ -7,10 +7,10 @@ export default function SVGWaveDivider() {
       <svg
         viewBox="0 -100 420 250"
         preserveAspectRatio="none"
-        className="absolute inset-0 w-full h-full"
+        className="absolute inset-0 w-full h-full text-[#DCEBFF]"
       >
         <path
-          className="fill-[#DCEBFF]"
+          className="fill-current"
           d="M -5 5 C 156 -47 149 115 420 14 L 420 150 L -5 150 Z"
         />
       </svg>
@@ -19,10 +19,10 @@ export default function SVGWaveDivider() {
       <svg
         viewBox="0 -100 420 250"
         preserveAspectRatio="none"
-        className="absolute inset-0 w-full h-full"
+        className="absolute inset-0 w-full h-full text-white"
       >
         <path
-          className="fill-white"
+          className="fill-current"
           d="M -5 17 C 156 -35 149 127 420 26 L 420 150 L -5 150 Z"
         />
       </svg>
