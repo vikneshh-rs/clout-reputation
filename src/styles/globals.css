@@ -36,14 +36,14 @@
 
 /* Override dark color-scheme so system dark mode has zero effect */
 :root {
-  color-scheme: light;
+  color-scheme: only light;
 }
 
 /* Even if .dark class is somehow added, neutralise it */
 html,
 html.dark {
   background-color: #f8fafc !important;
-  color-scheme: light !important;
+  color-scheme: only light !important;
 }
 
 /* Prevent any dark: Tailwind class from activating */
