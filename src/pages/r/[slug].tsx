@@ -188,9 +188,6 @@ export default function PublicReviewPortal({
         callbackRequested: false
       }));
 
-      // Transition straight to thanks screen in case the user navigates back
-      setStep('positive-thanks');
-
       // Immediately redirect to Google Review URL
       if (details?.business?.googleReviewUrl) {
         window.location.href = details.business.googleReviewUrl;
