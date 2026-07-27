@@ -49,7 +49,7 @@ export default function PublicReviewPortal({
   const [funnelLoggedStart, setFunnelLoggedStart] = useState(false);
 
   // Flow State
-  const [step, setStep] = useState<'rating' | 'positive-redirect' | 'negative-form' | 'negative-completion'>('rating');
+  const [step, setStep] = useState<'rating' | 'positive-redirect' | 'positive-thanks' | 'negative-form' | 'negative-completion'>('rating');
   const [rating, setRating] = useState(0);
   const [submitting, setSubmitting] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
@@ -72,7 +72,7 @@ export default function PublicReviewPortal({
           setReviewSessionId(parsed.reviewSessionId);
           if (parsed.hasSubmitted) {
             const isPos = parsed.submittedRating >= 4;
-            setStep(isPos ? 'positive-redirect' : 'negative-completion');
+            setStep(isPos ? 'positive-thanks' : 'negative-completion');
             setRating(parsed.submittedRating);
             setSheetDismissed(true);
           }
@@ -178,76 +178,83 @@ export default function PublicReviewPortal({
     setRating(selectedRating);
     triggerFunnelStart();
 
-    const timer = setTimeout(() => {
-      if (selectedRating >= 4) {
-        submitPositiveRating(selectedRating);
-      } else {
-        setStep('negative-form');
-        setSheetDismissed(false);
-      }
-    }, 400);
-
-    setSelectionTimer(timer);
-  };
-
-  // Submit positive rating (4-5 stars) and initiate automatic countdown redirect
-  const submitPositiveRating = async (posRating: number) => {
-    if (!details) return;
-
-    setSubmitting(true);
-    setSaveError(null);
-
-    try {
-      const res = await fetch(`/api/r/${slug}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          rating: posRating,
-          comment: null,
-          customerName: null,
-          customerPhone: null,
-          requestCallback: false,
-          reviewSessionId
-        })
-      });
-
-      if (!res.ok) {
-        throw new Error('Failed to record rating.');
-      }
-
-      const review = await res.json();
-
-      fetch('/api/r/cta', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          reviewId: review.id,
-          action: 'click',
-          businessId: details.business.id,
-          reviewSessionId
-        })
-      }).catch(err => console.error('Failed to log redirect cta click:', err));
-
+    if (selectedRating >= 4) {
+      // Immediately store progress in session storage as submitted
       const sessionKey = `clout_session_${String(slug).toLowerCase().trim()}`;
       sessionStorage.setItem(sessionKey, JSON.stringify({
         reviewSessionId,
         hasSubmitted: true,
-        submittedRating: posRating,
+        submittedRating: selectedRating,
         callbackRequested: false
       }));
 
-      setStep('positive-redirect');
-      setSubmitting(false);
-      if (details.business.googleReviewUrl) {
+      // Transition straight to thanks screen in case the user navigates back
+      setStep('positive-thanks');
+
+      // Immediately redirect to Google Review URL
+      if (details?.business?.googleReviewUrl) {
         window.location.href = details.business.googleReviewUrl;
       }
 
-    } catch (err) {
-      const errObj = err as Error;
-      console.error(errObj);
-      setSaveError(errObj.message || 'Unable to submit rating. Please try again.');
-      setSubmitting(false);
+      // Record the rating submission and redirect in the background
+      submitPositiveRatingBackground(selectedRating);
+    } else {
+      const timer = setTimeout(() => {
+        setStep('negative-form');
+        setSheetDismissed(false);
+      }, 400);
+
+      setSelectionTimer(timer);
     }
+  };
+
+  // Submit positive rating (4-5 stars) in the background with keepalive
+  const submitPositiveRatingBackground = (posRating: number) => {
+    if (!details) return;
+
+    fetch(`/api/r/${slug}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        rating: posRating,
+        comment: null,
+        customerName: null,
+        customerPhone: null,
+        requestCallback: false,
+        reviewSessionId
+      }),
+      keepalive: true
+    })
+    .then(async (res) => {
+      if (res.ok) {
+        const review = await res.json();
+        fetch('/api/r/cta', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            reviewId: review.id,
+            action: 'click',
+            businessId: details.business.id,
+            reviewSessionId
+          }),
+          keepalive: true
+        }).catch(err => console.error('Failed to log redirect cta click:', err));
+      }
+    })
+    .catch(err => console.error('Failed to submit rating in background:', err));
+
+    // Send fallback redirect event to guarantee redirect funnel logging
+    fetch('/api/r/cta', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        reviewId: 'undefined',
+        action: 'click',
+        businessId: details.business.id,
+        reviewSessionId
+      }),
+      keepalive: true
+    }).catch(err => console.error('Failed to log initial redirect cta click:', err));
   };
 
 
@@ -352,7 +359,7 @@ export default function PublicReviewPortal({
 
       <DigitalReviewCard 
         businessName={details.business.name} 
-        isRating={step === 'rating' || step === 'negative-form' || step === 'negative-completion'}
+        isRating={step === 'rating' || step === 'negative-form' || step === 'negative-completion' || step === 'positive-thanks'}
         sheetOpen={isSheetOpen}
       >
         {saveError && (
@@ -361,12 +368,24 @@ export default function PublicReviewPortal({
           </div>
         )}
 
-        {(step === 'rating' || step === 'negative-form' || step === 'negative-completion') && (
-          <RatingCard 
-            rating={rating} 
-            onChange={handleStarSelect} 
-            submitting={submitting} 
-          />
+        {(step === 'rating' || step === 'negative-form' || step === 'negative-completion' || step === 'positive-thanks') && (
+          step === 'positive-thanks' ? (
+            <div className="flex flex-col items-center justify-center py-8 text-center animate-fadeIn font-sans">
+              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-green-50 mb-4 border border-green-200">
+                <span className="text-green-600 text-xl font-bold">✓</span>
+              </div>
+              <h3 className="text-lg font-extrabold text-slate-900 mb-1">Thank You!</h3>
+              <p className="text-xs text-slate-500 max-w-[280px] leading-relaxed">
+                We appreciate your support. Thank you for taking the time to share your feedback with us!
+              </p>
+            </div>
+          ) : (
+            <RatingCard 
+              rating={rating} 
+              onChange={handleStarSelect} 
+              submitting={submitting} 
+            />
+          )
         )}
 
         {step === 'positive-redirect' && (
